@@ -88,7 +88,6 @@ table td
 #newobjectbutton
 {
     font-weight : bold;
-    margin-bottom : 10px;
 }
 
 #speedcontrol
@@ -125,6 +124,13 @@ table td
     height : 100%;
 }
 
+#instructions
+{
+    font-family : Arial;
+    font-size : 16px;
+    padding : 5px 0;
+}
+
 .trackobject
 {
     border-right : 5px solid black;
@@ -151,11 +157,6 @@ table td
     display : none;
 }
 
-.boundingboxdim
-{
-    opacity : 0.25;
-}
-
 .boundingboxhighlight .fill
 {
     opacity : 0.25;
@@ -165,4 +166,14 @@ table td
 .boundingboxoccluded
 {
     border-style : dashed;
+}
+
+.ui-resizable-disabled
+{
+    opacity : 1.0 !important;
+}
+
+.boundingboxdim
+{
+    opacity : 0.25 !important;
 }

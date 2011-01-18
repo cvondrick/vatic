@@ -31,6 +31,8 @@ function ui_setupnewobjects(player, tracks, drawer)
         drawer.color = colors[0];
         drawer.enable();
 
+        var mecolors = colors;
+
         $(this).button("option", "disabled", true);
 
         trackobject = $("<div class='trackobject'><div>");
@@ -39,6 +41,21 @@ function ui_setupnewobjects(player, tracks, drawer)
             'background-color': colors[1],
             'border-color': colors[0]});
         trackobject.html("Person");
+        trackobject.mouseover(function() {
+            $(this).css({
+                'background-color': mecolors[0],
+                'color': '#fff'
+            })
+        });
+        trackobject.mouseout(function() {
+            $(this).css({
+                'background-color': mecolors[1],
+                'color': '#000'
+            });
+        });
+
+        tracks.resizable(false);
+        tracks.draggable(false);
     });
 
     drawer.onstopdraw.push(function(position) {
@@ -56,6 +73,16 @@ function ui_setupnewobjects(player, tracks, drawer)
             tracks.dim(false);
             track.highlight(false);
         });
+
+        tracks.draggable(true);
+        if ($("#annotateoptionsresize:checked").size() == 0)
+        {
+            tracks.resizable(true);
+        }
+        else
+        {
+            track.resizable(false);
+        }
     });
 }
 
@@ -64,6 +91,10 @@ function ui_setup(job)
     var screen = $("<div id='annotatescreen'></div>").appendTo(container);
 
     $("<table>" + 
+        "<tr>" +
+            "<td><div id='instructions'><div id='instructionsbutton' class='button'>Instructions</div> Annotate the entire video below. We will hand review your work.</td>" +
+            "<td><div id='topbar'></div></td>" +
+        "</tr>" +
         "<tr>" +
               "<td><div id='videoframe'></div></td>" + 
               "<td><div id='sidebar'></div></td>" +
@@ -77,18 +108,22 @@ function ui_setup(job)
           "</tr>" +
       "</table>").appendTo(screen).css("width", "100%");
 
+
     $("#videoframe").css({"width": job.width + "px",
                           "height": job.height + "px"})
                     .parent().css("width", job.width + "px");
+
+    $("#sidebar").css("height", job.height + "px");
+
 
     $("#bottombar").append("<div id='playerslider'></div>");
     $("#bottombar").append("<div class='button' id='playbutton'>Play</div> ");
     $("#bottombar").append("<div class='button' id='rewindbutton'>Rewind</div>");
 
-    $("#sidebar").append("<div id='newobjectcontainer'>" +
+    $("#topbar").append("<div id='newobjectcontainer'>" +
         "<div class='button' id='newobjectbutton'>New Object</div></div>");
 
-    $("#sidebar").append("<div id='objectcontainer'></div>");
+    $("<div id='objectcontainer'></div>").appendTo("#sidebar");
 
     $("<div class='button' id='openadvancedoptions'>Options</div>")
         .button({
@@ -126,6 +161,14 @@ function ui_setup(job)
 
 function ui_setupbuttons(player, tracks)
 {
+    $("#instructionsbutton").click(function() {
+        ui_showinstructions(); 
+    }).button({
+        icons: {
+            primary: "ui-icon-help"
+        }
+    });
+
     $("#playbutton").click(function() {
         player.toggle();
     }).button({
@@ -197,25 +240,11 @@ function ui_setupbuttons(player, tracks)
     });
 
     $("#annotateoptionsresize").button().click(function() {
-        if ($(this).attr("checked"))
-        {
-            tracks.disableresize();
-        }
-        else
-        {
-            tracks.enableresize();
-        }
+        tracks.resizable(!$(this).attr("checked"));
     });
 
     $("#annotateoptionshideboxes").button().click(function() {
-        if ($(this).attr("checked"))
-        {
-            tracks.hideboxes();
-        }
-        else
-        {
-            tracks.showboxes();
-        }
+        tracks.visible($(this).attr("checked"));
     });
 
     $(window).keypress(function(e) {
@@ -270,22 +299,30 @@ function ui_setupslider(player)
     });
 }
 
+function ui_showinstructions()
+{
+}
+
+function ui_closeinstructions()
+{
+}
+
 /*
  * The colors we will cycle through when displaying tracks.
  */
-var ui_colors = [["#FF0000", "#FFBFBF"],
-                 ["#0000FF", "#BFBFFF"],
+var ui_colors = [["#FF00FF", "#FFBFFF"],
+                 ["#FF0000", "#FFBFBF"],
+                 ["#FF8000", "#FFDCBF"],
+                 ["#FFD100", "#FFEEA2"],
                  ["#008000", "#8FBF8F"],
-                 ["#FF00FF", "#FFBFFF"],
                  ["#0080FF", "#BFDFFF"],
-                 ["#FF8000", "#FFBFBF"],
+                 ["#0000FF", "#BFBFFF"],
                  ["#000080", "#8F8FBF"],
-                 ["#800000", "#BF8F8F"],
-                 ["#800080", "#BF8FBF"],
-                 ["#FFE100", "#FFF8BF"]];
+                 ["#800080", "#BF8FBF"]];
 
 function ui_pickcolor()
 {
     // move first element to end, then get last
     return ui_colors[ui_colors.push(ui_colors.shift()) - 1];
 }
+

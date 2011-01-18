@@ -271,17 +271,36 @@ function TrackCollection(player, job)
     }
 
     /*
+     * Changes the draggable functionality. If true, allow dragging, otherwise disable.
+     */
+    this.draggable = function(value)
+    {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].draggable(value);
+        }
+    }
+
+    /*
      * Changes the resize functionality. If true, allow resize, otherwise disable.
      */
-    this.allowresize = function(value)
+    this.resizable = function(value)
     {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].resizable(value);
+        }
     }
 
     /*
      * Changes the visibility on the boxes. If true, show boxes, otherwise hide.
      */
-    this.boxesvisible = function(value)
+    this.visible = function(value)
     {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].visible(value);
+        }
     }
 
     /*
@@ -422,6 +441,18 @@ function Track(player, color)
             this.handle.resizable("option", "disabled", true);
         }
     }   
+
+    this.visible = function(value)
+    {
+        if (value)
+        {
+            this.handle.hide();
+        }
+        else
+        {
+            this.handle.show();
+        }
+    }
 
     /*
      * Dims the visibility of the box.
