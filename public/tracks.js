@@ -41,7 +41,8 @@ function BoxDrawer(container)
             position: 'relative',
             top: '0px',
             left: '0px',
-            backgroundColor: this.color
+            backgroundColor: this.color,
+            zIndex: 1
         }).hide();
 
         this.hcrosshair.css({
@@ -50,7 +51,8 @@ function BoxDrawer(container)
             position: 'relative',
             top: '0px',
             left: '0px',
-            backgroundColor: this.color
+            backgroundColor: this.color,
+            zIndex: 1
         }).hide();
     }
 
@@ -96,9 +98,10 @@ function BoxDrawer(container)
         if (this.drawing)
         {
             var pos = this.calculateposition(xc, yc);
+            var offset = this.container.offset();
             this.handle.css({
-                "top": pos.ytl + "px",
-                "left": pos.xtl + "px",
+                "top": pos.ytl + offset.top + "px",
+                "left": pos.xtl + offset.left + "px",
                 "width": pos.width + "px",
                 "height": pos.height + "px",
                 "border-color": this.color
@@ -241,14 +244,23 @@ function TrackCollection(player, job)
         me.update(player.frame);
     });
 
+    // if the window moves, we have to update boxes
+    $(window).resize(function() {
+        me.update(me.player.frame);
+    });
+
     /*
      * Creates a new object.
      */
-    this.add = function(position, color)
+    this.add = function(frame, position, color)
     {
-        var track = Track(this.player.handle, color);
-        track.journal.mark(this.player.frame, position);
-        tracks.push(track);
+        var track = new Track(this.player, color);
+        track.journal.mark(frame, position);
+        track.draw(this.player.frame);
+
+        this.tracks.push(track);
+
+        console.log("Added new track");
 
         for (var i = 0; i < this.onnewobject.length; i++)
         {
@@ -270,6 +282,17 @@ function TrackCollection(player, job)
      */
     this.boxesvisible = function(value)
     {
+    }
+
+    /*
+     * Changes the opacity on the boxes.
+     */
+    this.dim = function(value)
+    {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].dim(value);
+        }
     }
 
     /*
@@ -300,11 +323,13 @@ function TrackCollection(player, job)
 /*
  * A track class.
  */
-function Track(container, color)
+function Track(player, color)
 {
+    var me = this;
+
     this.journal = new Journal();
     this.classification = null;
-    this.container = container;
+    this.player = player;
     this.handle = null;
     this.color = color;
 
@@ -316,14 +341,22 @@ function Track(container, color)
         var pos = this.handle.position();
         var width = this.handle.width();
         var height = this.handle.height();
-        var offset = this.container.offset();
+        var offset = this.player.handle.offset();
 
-        var xtl = pos.left - container.left;
-        var ytl = pos.top - container.top;
+        var xtl = pos.left - offset.left;
+        var ytl = pos.top - offset.top;
         var xbr = xtl + width;
         var ybr = ytl + height;
 
         return new Position(xtl, ytl, xbr, ybr)
+    }
+
+    /*
+     * Polls the on screen position and marks it in the journal.
+     */
+    this.recordposition = function()
+    {
+        this.journal.mark(this.player.frame, this.pollposition());
     }
 
     /*
@@ -333,19 +366,91 @@ function Track(container, color)
     {
         if (this.handle == null)
         {
-            this.handle = $('<div class="box"></div>');
+            this.handle = $('<div class="boundingbox"></div>');
             this.handle.css("border-color", this.color);
-            this.container.append(this.handle);
+            var fill = $('<div class="fill"></div>').appendTo(this.handle);
+            fill.css("background-color", this.color);
+            this.player.handle.append(this.handle);
+
+            this.handle.resizable({
+                handles: "n,w,s,e",
+                stop: function() {
+                    me.recordposition();
+                }
+            });
+
+            this.handle.draggable({
+                containment: this.player.handle,
+                stop: function() { 
+                    me.recordposition();                
+                }
+            });
         }
 
         var position = this.journal.estimate(frame);
+        var offset = this.player.handle.offset();
 
         this.handle.css({
-            top: position.ytl + "px",
-            left: position.xtl + "px",
+            top: position.ytl + offset.top + "px",
+            left: position.xtl + offset.left + "px",
             width: position.width + "px",
             height: position.height + "px"
         });
+
+    }
+
+    this.draggable = function(value)
+    {
+        if (value)
+        {
+            this.handle.draggable("option", "disabled", false);
+        }
+        else
+        {
+            this.handle.draggable("option", "disabled", true);
+        }
+    }
+
+    this.resizable = function(value)
+    {
+        if (value)
+        {
+            this.handle.resizable("option", "disabled", false);
+        }
+        else
+        {
+            this.handle.resizable("option", "disabled", true);
+        }
+    }   
+
+    /*
+     * Dims the visibility of the box.
+     */
+    this.dim = function(value)
+    {
+        if (value)
+        {
+            this.handle.addClass("boundingboxdim");
+        }
+        else
+        {
+            this.handle.removeClass("boundingboxdim");
+        }
+    }
+
+    /*
+     * Highlights a box.
+     */
+    this.highlight = function(value)
+    {
+        if (value)
+        {
+            this.handle.addClass("boundingboxhighlight");
+        }
+        else
+        {
+            this.handle.removeClass("boundingboxhighlight");
+        }
     }
 
     /*
@@ -379,6 +484,81 @@ function Journal()
      */
     this.estimate = function(frame)
     {
+        var bounds = this.bounds(frame);
+        if (bounds['leftframe'] == bounds['rightframe'])
+        {
+            return bounds['left'];
+        }
+
+        if (bounds['left'] == null)
+        {
+            return bounds['right'];
+        }
+
+        if (bounds['right'] == null)
+        {
+            return bounds['left'];
+        }
+
+        var fdiff = bounds['rightframe'] - bounds['leftframe'];
+        var xtlr = (bounds['right'].xtl - bounds['left'].xtl) / fdiff;
+        var ytlr = (bounds['right'].ytl - bounds['left'].ytl) / fdiff;
+        var xbrr = (bounds['right'].xbr - bounds['left'].xbr) / fdiff;
+        var ybrr = (bounds['right'].ybr - bounds['left'].ybr) / fdiff;
+
+        var off = frame - bounds['leftframe'];
+        var xtl = bounds['left'].xtl + xtlr * off;
+        var ytl = bounds['left'].ytl + ytlr * off;
+        var xbr = bounds['left'].xbr + xbrr * off;
+        var ybr = bounds['left'].ybr + ybrr * off;
+
+        return new Position(xtl, ytl, xbr, ybr);
+    }
+    
+    this.bounds = function(frame)
+    {
+        if (this.annotations[frame])
+        {
+            var item = this.annotations[frame];
+            return {'left': item,
+                    'leftframe': frame,
+                    'right': item,
+                    'rightframe': frame};
+        }
+
+        var left = null;
+        var right = null;
+        var lefttime = 0;
+        var righttime = 0;
+
+        for (t in this.annotations)
+        {
+            var item = this.annotations[t];
+            item.journal_frame = parseInt(t);
+            itemtime = parseInt(t);
+
+            if (item.journal_frame <= frame)
+            {
+                if (left == null || itemtime > lefttime) 
+                {
+                    left = item;
+                    lefttime = itemtime;;
+                }
+            }
+            else
+            {
+                if (right == null || itemtime < righttime)
+                {
+                    right = item;
+                    righttime = itemtime;
+                }
+            }
+        }
+
+        return {'left': left,
+                'leftframe': lefttime,
+                'right': right,
+                'rightframe': righttime};
     }
 
     /*

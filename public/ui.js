@@ -6,12 +6,57 @@ function ui_build(job)
     var tracks = new TrackCollection(player, job);
     var drawer = new BoxDrawer(videoframe);
 
-    drawer.onstopdraw.push(function() {
-        drawer.disable();
-    });
-    
-    ui_setupbuttons(player, tracks, drawer);
+    ui_setupbuttons(player, tracks);
     ui_setupslider(player);
+    ui_setupnewobjects(player, tracks, drawer)
+}
+
+function ui_setupnewobjects(player, tracks, drawer)
+{
+    var colors = null;
+    var trackobject = null;
+
+    $("#newobjectbutton").button({
+        icons: {
+            primary: "ui-icon-plusthick",
+            disabled: false
+        }
+    }).click(function() {
+        if (colors != null)
+        {
+            return;
+        }
+
+        colors = ui_pickcolor();
+        drawer.color = colors[0];
+        drawer.enable();
+
+        $(this).button("option", "disabled", true);
+
+        trackobject = $("<div class='trackobject'><div>");
+        trackobject.prependTo($("#objectcontainer"));
+        trackobject.css({
+            'background-color': colors[1],
+            'border-color': colors[0]});
+        trackobject.html("Person");
+    });
+
+    drawer.onstopdraw.push(function(position) {
+        var track = tracks.add(player.frame, position, colors[0]);
+
+        drawer.disable();
+        colors = null;
+        $("#newobjectbutton").button("option", "disabled", false);
+
+        trackobject.hover(function() {
+            tracks.dim(true);
+            track.dim(false);
+            track.highlight(true);
+        }, function() {
+            tracks.dim(false);
+            track.highlight(false);
+        });
+    });
 }
 
 function ui_setup(job)
@@ -42,6 +87,8 @@ function ui_setup(job)
 
     $("#sidebar").append("<div id='newobjectcontainer'>" +
         "<div class='button' id='newobjectbutton'>New Object</div></div>");
+
+    $("#sidebar").append("<div id='objectcontainer'></div>");
 
     $("<div class='button' id='openadvancedoptions'>Options</div>")
         .button({
@@ -77,7 +124,7 @@ function ui_setup(job)
     return screen;
 }
 
-function ui_setupbuttons(player, tracks, drawer)
+function ui_setupbuttons(player, tracks)
 {
     $("#playbutton").click(function() {
         player.toggle();
@@ -134,16 +181,6 @@ function ui_setupbuttons(player, tracks, drawer)
         {
             $("#rewindbutton").button("option", "disabled", false);
         }
-    });
-
-    $("#newobjectbutton").button({
-        icons: {
-            primary: "ui-icon-plusthick"
-        }
-    }).click(function() {
-        var color = ui_pickcolor();
-        drawer.color = color;
-        drawer.enable();
     });
 
     $("#speedcontrol").buttonset();
@@ -236,8 +273,16 @@ function ui_setupslider(player)
 /*
  * The colors we will cycle through when displaying tracks.
  */
-var ui_colors = ["#FF0000", "#0000FF", "#008000", "#FF00FF", "#0080FF",
-                 "#FF8000", "#000080", "#800000", "#800080"];
+var ui_colors = [["#FF0000", "#FFBFBF"],
+                 ["#0000FF", "#BFBFFF"],
+                 ["#008000", "#8FBF8F"],
+                 ["#FF00FF", "#FFBFFF"],
+                 ["#0080FF", "#BFDFFF"],
+                 ["#FF8000", "#FFBFBF"],
+                 ["#000080", "#8F8FBF"],
+                 ["#800000", "#BF8F8F"],
+                 ["#800080", "#BF8FBF"],
+                 ["#FFE100", "#FFF8BF"]];
 
 function ui_pickcolor()
 {
