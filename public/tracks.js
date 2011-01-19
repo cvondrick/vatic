@@ -102,8 +102,8 @@ function BoxDrawer(container)
             this.handle.css({
                 "top": pos.ytl + offset.top + "px",
                 "left": pos.xtl + offset.left + "px",
-                "width": pos.width + "px",
-                "height": pos.height + "px",
+                "width": (pos.width - 3) + "px",
+                "height": (pos.height - 3)+ "px",
                 "border-color": this.color
             });
         }
@@ -368,6 +368,7 @@ function Track(player, color)
     this.player = player;
     this.handle = null;
     this.color = color;
+    this.htmloffset = 3;
 
     /*
      * Polls the on screen position of the box and returns it.
@@ -381,8 +382,8 @@ function Track(player, color)
 
         var xtl = pos.left - offset.left;
         var ytl = pos.top - offset.top;
-        var xbr = xtl + width;
-        var ybr = ytl + height;
+        var xbr = xtl + width + this.htmloffset;
+        var ybr = ytl + height + this.htmloffset;
 
         return new Position(xtl, ytl, xbr, ybr)
     }
@@ -432,23 +433,6 @@ function Track(player, color)
     }
 
     /*
-     * Determines if the position is inside the frame.
-     */
-    this.insideframe = function(position)
-    {
-        if (position == null)
-        {
-            position = this.pollposition();
-        }
-        var outside = false;
-        outside = position.xtl > this.player.job.width;
-        outside = outside || position.ytl > this.player.job.height;
-        outside = outside || position.xbr <= 0;
-        outside = outside || position.ybr <= 0;
-        return !outside;
-    }
-
-    /*
      * Draws the current box on the screen. 
      */
     this.draw = function(frame, position)
@@ -493,8 +477,8 @@ function Track(player, color)
         this.handle.css({
             top: position.ytl + offset.top + "px",
             left: position.xtl + offset.left + "px",
-            width: position.width + "px",
-            height: position.height + "px"
+            width: (position.width - this.htmloffset) + "px",
+            height: (position.height - this.htmloffset) + "px"
         });
 
     }

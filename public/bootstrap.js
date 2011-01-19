@@ -1,3 +1,5 @@
+var music = false;
+
 var container;
 
 $(document).ready(function()
@@ -38,8 +40,11 @@ function loadingscreen(job)
         preloadslider($("#loadingscreenslider"), function(progress) {
             if (progress == 1)
             {
-                //$("body").append('<div id="music"><embed src="magic.mp3">' +
-                //    '<noembed><bgsound src="magic.mp3"></noembed></div>');
+                if (music)
+                {
+                    $("body").append('<div id="music"><embed src="magic.mp3">' +
+                        '<noembed><bgsound src="magic.mp3"></noembed></div>');
+                }
 
                 ls.remove()
                 ui_build(job);
