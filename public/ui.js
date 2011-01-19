@@ -27,6 +27,8 @@ function ui_setupnewobjects(player, tracks, drawer)
             return;
         }
 
+        player.pause();
+
         colors = ui_pickcolor();
         drawer.color = colors[0];
         drawer.enable();
@@ -162,10 +164,11 @@ function ui_setup(job)
 function ui_setupbuttons(player, tracks)
 {
     $("#instructionsbutton").click(function() {
+        player.pause();
         ui_showinstructions(); 
     }).button({
         icons: {
-            primary: "ui-icon-help"
+            primary: "ui-icon-newwin"
         }
     });
 
@@ -248,7 +251,7 @@ function ui_setupbuttons(player, tracks)
     });
 
     $(window).keypress(function(e) {
-        if (e.keyCode == 112)
+        if (e.keyCode == 32)
         {
             $("#playbutton").click();
         }
@@ -301,10 +304,33 @@ function ui_setupslider(player)
 
 function ui_showinstructions()
 {
+    console.log("Popup instructions");
+
+    $('<div id="turkic_overlay"></div>').appendTo("#container");
+    var h = $('<div id="instructionsdialog"></div>').appendTo("#container");
+
+    $('<div class="button" id="instructionsclosetop">Dismiss Instructions</div>').appendTo(h).button({
+        icons: {
+            primary: "ui-icon-circle-close"
+        }
+    }).click(ui_closeinstructions);
+
+    h.append("<h1>Important Instructions</h1>");
+    h.append("<p>In this task, you are going to annotate a video. You are to draw a box around every object of interest and track each object for the entirity of the video.</p>");
+
+    h.append("<h2>Keyboard Shortcuts</h2>");
+    h.append('<ul style="list-style-type:none;margin-left:0;padding-left:0;">' +
+        '<li><code>n</code> creates a new object</li>' +
+        '<li><code>[space]</code> toggles play/pause on the video</li>' +
+        '<li><code>r</code> rewinds the video to the start</li>' +
+        '</ul>');
 }
 
 function ui_closeinstructions()
 {
+    console.log("Popdown instructions");
+    $("#turkic_overlay").remove();
+    $("#instructionsdialog").remove();
 }
 
 /*

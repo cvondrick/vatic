@@ -3,10 +3,10 @@ function Job(data)
     var me = this;
 
     this.slug = data["slug"];
-    this.start = data["start"];
-    this.stop = data["stop"];
-    this.width = data["width"];
-    this.height = data["height"];
+    this.start = parseInt(data["start"]);
+    this.stop = parseInt(data["stop"]);
+    this.width = parseInt(data["width"]);
+    this.height = parseInt(data["height"]);
 
     this.frameurl = function(i)
     {

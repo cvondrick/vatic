@@ -207,10 +207,27 @@ function BoxDrawer(container)
         }
     }
 
-    container.click(function(e) {
+    var respondtoclick = function(e) {
         var offset = container.offset();
         me.click(e.pageX - offset.left, e.pageY - offset.top);
-        e.stopPropagation();
+    };
+
+    var ignoremouseup = false;
+
+    container.mousedown(function(e) {
+        ignoremouseup = true;
+        window.setTimeout(function() { 
+            ignoremouseup = false;
+        }, 500);
+
+        respondtoclick(e);
+    });
+
+    container.mouseup(function(e) {
+        if (!ignoremouseup)
+        {
+            respondtoclick(e);
+        }
     });
 
     container.mousemove(function(e) {
@@ -379,9 +396,62 @@ function Track(player, color)
     }
 
     /*
+     * Fixes the position to force box to be inside frame.
+     */
+    this.fixposition = function()
+    {
+        var width = this.player.job.width;
+        var height = this.player.job.height;
+        var pos = this.pollposition();
+
+        if (pos.xtl > width)
+        {
+            pos = new Position(width - pos.width, pos.ytl, width, pos.ybr);
+        }
+        if (pos.ytl > height)
+        {
+            pos = new Position(pos.xtl, height - pos.height, pos.xbr, height);
+        }
+        if (pos.xbr < 0)
+        {
+            pos = new Position(0, pos.ytl, pos.width, pos.ybr);
+        }
+        if (pos.ybr < 0)
+        {
+            pos = new Position(pos.xtl, 0, pos.xbr, pos.height);
+        }
+
+        var xtl = Math.max(pos.xtl, 0);
+        var ytl = Math.max(pos.ytl, 0); 
+        var xbr = Math.min(pos.xbr, width - 1);
+        var ybr = Math.min(pos.ybr, height - 1);
+
+        pos = new Position(xtl, ytl, xbr, ybr);
+
+        this.draw(this.player.frame, pos);
+    }
+
+    /*
+     * Determines if the position is inside the frame.
+     */
+    this.insideframe = function(position)
+    {
+        if (position == null)
+        {
+            position = this.pollposition();
+        }
+        var outside = false;
+        outside = position.xtl > this.player.job.width;
+        outside = outside || position.ytl > this.player.job.height;
+        outside = outside || position.xbr <= 0;
+        outside = outside || position.ybr <= 0;
+        return !outside;
+    }
+
+    /*
      * Draws the current box on the screen. 
      */
-    this.draw = function(frame)
+    this.draw = function(frame, position)
     {
         if (this.handle == null)
         {
@@ -393,20 +463,31 @@ function Track(player, color)
 
             this.handle.resizable({
                 handles: "n,w,s,e",
+                start: function() {
+                    player.pause();
+                },
                 stop: function() {
+                    me.fixposition();
                     me.recordposition();
                 }
             });
 
             this.handle.draggable({
-                containment: this.player.handle,
+                start: function() {
+                    player.pause();
+                },
                 stop: function() { 
+                    me.fixposition();
                     me.recordposition();                
                 }
             });
         }
 
-        var position = this.journal.estimate(frame);
+        if (position == null)
+        {
+            position = this.journal.estimate(frame);
+        }
+
         var offset = this.player.handle.offset();
 
         this.handle.css({

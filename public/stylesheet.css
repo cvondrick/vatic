@@ -9,6 +9,35 @@ table td
     vertical-align : top;
 }
 
+h1
+{
+    font-family : Arial;
+    margin : 0;
+    padding : 0;
+    font-size : 26px;
+    font-weight : bold;
+}
+
+h2
+{
+    font-family : Arial;
+    margin : 0;
+    padding : 0;
+    font-size : 20px;
+    font-weight : bold;
+}
+
+p, li
+{
+    font-family : Arial;
+    font-size : 16px;
+}
+
+code
+{
+    padding : 0 5px;
+}
+
 #turkic_acceptfirst
 {
     background-color : #cd0a0a;
@@ -129,6 +158,27 @@ table td
     font-family : Arial;
     font-size : 16px;
     padding : 5px 0;
+}
+
+#instructionsdialog
+{
+    position : fixed;
+    top : 50px;
+    left : 50%;
+    height : 480px;
+    width : 720px;
+    margin-left : -360px;
+    background-color : #fff;
+    z-index : 10000;
+    padding : 10px;
+    border : 2px solid #000;
+    overflow : auto;
+}
+
+#instructionsclosetop
+{
+    float : right;
+    font-weight : bold;
 }
 
 .trackobject
