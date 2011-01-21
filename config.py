@@ -1,7 +1,7 @@
 signature = "Qdy65mPoD7yUuDlfSwyBY6XCDPaEPg4hfMSpM8rt"
 accesskey = "AKIAIOZDXRMCRUIHDQSQ"
 sandbox   = True
-localhost = "http://localhost/"
+localhost = "http://video-deepthought.ics.uci.edu/"
 database  = "mysql://root@localhost/turkic"
 
 # probably no need to mess below this line

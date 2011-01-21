@@ -48,7 +48,6 @@ class load(LoadCommand):
     def setup(self):
         parser = argparse.ArgumentParser(parents = [importparser])
         parser.add_argument("slug")
-        parser.add_argument("subject")
         parser.add_argument("location")
         parser.add_argument("--label", "-l", nargs="+", required = True)
         parser.add_argument("--length", type=int, default = 300)
@@ -56,7 +55,19 @@ class load(LoadCommand):
         return parser
 
     def title(self, args):
-        return "Video annotation: {0}".format(args.subject)
+        return "Video annotation"
+
+    def description(self, args):
+        return "Draw boxes around objects moving around in a video."
+
+    def cost(self, args):
+        return 1.00
+
+    def duration(self, args):
+        return 7200
+
+    def keywords(self, args):
+        return "video, annotation, computer, vision"
 
     def __call__(self, args, group):
         print "Checking integrity..."
