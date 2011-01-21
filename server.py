@@ -15,7 +15,7 @@ def getjob(id):
         segment = job.segment
         video = segment.video
     finally:
-        session.close
+        session.close()
 
     return {"start": segment.start,
             "stop": segment.stop,

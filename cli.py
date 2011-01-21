@@ -2,6 +2,7 @@ import os
 import math
 import argparse
 import config
+import shutil
 from turkic.cli import handler, importparser, Command, LoadCommand
 from turkic import database
 from vision import ffmpeg
@@ -20,13 +21,17 @@ class extract(Command):
         return parser
 
     def __call__(self, args):
+        try:
+            os.makedirs(args.output)
+        except:
+            pass
         sequence = ffmpeg.extract(args.video)
         try:
             for frame, image in enumerate(sequence):
                 if frame % 100 == 0:
                     print "Decoding frames {0} to {1}".format(frame, frame + 100)
-                image.thumbnail(size, Image.BILINEAR)
-                page = Video.getframepath(frame, args.output)
+                image.thumbnail((args.width, args.height), Image.BILINEAR)
+                path = Video.getframepath(frame, args.output)
                 try:
                     image.save(path)
                 except IOError:
