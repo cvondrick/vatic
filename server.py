@@ -3,11 +3,22 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import config
 from turkic.server import handler, application
+from turkic import database
+import cStringIO
+from models import *
 
 @handler()
-def getjob(hitid):
-    return {"start": 1,
-            "stop": 300,
-            "slug": "http://phoenix.ics.uci.edu/store/frames/parkinglot/",
-            "width": 720,
-            "height": 405}
+def getjob(id):
+    session = database.connect()
+    try:
+        job = session.query(Job).get(id)
+        segment = job.segment
+        video = segment.video
+    finally:
+        session.close
+
+    return {"start": segment.start,
+            "stop": segment.stop,
+            "slug": video.slug,
+            "width": video.width,
+            "height": video.height}

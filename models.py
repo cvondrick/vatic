@@ -2,10 +2,11 @@ import turkic.database
 import turkic.models
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship, backref
+import Image
 
 video_labels = Table("videos2labels", turkic.database.Base.metadata,
     Column("video_slug", String(250), ForeignKey("videos.slug")),
-    Column("label_slug", Integer, ForeignKey("labels.slug")))
+    Column("label_id", Integer, ForeignKey("labels.id")))
 
 class Video(turkic.database.Base):
     __tablename__ = "videos"
@@ -16,6 +17,19 @@ class Video(turkic.database.Base):
     height = Column(Integer)
     totalframes = Column(Integer)
     location = Column(String(250))
+
+    def __getitem__(self, frame):
+        path = Video.getframepath(frame, self.location)
+        return Image.open(path)
+
+    @classmethod
+    def getframepath(cls, frame, base = None):
+        l1 = frame / 10000
+        l2 = frame / 100
+        path = "{0}/{1}/{2}.jpg".format(l1, l2, frame)
+        if base is not None:
+            path = "{0}/{1}".format(base, path)
+        return path
 
 class Segment(turkic.database.Base):
     __tablename__ = "segments"
@@ -60,5 +74,6 @@ class Box(turkic.database.Base):
 class Label(turkic.database.Base):
     __tablename__ = "labels"
 
-    slug = Column(String(250), primary_key = True)
+    id = Column(Integer, primary_key = True)
     text = Column(String(250))
+
