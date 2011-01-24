@@ -662,14 +662,13 @@ function Journal()
      */
     this.serialize = function()
     {
+        str = "{";
         for (var frame in this.annotations)
         {
             var dat = this.annotations[frame];
-            str += "[" + frame + "," + dat.xtl + "," + dat.ytl + ",";
-            str += dat.xbr + "," + dat.ybr + ",";
-            str += dat.occluded + "," + dat.outside + "],";
+            str += "\"" + frame + "\":" + dat.serialize() + ",";
         }
-        return str.substr(0, str.length - 1);
+        return str.substr(0, str.length - 1) + "}";
     }
 }
 
@@ -687,4 +686,14 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside)
     this.outside = outside ? outside : false;
     this.width = xbr - xtl;
     this.height = ybr - ytl;
+
+    this.serialize = function()
+    {
+        return "[" + this.xtl + "," +
+                     this.ytl + "," +
+                     this.xbr + "," +
+                     this.ybr + "," +
+                     this.occluded + "," +
+                     this.outside + "]";
+    }
 }

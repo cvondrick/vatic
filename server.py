@@ -22,3 +22,30 @@ def getjob(id):
             "slug": video.slug,
             "width": video.width,
             "height": video.height}
+
+@handler(post = "json")
+def savejob(id, tracks):
+    session = database.connect()
+    try:
+        job = session.query(Job).get(id)
+        for label, track in tracks:
+            path = Path(job = job)
+            path.label = session.query(Label).get(label)
+
+            for frame, userbox in track.items():
+                box = Box(path = path)
+                box.xtl = userbox[0]
+                box.ytl = userbox[1]
+                box.xbr = userbox[2]
+                box.ybr = userbox[3]
+                box.occluded = userbox[4]
+                box.outside = userbox[5]
+                box.frame = frame
+                path.boxes.append(box)
+            job.paths.append(path)
+
+        session.add(job)
+        session.commit()
+    finally:
+        session.close()
+    return True

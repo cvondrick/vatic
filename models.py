@@ -31,6 +31,12 @@ class Video(turkic.database.Base):
             path = "{0}/{1}".format(base, path)
         return path
 
+class Label(turkic.database.Base):
+    __tablename__ = "labels"
+
+    id = Column(Integer, primary_key = True)
+    text = Column(String(250))
+
 class Segment(turkic.database.Base):
     __tablename__ = "segments"
 
@@ -56,6 +62,8 @@ class Path(turkic.database.Base):
     id = Column(Integer, primary_key = True)
     jobid = Column(Integer, ForeignKey(Job.id))
     job = relationship(Job, cascade = "all", backref = "paths")
+    labelid = Column(Integer, ForeignKey(Label.id))
+    label = relationship(Label, cascade = "none", backref = "paths")
 
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
@@ -70,10 +78,3 @@ class Box(turkic.database.Base):
     frame = Column(Integer)
     occluded = Column(Boolean, default = False)
     outside = Column(Boolean, default = False)
-
-class Label(turkic.database.Base):
-    __tablename__ = "labels"
-
-    id = Column(Integer, primary_key = True)
-    text = Column(String(250))
-
