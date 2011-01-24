@@ -21,7 +21,8 @@ def getjob(id):
             "stop": segment.stop,
             "slug": video.slug,
             "width": video.width,
-            "height": video.height}
+            "height": video.height,
+            "jobid": job.id}
 
 @handler(post = "json")
 def savejob(id, tracks):

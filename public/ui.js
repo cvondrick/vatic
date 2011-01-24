@@ -9,6 +9,7 @@ function ui_build(job)
     ui_setupbuttons(player, tracks);
     ui_setupslider(player);
     ui_setupnewobjects(player, tracks, drawer)
+    ui_setupsubmit(job, tracks);
 }
 
 function ui_setupnewobjects(player, tracks, drawer)
@@ -99,14 +100,14 @@ function ui_setup(job)
         "</tr>" +
         "<tr>" +
               "<td><div id='videoframe'></div></td>" + 
-              "<td><div id='sidebar'></div></td>" +
+              "<td rowspan='2'><div id='sidebar'></div></td>" +
           "</tr>" + 
           "<tr>" +
               "<td><div id='bottombar'></div></td>" + 
-              "<td><div id='submitbar'></div></td>" +
           "</tr>" +
           "<tr>" +
               "<td><div id='advancedoptions'></div></td>" +
+              "<td><div id='submitbar'></div></td>" +
           "</tr>" +
       "</table>").appendTo(screen).css("width", "100%");
 
@@ -157,6 +158,8 @@ function ui_setup(job)
         "value='30,3' id='speedcontrolfast'>" +
     "<label for='speedcontrolfast'>Fast</label>" +
     "</div>");
+
+    $("#submitbar").append("<div id='submitbutton' class='button'>Submit HIT</div>");
 
     return screen;
 }
@@ -275,6 +278,7 @@ function ui_setupbuttons(player, tracks)
         }
         console.log("Key press: " + e.keyCode);
     });
+
 }
 
 function ui_setupslider(player)
@@ -299,6 +303,40 @@ function ui_setupslider(player)
 
     player.onupdate.push(function() {
         slider.slider({value: player.frame});
+    });
+}
+
+function ui_setupsubmit(job, tracks)
+{
+    $("#submitbutton").button({
+        icons: {
+            primary: 'ui-icon-check'
+        }
+    }).click(function() {
+        ui_submit(job, tracks);
+    });
+}
+
+function ui_submit(id, tracks)
+{
+    console.log("Start submit - status: " + tracks.serialize());
+
+    if (!mturk_isassigned())
+    {
+        alert("Please accept the task before you submit.");
+        return;
+    }
+
+    $('<div id="turkic_overlay"></div>').appendTo("#container");
+
+    var note = $("<div id='submitdialog'>Saving...</div>").appendTo("#container")
+    note.effect("pulsate");
+
+    mturk_submit(function(redirect) {
+        server_post("savejob", [job.jobid], tracks.serialize(), function(data) {
+            note.html("Saved!");
+            redirect();
+        });
     });
 }
 

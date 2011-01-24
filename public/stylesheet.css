@@ -228,3 +228,21 @@ code
 {
     opacity : 0.25 !important;
 }
+
+#submitbar
+{
+    text-align : center;
+    vertical-align : bottom;
+}
+
+#submitdialog
+{
+    position : absolute;
+    top : 200px;
+    left : 0;
+    width : 100%;
+    text-align : center;
+    font-size : 100px;
+    font-weight : bold;
+    font-family : Arial;
+}
