@@ -244,6 +244,8 @@ function BoxDrawer(container)
     });
 }
 
+var track_collection_dump = null;
+
 /*
  * A collection of tracks.
  */
@@ -347,6 +349,11 @@ function TrackCollection(player, job)
      */
     this.serialize = function()
     {
+        if (this.tracks.length == 0)
+        {
+            return "[]";
+        }
+
         var str = "[";
         for (var i in this.tracks)
         {
@@ -354,6 +361,10 @@ function TrackCollection(player, job)
         }
         return str.substr(0, str.length - 1) + "]";
     }
+
+    track_collection_dump = function() {
+        return me.serialize();
+    };
 }
 
 /*
@@ -662,6 +673,11 @@ function Journal()
      */
     this.serialize = function()
     {
+        if (this.annotations.length == 0)
+        {
+            return "{}";
+        }
+
         str = "{";
         for (var frame in this.annotations)
         {
