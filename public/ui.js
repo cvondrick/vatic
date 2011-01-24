@@ -317,7 +317,7 @@ function ui_setupsubmit(job, tracks)
     });
 }
 
-function ui_submit(id, tracks)
+function ui_submit(job, tracks)
 {
     console.log("Start submit - status: " + tracks.serialize());
 
