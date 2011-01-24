@@ -14,6 +14,7 @@ def getjob(id):
         job = session.query(Job).get(id)
         segment = job.segment
         video = segment.video
+        labels = dict((l.id, l.text) for l in video.labels)
     finally:
         session.close()
 
@@ -22,7 +23,8 @@ def getjob(id):
             "slug": video.slug,
             "width": video.width,
             "height": video.height,
-            "jobid": job.id}
+            "jobid": job.id,
+            "labels": labels}
 
 @handler(post = "json")
 def savejob(id, tracks):

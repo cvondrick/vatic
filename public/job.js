@@ -8,6 +8,20 @@ function Job(data)
     this.width = parseInt(data["width"]);
     this.height = parseInt(data["height"]);
     this.jobid = parseInt(data["jobid"]);
+    this.labels = data["labels"];
+
+    console.log("Job configured!");
+    console.log("  Slug: " + this.slug);
+    console.log("  Start: " + this.start);
+    console.log("  Stop: " + this.stop);
+    console.log("  Width: " + this.width);
+    console.log("  Height: " + this.height);
+    console.log("  Job ID: " + this.jobid);
+    console.log("  Labels: ");
+    for (var i in this.labels)
+    {
+        console.log("    " + i + " = " + this.labels[i]);
+    }
 
     this.frameurl = function(i)
     {

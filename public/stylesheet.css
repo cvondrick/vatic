@@ -180,6 +180,21 @@ code
     font-weight : bold;
 }
 
+.keyboardshortcuts
+{
+    list-style-type : none;
+    margin : 0;
+    margin-left : 10px;
+    padding : 0;
+}
+
+.keyboardshortcuts code
+{
+    display : block;
+    width : 100px;
+    float : left;
+}
+
 .trackobject
 {
     border-right : 5px solid black;

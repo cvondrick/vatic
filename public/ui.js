@@ -354,13 +354,16 @@ function ui_showinstructions()
     }).click(ui_closeinstructions);
 
     h.append("<h1>Important Instructions</h1>");
-    h.append("<p>In this task, you are going to annotate a video. You are to draw a box around every object of interest and track each object for the entirity of the video.</p>");
+    h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool. In return for following these instructions, we will pay you within a few days.</p>");
 
     h.append("<h2>Keyboard Shortcuts</h2>");
-    h.append('<ul style="list-style-type:none;margin-left:0;padding-left:0;">' +
+    h.append("<p>These shortcuts are available for your convenience:</p>");
+    h.append('<ul class="keyboardshortcuts">' +
         '<li><code>n</code> creates a new object</li>' +
         '<li><code>[space]</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
+        '<li><code>.</code> jump forward</li>' +
+        '<li><code>,</code> jump backwards</li>' +
         '</ul>');
 }
 
