@@ -4,89 +4,12 @@ function ui_build(job)
     var videoframe = $("#videoframe");
     var player = new VideoPlayer(videoframe, job);
     var tracks = new TrackCollection(player, job);
-    var drawer = new BoxDrawer(videoframe);
 
     ui_setupbuttons(player, tracks);
     ui_setupslider(player);
-    ui_setupnewobjects(player, tracks, drawer)
     ui_setupsubmit(job, tracks);
-}
 
-function ui_setupnewobjects(player, tracks, drawer)
-{
-    var colors = null;
-    var trackobject = null;
-
-    $("#newobjectbutton").button({
-        icons: {
-            primary: "ui-icon-plusthick",
-            disabled: false
-        }
-    }).click(function() {
-        if (colors != null)
-        {
-            return;
-        }
-
-        player.pause();
-
-        colors = ui_pickcolor();
-        drawer.color = colors[0];
-        drawer.enable();
-
-        var mecolors = colors;
-
-        $(this).button("option", "disabled", true);
-
-        trackobject = $("<div class='trackobject'><div>");
-        trackobject.prependTo($("#objectcontainer"));
-        trackobject.css({
-            'background-color': colors[1],
-            'border-color': colors[0]});
-        trackobject.html("Person");
-        trackobject.mouseover(function() {
-            $(this).css({
-                'background-color': mecolors[0],
-                'color': '#fff'
-            })
-        });
-        trackobject.mouseout(function() {
-            $(this).css({
-                'background-color': mecolors[1],
-                'color': '#000'
-            });
-        });
-
-        tracks.resizable(false);
-        tracks.draggable(false);
-    });
-
-    drawer.onstopdraw.push(function(position) {
-        var track = tracks.add(player.frame, position, colors[0]);
-
-        drawer.disable();
-        colors = null;
-        $("#newobjectbutton").button("option", "disabled", false);
-
-        trackobject.hover(function() {
-            tracks.dim(true);
-            track.dim(false);
-            track.highlight(true);
-        }, function() {
-            tracks.dim(false);
-            track.highlight(false);
-        });
-
-        tracks.draggable(true);
-        if ($("#annotateoptionsresize:checked").size() == 0)
-        {
-            tracks.resizable(true);
-        }
-        else
-        {
-            track.resizable(false);
-        }
-    });
+    var objectui = new TrackObjectUI($("#newobjectbutton"), $("#objectcontainer"), videoframe, job, player, tracks);
 }
 
 function ui_setup(job)
@@ -373,23 +296,3 @@ function ui_closeinstructions()
     $("#turkic_overlay").remove();
     $("#instructionsdialog").remove();
 }
-
-/*
- * The colors we will cycle through when displaying tracks.
- */
-var ui_colors = [["#FF00FF", "#FFBFFF"],
-                 ["#FF0000", "#FFBFBF"],
-                 ["#FF8000", "#FFDCBF"],
-                 ["#FFD100", "#FFEEA2"],
-                 ["#008000", "#8FBF8F"],
-                 ["#0080FF", "#BFDFFF"],
-                 ["#0000FF", "#BFBFFF"],
-                 ["#000080", "#8F8FBF"],
-                 ["#800080", "#BF8FBF"]];
-
-function ui_pickcolor()
-{
-    // move first element to end, then get last
-    return ui_colors[ui_colors.push(ui_colors.shift()) - 1];
-}
-

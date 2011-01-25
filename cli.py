@@ -49,7 +49,7 @@ class load(LoadCommand):
         parser = argparse.ArgumentParser(parents = [importparser])
         parser.add_argument("slug")
         parser.add_argument("location")
-        parser.add_argument("--label", "-l", nargs="+", required = True)
+        parser.add_argument("labels", nargs="+")
         parser.add_argument("--length", type=int, default = 300)
         parser.add_argument("--overlap", type=int, default = 20)
         return parser
@@ -120,7 +120,7 @@ class load(LoadCommand):
             print "Binding labels..."
 
             # create labels
-            for labeltext in args.label:
+            for labeltext in args.labels:
                 label = Label(text = labeltext)
                 session.add(label)
                 video.labels.append(label)
