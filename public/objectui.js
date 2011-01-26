@@ -26,6 +26,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
             return;
         }
 
+        ui_disable();
+
         console.log("Starting new track object");
 
         this.player.pause();
@@ -36,7 +38,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.drawer.color = this.currentcolor[0];
         this.drawer.enable();
 
-        this.button.button("option", "disabled", true);
         this.newobjectbuttonenabled = false;
 
         this.currentobject = new TrackObject(this.job, container, this.currentcolor);
@@ -65,6 +66,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     this.stopnewobject = function()
     {
         console.log("Finished new track object");
+
+        ui_enable();
 
         this.objects.push(this.currentobject);
 

@@ -1,3 +1,5 @@
+var ui_disabled = 0;
+
 function ui_build(job)
 {
     var screen = ui_setup(job);
@@ -99,6 +101,7 @@ function ui_setupbuttons(player, tracks)
     });
 
     $("#playbutton").click(function() {
+        if (ui_disabled) return;
         player.toggle();
     }).button({
         icons: {
@@ -107,6 +110,7 @@ function ui_setupbuttons(player, tracks)
     });
 
     $("#rewindbutton").click(function() {
+        if (ui_disabled) return;
         player.pause();
         player.seek(player.job.start);
     }).button({
@@ -177,6 +181,14 @@ function ui_setupbuttons(player, tracks)
     });
 
     $(window).keypress(function(e) {
+        console.log("Key press: " + e.keyCode);
+
+        if (ui_disabled)
+        {
+            console.log("Key press ignored because UI is disabled.");
+            return;
+        }
+        
         if (e.keyCode == 32)
         {
             $("#playbutton").click();
@@ -199,7 +211,6 @@ function ui_setupbuttons(player, tracks)
             player.pause();
             player.displace(10);
         }
-        console.log("Key press: " + e.keyCode);
     });
 
 }
@@ -236,6 +247,7 @@ function ui_setupsubmit(job, tracks)
             primary: 'ui-icon-check'
         }
     }).click(function() {
+        if (ui_disabled) return;
         ui_submit(job, tracks);
     });
 }
@@ -249,6 +261,8 @@ function ui_submit(job, tracks)
         alert("Please accept the task before you submit.");
         return;
     }
+
+    ui_disable();
 
     $('<div id="turkic_overlay"></div>').appendTo("#container");
 
@@ -288,6 +302,8 @@ function ui_showinstructions()
         '<li><code>.</code> jump forward</li>' +
         '<li><code>,</code> jump backwards</li>' +
         '</ul>');
+
+    ui_disable();
 }
 
 function ui_closeinstructions()
@@ -295,4 +311,40 @@ function ui_closeinstructions()
     console.log("Popdown instructions");
     $("#turkic_overlay").remove();
     $("#instructionsdialog").remove();
+
+    ui_enable();
+}
+
+function ui_disable()
+{
+    if (ui_disabled++ == 0)
+    {
+        $("#newobjectbutton").button("option", "disabled", true);
+        $("#playbutton").button("option", "disabled", true);
+        $("#rewindbutton").button("option", "disabled", true);
+        $("#submitbutton").button("option", "disabled", true);
+        $("#playerslider").slider("option", "disabled", true);
+
+        console.log("Disengaged UI");
+    }
+
+    console.log("UI disabled with count = " + ui_disabled);
+}
+
+function ui_enable()
+{
+    if (--ui_disabled == 0)
+    {
+        $("#newobjectbutton").button("option", "disabled", false);
+        $("#playbutton").button("option", "disabled", false);
+        $("#rewindbutton").button("option", "disabled", false);
+        $("#submitbutton").button("option", "disabled", false);
+        $("#playerslider").slider("option", "disabled", false);
+
+        console.log("Engaged UI");
+    }
+
+    ui_disabled = Math.max(0, ui_disabled);
+
+    console.log("UI disabled with count = " + ui_disabled);
 }
