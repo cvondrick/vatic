@@ -1,4 +1,4 @@
-label, .button
+.button
 {
     font-size : 12px !important;
 }
@@ -92,7 +92,7 @@ code
 
 #annotatescreen
 {
-    width : 900px;
+    width : 925px;
     margin : 0 auto;
 }
 
@@ -199,7 +199,7 @@ code
 {
     border : 2px solid black;
     font-family : Arial;
-    font-size : 14px;
+    font-size : 16px;
 }
 
 .trackobjectfoldedup
@@ -213,13 +213,18 @@ code
 .trackobject p, .trackobject li, .trackobject label
 {
     font-family : Arial;
-    font-size : 14px;
+    font-size : 16px;
     cursor : pointer;
+}
+
+.trackobject .label:hover
+{
+    font-weight : bold;
 }
 
 .trackobject p
 {
-    padding : 3px;
+    padding : 2px;
     margin : 0;
 }
 
@@ -233,7 +238,7 @@ code
 .trackobjectheader
 {
     margin : 0;
-    padding : 5px !important;
+    padding : 3px !important;
     cursor : pointer;
 }
 

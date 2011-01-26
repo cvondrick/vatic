@@ -213,7 +213,7 @@ function TrackObject(job, container, color)
         for (var i in job.labels)
         {
             var id = "classification" + this.id + "_" + i;
-            html += "<input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label><br>";
+            html += "<div class='label'><input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label></div>";
         }
         //html += "<input type='button' value='Done' id='object" + this.id + "done'>";
 
