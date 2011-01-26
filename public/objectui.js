@@ -105,7 +105,16 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
             me.stopdrawing(position);
         });
 
-        this.instructions = $("<p>A list of objects you are tracking will appear here. Click the above button to create your first track annotation.</p>").appendTo(this.container);
+        var html = "<p>In this video, please track all of these objects:</p>";
+        html += "<ul>";
+        for (var i in this.job.labels)
+        {
+            html += "<li>" + this.job.labels[i] + "</li>";
+        }
+        html += "</ul>";
+        html += "<p>Click the above button to create your first annotation of an object.</p>";
+
+        this.instructions = $(html).appendTo(this.container);
     }
 
     this.setup();

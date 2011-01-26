@@ -263,6 +263,13 @@ function TrackCollection(player, job)
         me.update(player.frame);
     });
 
+    player.onpause.push(function() {
+        for (var i in me.tracks)
+        {
+            me.tracks[i].recordposition();
+        }
+    });
+
     // if the window moves, we have to update boxes
     $(window).resize(function() {
         me.update(me.player.frame);
