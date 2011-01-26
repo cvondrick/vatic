@@ -247,14 +247,15 @@ function TrackObject(job, container, color)
     {
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "lost'> <label for='trackobject" + this.id + "lost'>Outside of view frame</label><br>");
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "occluded'> <label for='trackobject" + this.id + "occluded'>Occluded or obstructed</label><br>");
-        this.details.append("<input type='button' id='trackobject" + this.id + "delete' value='Delete'>");
+        //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
+        //this.details.append("<input type='button' id='trackobject" + this.id + "delete' value='Delete'>");
 
-        $("#trackobject" + this.id + "delete").click(function() {
+        /*$("#trackobject" + this.id + "delete").click(function() {
             if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? This cannot be undone!"))
             {
                 me.remove();
             }
-        });
+        });*/
     }
 
     this.statefoldup = function()
