@@ -154,8 +154,8 @@ function TrackObject(job, container, color)
     this.handle = $("<div class='trackobject'><div>");
     this.handle.prependTo(container);
     this.handle.css({
-        'background-color': color[1],
-        'border-color': color[1]});
+        'background-color': color[2],
+        'border-color': color[2]});
     this.handle.mouseover(function() {
         me.mouseover();
     });
@@ -299,7 +299,7 @@ function TrackObject(job, container, color)
     {
         this.handle.css({
             'border-color': me.color[0],
-            'background-color': me.color[2],
+            'background-color': me.color[1],
         });
 
         if (this.track)
@@ -318,8 +318,8 @@ function TrackObject(job, container, color)
     this.mouseout = function()
     {
         this.handle.css({
-            'border-color': me.color[1],
-            'background-color': me.color[1],
+            'border-color': me.color[2],
+            'background-color': me.color[2],
         });
 
         if (this.track)

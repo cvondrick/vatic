@@ -1,4 +1,4 @@
-.button
+label, .button
 {
     font-size : 12px !important;
 }
@@ -199,7 +199,7 @@ code
 {
     border : 2px solid black;
     font-family : Arial;
-    font-size : 16px;
+    font-size : 14px;
 }
 
 .trackobjectfoldedup
@@ -213,7 +213,7 @@ code
 .trackobject p, .trackobject li, .trackobject label
 {
     font-family : Arial;
-    font-size : 16px;
+    font-size : 14px !important;
     cursor : pointer;
 }
 
