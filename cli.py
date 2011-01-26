@@ -161,8 +161,8 @@ class load(LoadCommand):
 class DumpCommand(Command):
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("slug")
-    parent.add_argument("--interpolate", action="store_true", default=False)
-    parent.add_argument("--merge", action="store_true", default=False)
+    parent.add_argument("--interpolate", "-i", action="store_true", default=False)
+    parent.add_argument("--merge", "-m", action="store_true", default=False)
 
     class Tracklet(object):
         def __init__(self, label, boxes):
