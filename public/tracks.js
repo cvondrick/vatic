@@ -388,6 +388,9 @@ function Track(player, color)
     this.color = color;
     this.htmloffset = 3;
 
+    this.journal.mark(this.player.job.start,
+        new Position(0, 0, 0, 0, false, true));
+
     /*
      * Polls the on screen position of the box and returns it.
      */
