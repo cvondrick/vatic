@@ -375,7 +375,7 @@ function Track(player, color)
     var me = this;
 
     this.journal = new Journal();
-    this.classification = null;
+    this.label = null;
     this.player = player;
     this.handle = null;
     this.color = color;
@@ -565,7 +565,7 @@ function Track(player, color)
      */
     this.serialize = function()
     {
-        return "[" + this.classification + "," + this.journal.serialize() + "]";
+        return "[" + this.label + "," + this.journal.serialize() + "]";
     }
 
     /*

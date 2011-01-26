@@ -227,6 +227,7 @@ function TrackObject(job, container, color)
             if ($("#" + id + ":checked").size() > 0)
             {
                 this.label = i;
+                this.track.label = i;
                 break;
             }
         }

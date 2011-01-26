@@ -7,6 +7,8 @@ import shutil
 from turkic.cli import handler, importparser, Command, LoadCommand
 from turkic import database
 from vision import ffmpeg
+import vision.visualize
+import vision.track.interpolation
 import turkic.models
 from models import *
 
@@ -165,7 +167,7 @@ class DumpCommand(Command):
     class Tracklet(object):
         def __init__(self, label, boxes):
             self.label = label
-            self.boxes = boxes
+            self.boxes = sorted(boxes, key = lambda x: x.frame)
 
     def getdata(self, args):
         response = []
@@ -175,8 +177,18 @@ class DumpCommand(Command):
             for segment in video.segments:
                 for job in segment.jobs:
                     for path in job.paths:
-                        tracklet = Tracklet(path.label.text, path.getboxes())
-                        respone.append(tracklet)
+                        tracklet = DumpCommand.Tracklet(path.label.text,
+                                                        path.getboxes())
+                        response.append(tracklet)
+
+            if args.interpolate:
+                interpolated = []
+                for track in response:
+                    path = vision.track.interpolation.LinearFill(track.boxes)
+                    tracklet = DumpCommand.Tracklet(track.label, path)
+                    interpolated.append(tracklet)
+                response = interpolated
+
             return video, response
         finally:
             session.close()
@@ -185,7 +197,7 @@ class DumpCommand(Command):
 class visualize(DumpCommand):
     def setup(self):
         parser = argparse.ArgumentParser(parents = [self.parent])
-        parser.add_argument("location")
+        parser.add_argument("output")
         return parser
 
     def __call__(self, args):
@@ -196,7 +208,8 @@ class visualize(DumpCommand):
         paths = [x.boxes for x in data]
         
         print "Highlighting frames..."
-        vision.visualize.highlight_paths(video, paths)
+        it = vision.visualize.highlight_paths(video, paths)
+        vision.visualize.save(it, lambda x: "{0}/{1}.jpg".format(args.output, x))
 
 @handler("Dumps the tracking data")
 class dump(DumpCommand):
@@ -226,35 +239,35 @@ class dump(DumpCommand):
         for id, track in enumerate(data):
             file.write("\t<track id=\"{0}\" label=\"{1}\">\n".format(id, track.label))
             for box in track.boxes:
-                box.write("\t\t<box frame=\"{0}\">\n".format(box.frame))
+                file.write("\t\t<box frame=\"{0}\">\n".format(box.frame))
                 file.write("\t\t\t<xtl>{0}</xtl>\n".format(box.xtl))
                 file.write("\t\t\t<ytl>{0}</ytl>\n".format(box.ytl))
                 file.write("\t\t\t<xbr>{0}</xbr>\n".format(box.xbr))
                 file.write("\t\t\t<ybr>{0}</ybr>\n".format(box.ybr))
                 file.write("\t\t\t<outside>{0}</outside>\n".format(box.lost))
                 file.write("\t\t\t<occluded>{0}</occluded>\n".format(box.occluded))
-                box.write("\t\t</box>\n")
+                file.write("\t\t</box>\n")
             file.write("\t</track>\n")
         file.write("</annotations>\n")
 
     def dumptext(self, file, data):
         for id, track in enumerate(data):
             for box in track.boxes:
-                file.write(id)
+                file.write(str(id))
                 file.write(" ")
-                file.write(box.xtl)
+                file.write(str(box.xtl))
                 file.write(" ")
-                file.write(box.ytl)
+                file.write(str(box.ytl))
                 file.write(" ")
-                file.write(box.xbr)
+                file.write(str(box.xbr))
                 file.write(" ")
-                file.write(box.ybr)
+                file.write(str(box.ybr))
                 file.write(" ")
-                file.write(box.frame)
+                file.write(str(box.frame))
                 file.write(" ")
-                file.write(box.lost)
+                file.write(str(box.lost))
                 file.write(" ")
-                file.write(box.occluded)
+                file.write(str(box.occluded))
                 file.write(" \"")
                 file.write(track.label)
                 file.write("\"\n")
