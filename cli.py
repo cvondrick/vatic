@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import argparse
 import config
@@ -155,22 +156,105 @@ class load(LoadCommand):
         finally:
             session.close()
 
+class DumpCommand(Command):
+    parent = argparse.ArgumentParser(add_help=False)
+    parent.add_argument("slug")
+    parent.add_argument("--interpolate", action="store_true", default=False)
+    parent.add_argument("--merge", action="store_true", default=False)
+
+    class Tracklet(object):
+        def __init__(self, label, boxes):
+            self.label = label
+            self.boxes = boxes
+
+    def getdata(self, args):
+        response = []
+        session = database.connect()
+        try:
+            video = session.query(Video).filter(Video.slug == args.slug).one()
+            for segment in video.segments:
+                for job in segment.jobs:
+                    for path in job.paths:
+                        tracklet = Tracklet(path.label.text, path.getboxes())
+                        respone.append(tracklet)
+            return video, response
+        finally:
+            session.close()
+
 @handler("Highlights a video sequence")
-def visualize(Command):
+class visualize(DumpCommand):
     def setup(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("slug")
+        parser = argparse.ArgumentParser(parents = [self.parent])
+        parser.add_argument("location")
         return parser
 
     def __call__(self, args):
-        pass
+        print "Fetching data..."
+        video, data = self.getdata(args)
+
+        print "Processing {0} tracks...".format(len(data))
+        paths = [x.boxes for x in data]
+        
+        print "Highlighting frames..."
+        vision.visualize.highlight_paths(video, paths)
 
 @handler("Dumps the tracking data")
-def dump(Command):
+class dump(DumpCommand):
     def setup(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("slug")
+        parser = argparse.ArgumentParser(parents = [self.parent])
+        parser.add_argument("--output", "-o")
+        parser.add_argument("--xml", "-x", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
-        pass
+        file = sys.stdout
+        if args.output:
+            file = open(args.output, 'w')
+
+        video, data = self.getdata(args)
+
+        if args.xml:
+            self.dumpxml(file, data)
+        else:
+            self.dumptext(file, data)
+
+        if args.output:
+            file.close()
+
+    def dumpxml(self, file, data):
+        file.write("<annotations count=\"{0}\">\n".format(len(data)))
+        for id, track in enumerate(data):
+            file.write("\t<track id=\"{0}\" label=\"{1}\">\n".format(id, track.label))
+            for box in track.boxes:
+                box.write("\t\t<box frame=\"{0}\">\n".format(box.frame))
+                file.write("\t\t\t<xtl>{0}</xtl>\n".format(box.xtl))
+                file.write("\t\t\t<ytl>{0}</ytl>\n".format(box.ytl))
+                file.write("\t\t\t<xbr>{0}</xbr>\n".format(box.xbr))
+                file.write("\t\t\t<ybr>{0}</ybr>\n".format(box.ybr))
+                file.write("\t\t\t<outside>{0}</outside>\n".format(box.lost))
+                file.write("\t\t\t<occluded>{0}</occluded>\n".format(box.occluded))
+                box.write("\t\t</box>\n")
+            file.write("\t</track>\n")
+        file.write("</annotations>\n")
+
+    def dumptext(self, file, data):
+        for id, track in enumerate(data):
+            for box in track.boxes:
+                file.write(id)
+                file.write(" ")
+                file.write(box.xtl)
+                file.write(" ")
+                file.write(box.ytl)
+                file.write(" ")
+                file.write(box.xbr)
+                file.write(" ")
+                file.write(box.ybr)
+                file.write(" ")
+                file.write(box.frame)
+                file.write(" ")
+                file.write(box.lost)
+                file.write(" ")
+                file.write(box.occluded)
+                file.write(" \"")
+                file.write(track.label)
+                file.write("\"\n")

@@ -3,6 +3,7 @@ import turkic.models
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship, backref
 import Image
+import vision
 
 video_labels = Table("videos2labels", turkic.database.Base.metadata,
     Column("video_slug", String(250), ForeignKey("videos.slug")),
@@ -65,6 +66,9 @@ class Path(turkic.database.Base):
     labelid = Column(Integer, ForeignKey(Label.id))
     label = relationship(Label, cascade = "none", backref = "paths")
 
+    def getboxes(self):
+        return [x.getbox() for x in self.boxes]
+        
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
 
@@ -78,3 +82,7 @@ class Box(turkic.database.Base):
     frame = Column(Integer)
     occluded = Column(Boolean, default = False)
     outside = Column(Boolean, default = False)
+
+    def getbox(self):
+        return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,
+                          self.frame, self.outside, self.occluded)
