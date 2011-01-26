@@ -567,6 +567,16 @@ function Track(player, color)
     {
         return "[" + this.classification + "," + this.journal.serialize() + "]";
     }
+
+    /*
+     * Removes the box.
+     */
+    this.remove = function()
+    {
+        this.handle.fadeOut(null, function() {
+            me.handle.remove();
+        });
+    }
 }
 
 /*

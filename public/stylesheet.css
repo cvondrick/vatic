@@ -197,14 +197,13 @@ code
 
 .trackobject
 {
-    border-right : 5px solid black;
+    border : 2px solid black;
     font-family : Arial;
     font-size : 14px;
 }
 
 .trackobjectfoldedup
 {
-    cursor : pointer;
 }
 
 .trackobjectfoldeddown
@@ -215,6 +214,7 @@ code
 {
     font-family : Arial;
     font-size : 14px;
+    cursor : pointer;
 }
 
 .trackobject p
@@ -234,6 +234,17 @@ code
 {
     margin : 0;
     padding : 5px !important;
+    cursor : pointer;
+}
+
+.trackobjectheader:hover
+{
+    text-decoration : underline;
+}
+
+.trackobjectheader .ui-icon
+{
+    float : left;
 }
 
 .boundingbox

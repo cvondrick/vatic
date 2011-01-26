@@ -17,6 +17,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     this.currentobject = null;
     this.currentcolor = null;
 
+    this.objects = [];
+
     this.startnewobject = function()
     {
         if (!this.newobjectbuttonenabled)
@@ -27,6 +29,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         console.log("Starting new track object");
 
         this.player.pause();
+
+        this.instructions.fadeOut();
 
         this.currentcolor = this.pickcolor();
         this.drawer.color = this.currentcolor[0];
@@ -50,7 +54,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         this.drawer.disable();
         
-        this.currentobject.initialize(this.counter++, track, this.tracks);
+        this.currentobject.initialize(this.counter, track, this.tracks);
         this.currentobject.stateclassify();
 
         this.currentobject.onready.push(function() {
@@ -61,6 +65,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     this.stopnewobject = function()
     {
         console.log("Finished new track object");
+
+        this.objects.push(this.currentobject);
 
         this.tracks.draggable(true);
         if ($("#annotateoptionsresize:checked").size() == 0)
@@ -77,6 +83,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         this.button.button("option", "disabled", false);
         this.newobjectbuttonenabled = true;
+
+        this.counter++;
     }
 
     this.setup = function()
@@ -93,19 +101,21 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.drawer.onstopdraw.push(function(position) {
             me.stopdrawing(position);
         });
+
+        this.instructions = $("<p>A list of objects you are tracking will appear here. Click the above button to create your first track annotation.</p>").appendTo(this.container);
     }
 
     this.setup();
 
-    this.availcolors = [["#FF00FF", "#FFBFFF"],
-                        ["#FF0000", "#FFBFBF"],
-                        ["#FF8000", "#FFDCBF"],
-                        ["#FFD100", "#FFEEA2"],
-                        ["#008000", "#8FBF8F"],
-                        ["#0080FF", "#BFDFFF"],
-                        ["#0000FF", "#BFBFFF"],
-                        ["#000080", "#8F8FBF"],
-                        ["#800080", "#BF8FBF"]];
+    this.availcolors = [["#FF00FF", "#FFBFFF", "#FFA6FF"],
+                        ["#FF0000", "#FFBFBF", "#FFA6A6"],
+                        ["#FF8000", "#FFDCBF", "#FFCEA6"],
+                        ["#FFD100", "#FFEEA2", "#FFEA8A"],
+                        ["#008000", "#8FBF8F", "#7CBF7C"],
+                        ["#0080FF", "#BFDFFF", "#A6D2FF"],
+                        ["#0000FF", "#BFBFFF", "#A6A6FF"],
+                        ["#000080", "#8F8FBF", "#7C7CBF"],
+                        ["#800080", "#BF8FBF", "#BF7CBF"]];
     this.pickcolor = function()
     {
         return this.availcolors[this.availcolors.push(this.availcolors.shift()) - 1];
@@ -133,18 +143,19 @@ function TrackObject(job, container, color)
     this.handle.prependTo(container);
     this.handle.css({
         'background-color': color[1],
-        'border-color': color[0]});
+        'border-color': color[1]});
     this.handle.mouseover(function() {
         me.mouseover();
     });
     this.handle.mouseout(function() {
         me.mouseout();
     });
-    this.handle.mouseup(function() {
-        me.click();
-    });
+
     this.header = null;
     this.details = null;
+    this.drawinst = null;
+    this.classifyinst = null;
+    this.opencloseicon = null;
 
     this.ready = false;
     this.foldedup = false;
@@ -154,6 +165,14 @@ function TrackObject(job, container, color)
         this.id = id;
         this.track = track;
         this.tracks = tracks;
+    }
+
+    this.remove = function()
+    {
+        this.handle.slideUp(null, function() {
+            me.handle.remove(); 
+        });
+        this.track.remove();
     }
 
     this.statedraw = function()
@@ -166,25 +185,33 @@ function TrackObject(job, container, color)
             html += "<li>" + this.job.labels[i] + "</li>";
         }
         html += "</ul>";
+        html += "<p>Do not annotate the same object twice.</p>";
 
-        html += "<p>Do not label an object more than once.</p>";
-
-        this.handle.html(html);
+        this.drawinst = $("<div>" + html + "</div>").appendTo(this.handle);
+        this.drawinst.hide().slideDown();
     }
 
     this.stateclassify = function()
     {
+        this.drawinst.slideUp(null, function() {
+            me.drawinst.remove(); 
+        });
+
         var html = "<p>What type of object did you just annotate?</p>";
         for (var i in job.labels)
         {
             var id = "classification" + this.id + "_" + i;
             html += "<input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label><br>";
         }
-        html += "<input type='button' value='Done' id='object" + this.id + "done'>";
+        //html += "<input type='button' value='Done' id='object" + this.id + "done'>";
 
-        this.handle.html(html);
+        this.classifyinst = $("<div>" + html + "</div>").appendTo(this.handle);
+        this.classifyinst.hide().slideDown();
 
-        $("#object" + this.id + "done").click(function() {
+        $("input[name='classification" + this.id + "']").click(function() {
+            me.classifyinst.slideUp(null, function() {
+                me.classifyinst.remove(); 
+            });
             me.finalize();
         });
     }
@@ -201,13 +228,33 @@ function TrackObject(job, container, color)
             }
         }
 
-        this.handle.html("");
-        this.header = $("<p class='trackobjectheader'><strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong></p>").appendTo(this.handle);
+        this.header = $("<p class='trackobjectheader'><strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong></p>").appendTo(this.handle).hide().slideDown();
+        this.opencloseicon = $('<div class="ui-icon ui-icon-triangle-1-e"></div>').prependTo(this.header);
         this.details = $("<div class='trackobjectdetails'></div>").appendTo(this.handle).hide();
+
+        this.setupdetails();
+
+        this.header.mouseup(function() {
+            me.click();
+        });
 
         this.statefoldup();
         this.ready = true;
         this._callback(this.onready);
+    }
+
+    this.setupdetails = function()
+    {
+        this.details.append("<input type='checkbox' id='trackobject" + this.id + "lost'> <label for='trackobject" + this.id + "lost'>Outside of view frame</label><br>");
+        this.details.append("<input type='checkbox' id='trackobject" + this.id + "occluded'> <label for='trackobject" + this.id + "occluded'>Occluded or obstructed</label><br>");
+        this.details.append("<input type='button' id='trackobject" + this.id + "delete' value='Delete'>");
+
+        $("#trackobject" + this.id + "delete").click(function() {
+            if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? This cannot be undone!"))
+            {
+                me.remove();
+            }
+        });
     }
 
     this.statefoldup = function()
@@ -217,6 +264,9 @@ function TrackObject(job, container, color)
         this.details.slideUp();
         this.foldedup = true;
         this._callback(this.onfoldup);
+
+        this.opencloseicon.removeClass("ui-icon-triangle-1-s");
+        this.opencloseicon.addClass("ui-icon-triangle-1-e");
     }
 
     this.statefolddown = function()
@@ -226,34 +276,47 @@ function TrackObject(job, container, color)
         this.details.slideDown();
         this.foldedup = false;
         this._callback(this.onfolddown);
+
+        this.opencloseicon.removeClass("ui-icon-triangle-1-e");
+        this.opencloseicon.addClass("ui-icon-triangle-1-s");
     }
 
     this.mouseover = function()
     {
-        if (this.ready)
-        {
-            this.header.css({
-                'background-color': me.color[0],
-                'color': '#fff'
-            })
+        this.handle.css({
+            'border-color': me.color[0],
+            'background-color': me.color[2],
+        });
 
+        if (this.track)
+        {
             this.tracks.dim(true);
             this.track.dim(false);
             this.track.highlight(true);
+        }
+
+        if (this.opencloseicon)
+        {
+            this.opencloseicon.addClass("ui-icon-triangle-1-se");
         }
     }
 
     this.mouseout = function()
     {
-        if (this.ready)
-        {
-            this.header.css({
-                'background-color': me.color[1],
-                'color': '#000'
-            });
+        this.handle.css({
+            'border-color': me.color[1],
+            'background-color': me.color[1],
+        });
 
+        if (this.track)
+        {
             this.tracks.dim(false);
             this.track.highlight(false);
+        }
+
+        if (this.opencloseicon)
+        {
+            this.opencloseicon.removeClass("ui-icon-triangle-1-se");
         }
     }
 
