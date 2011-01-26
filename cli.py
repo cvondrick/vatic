@@ -217,6 +217,7 @@ class dump(DumpCommand):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("--output", "-o")
         parser.add_argument("--xml", "-x", action="store_true", default=False)
+        parser.add_argument("--json", "-j", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -228,6 +229,8 @@ class dump(DumpCommand):
 
         if args.xml:
             self.dumpxml(file, data)
+        elif args.json:
+            self.dumpjson(file, data)
         else:
             self.dumptext(file, data)
 
@@ -239,16 +242,34 @@ class dump(DumpCommand):
         for id, track in enumerate(data):
             file.write("\t<track id=\"{0}\" label=\"{1}\">\n".format(id, track.label))
             for box in track.boxes:
-                file.write("\t\t<box frame=\"{0}\">\n".format(box.frame))
-                file.write("\t\t\t<xtl>{0}</xtl>\n".format(box.xtl))
-                file.write("\t\t\t<ytl>{0}</ytl>\n".format(box.ytl))
-                file.write("\t\t\t<xbr>{0}</xbr>\n".format(box.xbr))
-                file.write("\t\t\t<ybr>{0}</ybr>\n".format(box.ybr))
-                file.write("\t\t\t<outside>{0}</outside>\n".format(box.lost))
-                file.write("\t\t\t<occluded>{0}</occluded>\n".format(box.occluded))
-                file.write("\t\t</box>\n")
+                file.write("\t\t<box frame=\"{0}\"".format(box.frame))
+                file.write(" xtl=\"{0}\"".format(box.xtl))
+                file.write(" ytl=\"{0}\"".format(box.ytl))
+                file.write(" xbr=\"{0}\"".format(box.xbr))
+                file.write(" ybr=\"{0}\"".format(box.ybr))
+                file.write(" outside=\"{0}\"".format(box.lost))
+                file.write(" occluded=\"{0}\" />\n".format(box.occluded))
             file.write("\t</track>\n")
         file.write("</annotations>\n")
+
+    def dumpjson(self, file, data):
+        file.write("annotations: {\n")
+        for id, track in enumerate(data):
+            file.write("\t{0}: {{\n".format(id))
+            file.write("\t\tlabel: \"{0}\",\n".format(track.label))
+            file.write("\t\tboxes: {\n")
+            for box in track.boxes:
+                file.write("\t\t\t{0}: {{\n".format(box.frame))
+                file.write("\t\t\t\txtl: {0},\n".format(box.xtl))
+                file.write("\t\t\t\tytl: {0},\n".format(box.ytl))
+                file.write("\t\t\t\txbr: {0},\n".format(box.xbr))
+                file.write("\t\t\t\tybr: {0},\n".format(box.ybr))
+                file.write("\t\t\t\toutside: {0},\n".format(box.lost))
+                file.write("\t\t\t\toccluded: {0}\n".format(box.occluded))
+                file.write("\t\t\t},\n")
+            file.write("\t\t},\n")
+            file.write("\t},\n")
+        file.write("}\n");
 
     def dumptext(self, file, data):
         for id, track in enumerate(data):
