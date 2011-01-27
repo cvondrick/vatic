@@ -391,9 +391,6 @@ function Track(player, color)
     this.journal.mark(this.player.job.start,
         new Position(0, 0, 0, 0, false, true));
 
-    this.journal.mark(this.player.job.stop,
-        new Position(0, 0, 0, 0, false, true));
-
     /*
      * Polls the on screen position of the box and returns it.
      */
@@ -696,7 +693,7 @@ function Journal()
 
         if (bounds['left'] == null || bounds['left'].outside)
         {
-            return bounds['right'];
+            return bounds['left'];
         }
 
         if (bounds['right'] == null || bounds['right'].outside)
