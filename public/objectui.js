@@ -40,7 +40,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         this.newobjectbuttonenabled = false;
 
-        this.currentobject = new TrackObject(this.job, container, this.currentcolor);
+        this.currentobject = new TrackObject(this.job, this.player, container, this.currentcolor);
         this.currentobject.statedraw();
 
         this.tracks.resizable(false);
@@ -134,11 +134,12 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     }
 }
 
-function TrackObject(job, container, color)
+function TrackObject(job, player, container, color)
 {
     var me = this;
 
     this.job = job;
+    this.player = player;
     this.container = container;
     this.color = color;
 
@@ -251,7 +252,7 @@ function TrackObject(job, container, color)
             me.click();
         });
 
-        this.statefoldup();
+        this.statefolddown();
         this.ready = true;
         this._callback(this.onready);
     }
@@ -260,6 +261,21 @@ function TrackObject(job, container, color)
     {
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "lost'> <label for='trackobject" + this.id + "lost'>Outside of view frame</label><br>");
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "occluded'> <label for='trackobject" + this.id + "occluded'>Occluded or obstructed</label><br>");
+
+
+        $("#trackobject" + this.id + "lost").click(function() {
+            me.track.setoutside($(this).attr("checked"));
+        });
+        $("#trackobject" + this.id + "occluded").click(function() {
+            me.track.setocclusion($(this).attr("checked"));
+        });
+
+        this.player.onupdate.push(function() {
+            var e = me.track.journal.estimate(me.player.frame);
+            $("#trackobject" + me.id + "lost").attr("checked", e.outside);
+            $("#trackobject" + me.id + "occluded").attr("checked", e.occluded);
+        });
+
         //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
         //this.details.append("<input type='button' id='trackobject" + this.id + "delete' value='Delete'>");
 

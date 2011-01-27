@@ -266,7 +266,7 @@ function TrackCollection(player, job)
     player.onpause.push(function() {
         for (var i in me.tracks)
         {
-            me.tracks[i].recordposition();
+            //me.tracks[i].recordposition();
         }
     });
 
@@ -391,6 +391,9 @@ function Track(player, color)
     this.journal.mark(this.player.job.start,
         new Position(0, 0, 0, 0, false, true));
 
+    this.journal.mark(this.player.job.stop,
+        new Position(0, 0, 0, 0, false, true));
+
     /*
      * Polls the on screen position of the box and returns it.
      */
@@ -406,7 +409,11 @@ function Track(player, color)
         var xbr = xtl + width + this.htmloffset;
         var ybr = ytl + height + this.htmloffset;
 
-        return new Position(xtl, ytl, xbr, ybr)
+        var estimate = this.journal.estimate(this.player.frame);
+        var position = new Position(xtl, ytl, xbr, ybr)
+        position.occluded = estimate.occluded;
+        position.outside = estimate.outside;
+        return position;
     }
 
     /*
@@ -448,8 +455,60 @@ function Track(player, color)
         var xbr = Math.min(pos.xbr, width - 1);
         var ybr = Math.min(pos.ybr, height - 1);
 
-        pos = new Position(xtl, ytl, xbr, ybr);
+        var fpos = new Position(xtl, ytl, xbr, ybr);
+        fpos.occluded = pos.occluded;
+        fpos.outside = pos.outside;
 
+        this.draw(this.player.frame, fpos);
+    }
+
+    /*
+     * Sets the current position as occluded.
+     */
+    this.setocclusion = function(value)
+    {
+        if (value)
+        {   
+            console.log("Marking object as occluded here.");
+        }
+        else
+        {
+            console.log("Marking object as not occluded here.");
+        }
+
+        var pos = this.journal.estimate(this.player.frame);
+        if (pos == null)
+        {
+            pos = this.pollposition();
+        }
+        pos = pos.clone();
+        pos.occluded = value;
+        this.journal.mark(this.player.frame, pos);
+        this.draw(this.player.frame, pos);
+    }
+
+    /*
+     * Sets the current position as outside.
+     */
+    this.setoutside = function(value)
+    {
+        if (value)
+        {   
+            console.log("Marking object as outside here.");
+        }
+        else
+        {
+            console.log("Marking object as not outside here.");
+        }
+
+        var pos = this.journal.estimate(this.player.frame);
+        if (pos == null)
+        {
+            pos = this.pollposition();
+        }
+        pos = pos.clone();
+        pos.outside = value;
+        this.journal.mark(this.player.frame, pos);
         this.draw(this.player.frame, pos);
     }
 
@@ -491,6 +550,23 @@ function Track(player, color)
         if (position == null)
         {
             position = this.journal.estimate(frame);
+        }
+
+        if (position.outside)
+        {
+            this.handle.hide();
+            return;
+        }
+
+        this.handle.show();
+        
+        if (position.occluded)
+        {
+            this.handle.addClass("boundingboxoccluded");
+        }
+        else
+        {
+            this.handle.removeClass("boundingboxoccluded");
         }
 
         var offset = this.player.handle.offset();
@@ -601,6 +677,7 @@ function Journal()
      */
     this.mark = function(frame, position) 
     {
+        console.log("Marking " + frame);
         this.annotations[frame] = position;
     }
 
@@ -617,12 +694,12 @@ function Journal()
             return bounds['left'];
         }
 
-        if (bounds['left'] == null)
+        if (bounds['left'] == null || bounds['left'].outside)
         {
             return bounds['right'];
         }
 
-        if (bounds['right'] == null)
+        if (bounds['right'] == null || bounds['right'].outside)
         {
             return bounds['left'];
         }
@@ -639,7 +716,21 @@ function Journal()
         var xbr = bounds['left'].xbr + xbrr * off;
         var ybr = bounds['left'].ybr + ybrr * off;
 
-        return new Position(xtl, ytl, xbr, ybr);
+        var occluded = false;
+        var outside = false;
+
+//        if (Math.abs(bounds['rightframe'] - frame) > Math.abs(bounds['leftframe'] - frame))
+//        {
+//            occluded = bounds['right'].occluded;
+//            outside = bounds['right'].outside;
+//        }
+//        else
+//        {
+            occluded = bounds['left'].occluded;
+            outside = bounds['left'].outside;
+//        }
+
+        return new Position(xtl, ytl, xbr, ybr, occluded, outside);
     }
     
     this.bounds = function(frame)
@@ -661,10 +752,9 @@ function Journal()
         for (t in this.annotations)
         {
             var item = this.annotations[t];
-            item.journal_frame = parseInt(t);
             itemtime = parseInt(t);
 
-            if (item.journal_frame <= frame)
+            if (itemtime <= frame)
             {
                 if (left == null || itemtime > lefttime) 
                 {
@@ -731,5 +821,15 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside)
                      this.ybr + "," +
                      this.occluded + "," +
                      this.outside + "]";
+    }
+
+    this.clone = function()
+    {
+        return new Position(this.xtl,
+                            this.ytl,
+                            this.xbr,
+                            this.ybr,
+                            this.occluded,
+                            this.outside);
     }
 }
