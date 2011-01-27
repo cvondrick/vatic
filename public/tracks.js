@@ -280,9 +280,7 @@ function TrackCollection(player, job)
      */
     this.add = function(frame, position, color)
     {
-        var track = new Track(this.player, color);
-        track.journal.mark(frame, position);
-        track.draw(this.player.frame);
+        var track = new Track(this.player, color, position);
 
         this.tracks.push(track);
 
@@ -377,7 +375,7 @@ function TrackCollection(player, job)
 /*
  * A track class.
  */
-function Track(player, color)
+function Track(player, color, position)
 {
     var me = this;
 
@@ -389,7 +387,11 @@ function Track(player, color)
     this.htmloffset = 3;
 
     this.journal.mark(this.player.job.start,
-        new Position(0, 0, 0, 0, false, true));
+        new Position(position.xtl, position.ytl,
+                     position.xbr, position.ybr, 
+                     false, true));
+
+    this.journal.mark(this.player.frame, position);
 
     /*
      * Polls the on screen position of the box and returns it.
@@ -660,6 +662,8 @@ function Track(player, color)
             me.handle.remove();
         });
     }
+
+    this.draw(this.player.frame);
 }
 
 /*
