@@ -350,22 +350,31 @@ function TrackCollection(player, job)
     }
 
     /*
+     * Returns the number of tracks.
+     */
+    this.count = function()
+    {
+        return this.tracks.length;
+    }
+
+    /*
      * Serializes all tracks for sending to server.
      */
     this.serialize = function()
     {
-        if (this.tracks.length == 0)
-        {
-            return "[]";
-        }
-
+        var count = 0;
         var str = "[";
         for (var i in this.tracks)
         {
             if (!this.tracks[i].deleted)
             {
                 str += this.tracks[i].serialize() + ",";
+                count++;
             }
+        }
+        if (count == 0)
+        {
+            return "[]";
         }
         return str.substr(0, str.length - 1) + "]";
     }

@@ -277,6 +277,11 @@ function ui_submit(job, tracks)
         return;
     }
 
+    if (tracks.count() == 0 && !window.confirm("You have not labeled anything. Do you still wish to submit?"))
+    {
+        return;
+    }
+
     ui_disable();
 
     $('<div id="turkic_overlay"></div>').appendTo("#container");
