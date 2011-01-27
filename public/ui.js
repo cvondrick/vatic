@@ -201,15 +201,25 @@ function ui_setupbuttons(player, tracks)
         {
             $("#newobjectbutton").click();
         }
-        else if (e.keyCode == 60 || e.keyCode == 44)
+        else if (e.keyCode == 44)
         {
             player.pause();
             player.displace(-10);
         }
-        else if (e.keyCode == 62 || e.keyCode == 46)
+        else if (e.keyCode == 46)
         {
             player.pause();
             player.displace(10);
+        }
+        else if (e.keyCode == 62)
+        {
+            player.pause();
+            player.displace(1);
+        }
+        else if (e.keyCode == 60)
+        {
+            player.pause();
+            player.displace(-1);
         }
     });
 
@@ -299,8 +309,10 @@ function ui_showinstructions()
         '<li><code>n</code> creates a new object</li>' +
         '<li><code>[space]</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
-        '<li><code>.</code> jump forward</li>' +
-        '<li><code>,</code> jump backwards</li>' +
+        '<li><code>.</code> jump forward a bit</li>' +
+        '<li><code>,</code> jump backward a bit</li>' +
+        '<li><code>&gt;</code> jump forward a tiny bit</li>' +
+        '<li><code>&lt;</code> jump forward a tiny bit</li>' +
         '</ul>');
 
     ui_disable();

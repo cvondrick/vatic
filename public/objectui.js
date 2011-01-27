@@ -165,6 +165,7 @@ function TrackObject(job, player, container, color)
     });
 
     this.header = null;
+    this.headerdetails = null;
     this.details = null;
     this.drawinst = null;
     this.classifyinst = null;
@@ -242,6 +243,7 @@ function TrackObject(job, player, container, color)
             }
         }
 
+        this.headerdetails = $("<div style='float:right;'></div>").appendTo(this.handle);
         this.header = $("<p class='trackobjectheader'><strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong></p>").appendTo(this.handle).hide().slideDown();
         this.opencloseicon = $('<div class="ui-icon ui-icon-triangle-1-e"></div>').prependTo(this.header);
         this.details = $("<div class='trackobjectdetails'></div>").appendTo(this.handle).hide();
@@ -264,9 +266,11 @@ function TrackObject(job, player, container, color)
 
 
         $("#trackobject" + this.id + "lost").click(function() {
+            me.player.pause();
             me.track.setoutside($(this).attr("checked"));
         });
         $("#trackobject" + this.id + "occluded").click(function() {
+            me.player.pause();
             me.track.setocclusion($(this).attr("checked"));
         });
 
@@ -277,14 +281,14 @@ function TrackObject(job, player, container, color)
         });
 
         //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
-        //this.details.append("<input type='button' id='trackobject" + this.id + "delete' value='Delete'>");
+        this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-trash' id='trackobject" + this.id + "delete'></div></div>");
 
-        /*$("#trackobject" + this.id + "delete").click(function() {
+        $("#trackobject" + this.id + "delete").click(function() {
             if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? This cannot be undone!"))
             {
                 me.remove();
             }
-        });*/
+        });
     }
 
     this.statefoldup = function()
@@ -292,6 +296,7 @@ function TrackObject(job, player, container, color)
         this.handle.addClass("trackobjectfoldedup");
         this.handle.removeClass("trackobjectfoldeddown");
         this.details.slideUp();
+        this.headerdetails.fadeOut();
         this.foldedup = true;
         this._callback(this.onfoldup);
 
@@ -304,6 +309,7 @@ function TrackObject(job, player, container, color)
         this.handle.removeClass("trackobjectfoldedup");
         this.handle.addClass("trackobjectfoldeddown");
         this.details.slideDown();
+        this.headerdetails.fadeIn();
         this.foldedup = false;
         this._callback(this.onfolddown);
 
