@@ -362,7 +362,10 @@ function TrackCollection(player, job)
         var str = "[";
         for (var i in this.tracks)
         {
-            str += this.tracks[i].serialize() + ",";
+            if (!this.tracks[i].deleted)
+            {
+                str += this.tracks[i].serialize() + ",";
+            }
         }
         return str.substr(0, str.length - 1) + "]";
     }
@@ -385,6 +388,7 @@ function Track(player, color, position)
     this.handle = null;
     this.color = color;
     this.htmloffset = 3;
+    this.deleted = false;
 
     this.journal.mark(this.player.job.start,
         new Position(position.xtl, position.ytl,
@@ -650,6 +654,10 @@ function Track(player, color, position)
      */
     this.serialize = function()
     {
+        if (this.deleted)
+        {
+            return "";
+        }
         return "[" + this.label + "," + this.journal.serialize() + "]";
     }
 
@@ -661,6 +669,7 @@ function Track(player, color, position)
         this.handle.fadeOut(null, function() {
             me.handle.remove();
         });
+        this.deleted = true;
     }
 
     this.draw(this.player.frame);

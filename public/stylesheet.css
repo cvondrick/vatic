@@ -41,6 +41,12 @@ p, li
     font-size : 16px;
 }
 
+ul
+{
+    margin-top : 10px;
+    margin-bottom : 10px;
+}
+
 code
 {
     padding : 0 5px;
@@ -97,6 +103,13 @@ code
     font-family : Arial;
     margin-top : 25px;
     color : #666;
+}
+
+#loadingscreeninstructions
+{
+    float : right;
+    margin-top : -10px;
+    font-weight : bold;
 }
 
 #annotatescreen

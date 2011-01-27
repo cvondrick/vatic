@@ -239,10 +239,10 @@ function ui_setupslider(player)
         }
     });
 
-    slider.children(".ui-slider-handle").hide();
+    /*slider.children(".ui-slider-handle").hide();
     slider.children(".ui-slider-range").css({
         "background-color": "#868686",
-        "background-image": "none"});
+        "background-image": "none"});*/
 
     slider.css({
         marginTop: "6px",
@@ -282,7 +282,6 @@ function ui_submit(job, tracks)
     $('<div id="turkic_overlay"></div>').appendTo("#container");
 
     var note = $("<div id='submitdialog'>Saving...</div>").appendTo("#container")
-    note.effect("pulsate");
 
     mturk_submit(function(redirect) {
         server_post("savejob", [job.jobid], tracks.serialize(), function(data) {
@@ -295,6 +294,11 @@ function ui_submit(job, tracks)
 function ui_showinstructions()
 {
     console.log("Popup instructions");
+
+    if ($("#instructionsdialog").size() > 0)
+    {
+        return;
+    }
 
     $('<div id="turkic_overlay"></div>').appendTo("#container");
     var h = $('<div id="instructionsdialog"></div>').appendTo("#container");
@@ -309,6 +313,20 @@ function ui_showinstructions()
     h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool.</p>");
 
     h.append("<h2>Getting Started</h2>");
+    h.append("<img src='box.jpg' align='right'>");
+    h.append("<p>Click the <strong>New Object</strong> button to start annotating your first object. Position your cursor over the view screen to click on the corner of an object of interest. Use the cross hairs to line up your click. Click on another corner to finish drawing the box. The rectangle should tightly and completely enclose the object you are annotating. Resize the box, if necessary, by dragging the edges of the box.</p>");
+
+    h.append("<img src='classify.jpg' align='right'>");
+    h.append("<p>On the right, directly below the New Object button, you will find a colorful box. The box is prompting you to input which type of object you have labeled. Click the correst response.</p>");
+
+    h.append("<p>Press the <strong>Play</strong> button. The video will begin to play forward. After the object you are tracking has moved a bit, click <strong>Pause</strong>. Using your mouse, drag-and-drop the box to the correct position and resize if necessary. Continue in this fashion until you have reached the end of the video.</p>");
+
+    h.append("<p>Once you have reached the end, you should rewind by pressing the rewind button (next to Play) and repeat this process for every object of interest. You are welcome to annotate multiple objects each playthrough.</p>");
+
+    h.append("<img src='outsideoccluded.jpg' align='right'>");
+    h.append("<p>If an object leaves the screen, mark the <strong>Outside of view frame</strong> checkbox for the corresponding tracking rectangle. Make sure you click the right button. When you mouse over the controls, the corresponding rectangle will light up in the view screen. Likewise, if the object you are tracking is still in the view frame but the view is obstructed (e.g., inside a car), mark the <strong>Occluded or obstructed</strong> checkbox. When the object becomes visible again, remember to uncheck these boxes.</p>");
+
+    h.append("<p>When you are ready to submit your work, rewind the video and watch it through one more time. Does each rectangle follow the object it is tracking for the entire sequence? If you find a spot where it misses, press <strong>Pause</strong> and adjust the box. After you have checked your work, press the <strong>Submit HIT</strong> button. We will pay you as soon as possible.</p>");
 
     h.append("<h2>How We Accept Your Work</h2>");
     h.append("<p>We will hand review your work and we will only accept high quality work. Your annotations are not compared against other workers. Follow these guidelines to ensure your work is accepted:</p>");
@@ -328,9 +346,15 @@ function ui_showinstructions()
     h.append("<p>The entire video sequence must be labeled. When an object moves, you must update its position. A box must describe only one object. You should never change which object identity a particular box tracks.</p>");
 
     h.append("<h2>Advanced Features</h2>");
+    h.append("<p>We have provided some advanced tools for videos that are especially difficult. Clicking the <strong>Options</strong> button will enable the advanced options.</p>");
+    h.append("<ul>" +
+        "<li>Clicking <strong>Disable Resize?</strong> will toggle between allowing you to resize the boxes. This option is helpful when the boxes become especially tiny.</li>" +
+        "<li>Clicking <strong>Hide Boxes?</strong> will temporarily hide the boxes on the screen. This is useful when the scene becomes too crowded. Remember to click it again to show the boxes again!</li>" +
+        "<li>The <strong>Slow</strong>, <strong>Normal</strong>, <strong>Fast</strong> buttons will change how fast the video plays back. If the video becomes confusing, slowing the play back speed may help.</li>" +
+    "</ul>");
 
-    h.append("<h2>Keyboard Shortcuts</h2>");
-    h.append("<p>These shortcuts are available for your convenience:</p>");
+    h.append("<h3>Keyboard Shortcuts</h3>");
+    h.append("<p>These keyboard shortcuts are available for your convenience:</p>");
     h.append('<ul class="keyboardshortcuts">' +
         '<li><code>n</code> creates a new object</li>' +
         '<li><code>[space]</code> toggles play/pause on the video</li>' +
