@@ -239,6 +239,11 @@ function ui_setupslider(player)
         }
     });
 
+    slider.children(".ui-slider-handle").hide();
+    slider.children(".ui-slider-range").css({
+        "background-color": "#868686",
+        "background-image": "none"});
+
     slider.css({
         marginTop: "6px",
         width: "590px",
@@ -301,7 +306,28 @@ function ui_showinstructions()
     }).click(ui_closeinstructions);
 
     h.append("<h1>Important Instructions</h1>");
-    h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool. In return for following these instructions, we will pay you within a few days.</p>");
+    h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool.</p>");
+
+    h.append("<h2>Getting Started</h2>");
+
+    h.append("<h2>How We Accept Your Work</h2>");
+    h.append("<p>We will hand review your work and we will only accept high quality work. Your annotations are not compared against other workers. Follow these guidelines to ensure your work is accepted:</p>");
+
+    h.append("<h3>Label Every Object</h3>")
+    h.append("<img src='everyobject.jpg'>");
+    h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once.</p>");
+
+    h.append("<h3>Boxes Are Tight</h3>");
+    h.append("<table><tr><td><img src='tight-good.jpg'></td><td><img src='tight-bad.jpg'></td></tr><tr><th>Good</th><th>Bad</th></tr></table>");
+    h.append("<p>The boxes you draw must be tight. They boxes must fit around the object as close as possible. The loose annotation on the right would be rejected while the tight annotation on the left will be accepted.</p>");
+
+    h.append("<h3>Entire Video is Labeled</h3>")
+    h.append("<img src='sequence1.jpg'> ");
+    h.append("<img src='sequence3.jpg'> ");
+    h.append("<img src='sequence4.jpg'><br>");
+    h.append("<p>The entire video sequence must be labeled. When an object moves, you must update its position. A box must describe only one object. You should never change which object identity a particular box tracks.</p>");
+
+    h.append("<h2>Advanced Features</h2>");
 
     h.append("<h2>Keyboard Shortcuts</h2>");
     h.append("<p>These shortcuts are available for your convenience:</p>");
@@ -309,10 +335,10 @@ function ui_showinstructions()
         '<li><code>n</code> creates a new object</li>' +
         '<li><code>[space]</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
-        '<li><code>.</code> jump forward a bit</li>' +
-        '<li><code>,</code> jump backward a bit</li>' +
-        '<li><code>&gt;</code> jump forward a tiny bit</li>' +
-        '<li><code>&lt;</code> jump forward a tiny bit</li>' +
+        '<li><code>.</code> jump the video forward a bit</li>' +
+        '<li><code>,</code> jump the video backward a bit</li>' +
+        '<li><code>&gt;</code> step the video forward a tiny bit</li>' +
+        '<li><code>&lt;</code> step the video backward a tiny bit</li>' +
         '</ul>');
 
     ui_disable();
