@@ -20,6 +20,7 @@ class extract(Command):
         parser.add_argument("output")
         parser.add_argument("--width", default=720, type=int)
         parser.add_argument("--height", default=480, type=int)
+        parser.add_argument("--no-resize", action="store_true", default = False)
         parser.add_argument("--no-cleanup", action="store_true", default=False)
         return parser
 
@@ -33,7 +34,8 @@ class extract(Command):
             for frame, image in enumerate(sequence):
                 if frame % 100 == 0:
                     print "Decoding frames {0} to {1}".format(frame, frame + 100)
-                image.thumbnail((args.width, args.height), Image.BILINEAR)
+                if not args.no_resize:
+                    image.thumbnail((args.width, args.height), Image.BILINEAR)
                 path = Video.getframepath(frame, args.output)
                 try:
                     image.save(path)
