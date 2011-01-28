@@ -20,7 +20,7 @@ function ui_setup(job)
 
     $("<table>" + 
         "<tr>" +
-            "<td><div id='instructions'><div id='instructionsbutton' class='button'>Instructions</div> Annotate the entire video below. We will hand review your work.</td>" +
+            "<td><div id='instructions'><div id='instructionsbutton' class='button'>Instructions</div> Annotate every object, even stationary and obstructed objects, for the entire video.</td>" +
             "<td><div id='topbar'></div></td>" +
         "</tr>" +
         "<tr>" +
@@ -338,7 +338,7 @@ function ui_showinstructions()
 
     h.append("<h3>Label Every Object</h3>")
     h.append("<img src='everyobject.jpg'>");
-    h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once.</p>");
+    h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once. Even if the object does not move, you must label it.</p>");
 
     h.append("<h3>Boxes Are Tight</h3>");
     h.append("<table><tr><td><img src='tight-good.jpg'></td><td><img src='tight-bad.jpg'></td></tr><tr><th>Good</th><th>Bad</th></tr></table>");
