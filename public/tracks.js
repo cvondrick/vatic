@@ -263,12 +263,12 @@ function TrackCollection(player, job)
         me.update(player.frame);
     });
 
-    player.onpause.push(function() {
+    /*player.onpause.push(function() {
         for (var i in me.tracks)
         {
-            //me.tracks[i].recordposition();
+            me.tracks[i].recordposition();
         }
-    });
+    });*/
 
     // if the window moves, we have to update boxes
     $(window).resize(function() {
@@ -354,7 +354,15 @@ function TrackCollection(player, job)
      */
     this.count = function()
     {
-        return this.tracks.length;
+        var count = 0;
+        for (var i in this.tracks)
+        {
+            if (!this.tracks[i].deleted)
+            {
+                count++;
+            }
+        }
+        return count;
     }
 
     /*
@@ -406,6 +414,9 @@ function Track(player, color, position)
 
     this.journal.mark(this.player.frame, position);
 
+    this.journal.artificialrightframe = this.player.job.stop;
+    this.journal.artificialright = position;
+
     /*
      * Polls the on screen position of the box and returns it.
      */
@@ -434,6 +445,7 @@ function Track(player, color, position)
     this.recordposition = function()
     {
         this.journal.mark(this.player.frame, this.pollposition());
+        this.journal.artificialright = this.journal.rightmost();
     }
 
     /*
@@ -496,6 +508,7 @@ function Track(player, color, position)
         pos = pos.clone();
         pos.occluded = value;
         this.journal.mark(this.player.frame, pos);
+        this.journal.artificialright = this.journal.rightmost();
         this.draw(this.player.frame, pos);
     }
 
@@ -521,6 +534,7 @@ function Track(player, color, position)
         pos = pos.clone();
         pos.outside = value;
         this.journal.mark(this.player.frame, pos);
+        this.journal.artificialright = this.journal.rightmost();
         this.draw(this.player.frame, pos);
     }
 
@@ -690,6 +704,8 @@ function Track(player, color, position)
 function Journal()
 {
     this.annotations = {};
+    this.artificialright = null;
+    this.artificialrightframe = null;
 
     /*
      * Marks the boxes position.
@@ -798,6 +814,24 @@ function Journal()
     }
 
     /*
+     * Gets the right most annotation.
+     */
+    this.rightmost = function()
+    {
+        var item = null
+        var itemtime = null;
+        for (var t in this.annotations)
+        {
+            if (t > itemtime)
+            {
+                item = this.annotations[t];
+                itemtime = t;
+            }
+        }
+        return item;
+    }
+
+    /*
      * Serializes this journal based on position.
      */
     this.serialize = function()
@@ -812,6 +846,11 @@ function Journal()
         {
             var dat = this.annotations[frame];
             str += "\"" + frame + "\":" + dat.serialize() + ",";
+        }
+        if (this.artificialrightframe != null && this.annotations[this.artificialrightframe] == null)
+        {
+            console.log("Using artificial in serialization");
+            str += "\"" + this.artificialrightframe + "\":" + this.artificialright.serialize() + ",";
         }
         return str.substr(0, str.length - 1) + "}";
     }
