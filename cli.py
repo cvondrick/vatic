@@ -67,7 +67,7 @@ class load(LoadCommand):
         return 1.00
 
     def duration(self, args):
-        return 7200
+        return 7200 * 3
 
     def keywords(self, args):
         return "video, annotation, computer, vision"
