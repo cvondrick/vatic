@@ -188,35 +188,37 @@ function ui_setupbuttons(player, tracks)
             console.log("Key press ignored because UI is disabled.");
             return;
         }
+
+        var keycode = e.keyCode ? e.keyCode : e.which;
         
-        if (e.keyCode == 32)
+        if (keycode == 32)
         {
             $("#playbutton").click();
         }
-        if (e.keyCode == 114)
+        if (keycode == 114)
         {
             $("#rewindbutton").click();
         }
-        else if (e.keyCode == 110)
+        else if (keycode == 110)
         {
             $("#newobjectbutton").click();
         }
-        else if (e.keyCode == 44)
+        else if (keycode == 44)
         {
             player.pause();
             player.displace(-10);
         }
-        else if (e.keyCode == 46)
+        else if (keycode == 46)
         {
             player.pause();
             player.displace(10);
         }
-        else if (e.keyCode == 62)
+        else if (keycode == 62)
         {
             player.pause();
             player.displace(1);
         }
-        else if (e.keyCode == 60)
+        else if (keycode == 60)
         {
             player.pause();
             player.displace(-1);
