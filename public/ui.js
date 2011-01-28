@@ -273,7 +273,7 @@ function ui_submit(job, tracks)
 {
     console.log("Start submit - status: " + tracks.serialize());
 
-    if (!mturk_isassigned())
+    if (!mturk_submitallowed())
     {
         alert("Please accept the task before you submit.");
         return;

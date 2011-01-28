@@ -44,7 +44,7 @@ function loadingscreen(job)
         "finishes, we'll play a gentle musical tune to notify you.</div>");
     container.html(ls);
 
-    if (!development)
+    if (!development && !mturk_isoffline())
     {
         ui_showinstructions();
     }
@@ -61,7 +61,7 @@ function loadingscreen(job)
         preloadslider($("#loadingscreenslider"), function(progress) {
             if (progress == 1)
             {
-                if (!development)
+                if (!development && !mturk_isoffline())
                 {
                     $("body").append('<div id="music"><embed src="magic.mp3">' +
                         '<noembed><bgsound src="magic.mp3"></noembed></div>');
