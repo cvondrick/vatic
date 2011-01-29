@@ -12,11 +12,6 @@ import vision.track.interpolation
 import turkic.models
 from models import *
 
-try:
-    from scipy.io import savemat as savematlab
-    canwritematlab = True
-except ImportError:
-    canwritematlab = False
 
 @handler("Decompresses an entire video into frames")
 class extract(Command):
@@ -226,8 +221,7 @@ class dump(DumpCommand):
         parser.add_argument("--output", "-o")
         parser.add_argument("--xml", "-x", action="store_true", default=False)
         parser.add_argument("--json", "-j", action="store_true", default=False)
-        if canwritematlab:
-            parser.add_argument("--matlab", "-ml", action="store_true", default=False)
+        parser.add_argument("--matlab", "-ml", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -250,6 +244,7 @@ class dump(DumpCommand):
             file.close()
 
     def dumpmatlab(self, file, data):
+        from scipy.io import savemat as savematlab
         if file is sys.stdout:
             print "Cannot output matlab to stdout, specify -o"
             return
