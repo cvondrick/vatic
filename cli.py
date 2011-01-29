@@ -235,7 +235,7 @@ class dump(DumpCommand):
             self.dumpxml(file, data)
         elif args.json:
             self.dumpjson(file, data)
-        elif canwritematlab and args.matlab:
+        elif args.matlab:
             self.dumpmatlab(file, data)
         else:
             self.dumptext(file, data)
