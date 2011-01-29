@@ -18,6 +18,7 @@ class Video(turkic.database.Base):
     height = Column(Integer)
     totalframes = Column(Integer)
     location = Column(String(250))
+    skip = Column(Integer, default = 0, nullable = False)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)

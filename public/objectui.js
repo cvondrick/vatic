@@ -217,7 +217,6 @@ function TrackObject(job, player, container, color)
             var id = "classification" + this.id + "_" + i;
             html += "<div class='label'><input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label></div>";
         }
-        //html += "<input type='button' value='Done' id='object" + this.id + "done'>";
 
         this.classifyinst = $("<div>" + html + "</div>").appendTo(this.handle);
         this.classifyinst.hide().slideDown();

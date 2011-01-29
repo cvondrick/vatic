@@ -7,6 +7,7 @@ function Job(data)
     this.stop = parseInt(data["stop"]);
     this.width = parseInt(data["width"]);
     this.height = parseInt(data["height"]);
+    this.skip = parseInt(data["skip"]);
     this.jobid = parseInt(data["jobid"]);
     this.labels = data["labels"];
 

@@ -18,12 +18,13 @@ def getjob(id):
     finally:
         session.close()
 
-    return {"start": segment.start,
-            "stop": segment.stop,
-            "slug": video.slug,
-            "width": video.width,
+    return {"start":  segment.start,
+            "stop":   segment.stop,
+            "slug":   video.slug,
+            "width":  video.width,
             "height": video.height,
-            "jobid": job.id,
+            "skip":   video.skip,
+            "jobid":  job.id,
             "labels": labels}
 
 @handler(post = "json")
@@ -46,6 +47,7 @@ def savejob(id, tracks):
                 box.frame = frame
                 path.boxes.append(box)
             job.paths.append(path)
+        job.hit.numobjects = len(tracks)
 
         session.add(job)
         session.commit()
