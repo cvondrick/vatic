@@ -12,6 +12,12 @@ import vision.track.interpolation
 import turkic.models
 from models import *
 
+try:
+    from scipy.io import savemat as savematlab
+    canwritematlab = True
+except ImportError:
+    canwritematlab = False
+
 @handler("Decompresses an entire video into frames")
 class extract(Command):
     def setup(self):
@@ -220,6 +226,8 @@ class dump(DumpCommand):
         parser.add_argument("--output", "-o")
         parser.add_argument("--xml", "-x", action="store_true", default=False)
         parser.add_argument("--json", "-j", action="store_true", default=False)
+        if canwritematlab:
+            parser.add_argument("--matlab", "-ml", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -233,11 +241,36 @@ class dump(DumpCommand):
             self.dumpxml(file, data)
         elif args.json:
             self.dumpjson(file, data)
+        elif canwritematlab and args.matlab:
+            self.dumpmatlab(file, data)
         else:
             self.dumptext(file, data)
 
         if args.output:
             file.close()
+
+    def dumpmatlab(self, file, data):
+        if file is sys.stdout:
+            print "Cannot output matlab to stdout, specify -o"
+            return
+
+        results = []
+        for id, track in enumerate(data):
+            for box in track.boxes:
+                data = {}
+                data['id'] = id
+                data['xtl'] = box.xtl
+                data['ytl'] = box.ytl
+                data['xbr'] = box.xbr
+                data['ybr'] = box.ybr
+                data['frame'] = box.frame
+                data['lost'] = box.lost
+                data['occluded'] = box.occluded
+                data['label'] = track.label
+                results.append(data)
+
+        savematlab(file,
+            {"annotations": results}, oned_as="row")
 
     def dumpxml(self, file, data):
         file.write("<annotations count=\"{0}\">\n".format(len(data)))
