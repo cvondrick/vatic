@@ -234,6 +234,8 @@ function ui_setupkeyboardshortcuts(job, player)
             {
                 player.pause();
                 player.displace(skip);
+
+                ui_snaptokeyframe(job, player);
             }
         }
     });
@@ -280,6 +282,23 @@ function ui_iskeyframe(frame, job)
     return frame == job.stop || (frame - job.start) % job.skip == 0;
 }
 
+function ui_snaptokeyframe(job, player)
+{
+    if (job.skip > 0 && !ui_iskeyframe(player.frame, job))
+    {
+        console.log("Fixing slider to key frame");
+        var remainder = (player.frame - job.start) % job.skip;
+        if (remainder > job.skip / 2)
+        {
+            player.seek(player.frame + (job.skip - remainder));
+        }
+        else
+        {
+            player.seek(player.frame - remainder);
+        }
+    }
+}
+
 function ui_setupclickskip(job, player, tracks, objectui)
 {
     if (job.skip <= 0)
@@ -308,13 +327,9 @@ function ui_setupclickskip(job, player, tracks, objectui)
             objectui.disable();
         }
     });
-    
+
     $("#playerslider").bind("slidestop", function() {
-        if (!ui_iskeyframe(player.frame, job))
-        {
-            console.log("Fixing slider to key frame");
-            player.seek(player.frame - (player.frame - job.start) % job.skip);
-        }
+        ui_snaptokeyframe(job, player);
     });
 }
 
