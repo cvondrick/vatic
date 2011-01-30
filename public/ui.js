@@ -8,7 +8,7 @@ function ui_build(job)
     var tracks = new TrackCollection(player, job);
     var objectui = new TrackObjectUI($("#newobjectbutton"), $("#objectcontainer"), videoframe, job, player, tracks);
 
-    ui_setupbuttons(player, tracks);
+    ui_setupbuttons(job, player, tracks);
     ui_setupslider(player);
     ui_setupsubmit(job, tracks);
     ui_setupclickskip(job, player, tracks, objectui);
@@ -90,11 +90,11 @@ function ui_setup(job)
     return screen;
 }
 
-function ui_setupbuttons(player, tracks)
+function ui_setupbuttons(job, player, tracks)
 {
     $("#instructionsbutton").click(function() {
         player.pause();
-        ui_showinstructions(); 
+        ui_showinstructions(job); 
     }).button({
         icons: {
             primary: "ui-icon-newwin"
@@ -358,7 +358,7 @@ function ui_submit(job, tracks)
     });
 }
 
-function ui_showinstructions()
+function ui_showinstructions(job)
 {
     console.log("Popup instructions");
 
@@ -386,7 +386,14 @@ function ui_showinstructions()
     h.append("<img src='classify.jpg' align='right'>");
     h.append("<p>On the right, directly below the New Object button, you will find a colorful box. The box is prompting you to input which type of object you have labeled. Click the correst response.</p>");
 
-    h.append("<p>Press the <strong>Play</strong> button. The video will begin to play forward. After the object you are tracking has moved a bit, click <strong>Pause</strong>. Using your mouse, drag-and-drop the box to the correct position and resize if necessary. Continue in this fashion until you have reached the end of the video.</p>");
+    if (job.skip > 0)
+    {
+        h.append("<p>Press the <strong>Play</strong> button. The video will play. When the video automatically pauses, adjust the boxes. Using your mouse, drag-and-drop the box to the correct position and resize if necessary. Continue in this fashion until you have reached the end of the video.</p>");
+    }
+    else
+    {
+        h.append("<p>Press the <strong>Play</strong> button. The video will begin to play forward. After the object you are tracking has moved a bit, click <strong>Pause</strong>. Using your mouse, drag-and-drop the box to the correct position and resize if necessary. Continue in this fashion until you have reached the end of the video.</p>");
+    }
 
     h.append("<p>Once you have reached the end, you should rewind by pressing the rewind button (next to Play) and repeat this process for every object of interest. You are welcome to annotate multiple objects each playthrough.</p>");
 

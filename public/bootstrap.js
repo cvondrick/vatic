@@ -46,7 +46,7 @@ function loadingscreen(job)
 
     if (!development && !mturk_isoffline())
     {
-        ui_showinstructions();
+        ui_showinstructions(job);
     }
 
     $("#loadingscreeninstructions").button({
@@ -54,7 +54,7 @@ function loadingscreen(job)
             primary: "ui-icon-newwin"
         }
     }).click(function() {
-        ui_showinstructions();
+        ui_showinstructions(job);
     });
 
     preloadvideo(job.start, job.stop, job.frameurl,
