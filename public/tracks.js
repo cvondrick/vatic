@@ -364,6 +364,14 @@ function TrackCollection(player, job)
         }
         return count;
     }
+    
+    this.recordposition = function()
+    {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].recordposition();
+        }
+    }
 
     /*
      * Serializes all tracks for sending to server.

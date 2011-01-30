@@ -296,6 +296,7 @@ function ui_setupclickskip(job, player, tracks, objectui)
             $("#playbutton").button("option", "disabled", false);
             tracks.draggable(true);
             tracks.resizable(ui_canresize());
+            tracks.recordposition();
             objectui.enable();
         }
         else
