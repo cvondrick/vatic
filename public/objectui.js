@@ -110,7 +110,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
             html += "<li>" + this.job.labels[i] + "</li>";
         }
         html += "</ul>";
-        html += "<p>Click the above button to create your first annotation of an object.</p>";
+        html += "<p>Click the above button to create your first annotation.</p>";
 
         this.instructions = $(html).appendTo(this.container);
     }
