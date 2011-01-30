@@ -181,6 +181,11 @@ code
     padding : 5px 0;
 }
 
+#instructionsbutton
+{
+    float : right;
+}
+
 #instructionsdialog
 {
     position : fixed;

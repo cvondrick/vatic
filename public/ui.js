@@ -6,12 +6,13 @@ function ui_build(job)
     var videoframe = $("#videoframe");
     var player = new VideoPlayer(videoframe, job);
     var tracks = new TrackCollection(player, job);
+    var objectui = new TrackObjectUI($("#newobjectbutton"), $("#objectcontainer"), videoframe, job, player, tracks);
 
     ui_setupbuttons(player, tracks);
     ui_setupslider(player);
     ui_setupsubmit(job, tracks);
-
-    var objectui = new TrackObjectUI($("#newobjectbutton"), $("#objectcontainer"), videoframe, job, player, tracks);
+    ui_setupclickskip(job, player, tracks, objectui);
+    ui_setupkeyboardshortcuts(job, player);
 }
 
 function ui_setup(job)
@@ -20,7 +21,7 @@ function ui_setup(job)
 
     $("<table>" + 
         "<tr>" +
-            "<td><div id='instructions'><div id='instructionsbutton' class='button'>Instructions</div> Annotate every object, even stationary and obstructed objects, for the entire video.</td>" +
+            "<td><div id='instructionsbutton' class='button'>Instructions</div><div id='instructions'>Annotate every object, even stationary and obstructed objects, for the entire video.</td>" +
             "<td><div id='topbar'></div></td>" +
         "</tr>" +
         "<tr>" +
@@ -101,9 +102,12 @@ function ui_setupbuttons(player, tracks)
     });
 
     $("#playbutton").click(function() {
-        if (ui_disabled) return;
-        player.toggle();
+        if (!$(this).button("option", "disabled"))
+        {
+            player.toggle();
+        }
     }).button({
+        disabled: false,
         icons: {
             primary: "ui-icon-play"
         }
@@ -179,7 +183,10 @@ function ui_setupbuttons(player, tracks)
     $("#annotateoptionshideboxes").button().click(function() {
         tracks.visible($(this).attr("checked"));
     });
+}
 
+function ui_setupkeyboardshortcuts(job, player)
+{
     $(window).keypress(function(e) {
         console.log("Key press: " + e.keyCode);
 
@@ -203,28 +210,39 @@ function ui_setupbuttons(player, tracks)
         {
             $("#newobjectbutton").click();
         }
-        else if (keycode == 44)
+        else 
         {
-            player.pause();
-            player.displace(-10);
-        }
-        else if (keycode == 46)
-        {
-            player.pause();
-            player.displace(10);
-        }
-        else if (keycode == 62)
-        {
-            player.pause();
-            player.displace(1);
-        }
-        else if (keycode == 60)
-        {
-            player.pause();
-            player.displace(-1);
+            var skip = 0;
+            if (keycode == 44)
+            {
+                skip = job.skip > 0 ? -job.skip : -10;
+            }
+            else if (keycode == 46)
+            {
+                skip = job.skip > 0 ? job.skip : 10;
+            }
+            else if (keycode == 62)
+            {
+                skip = job.skip > 0 ? job.skip : 1;
+            }
+            else if (keycode == 60)
+            {
+                skip = job.skip > 0 ? -job.skip : -1;
+            }
+
+            if (skip != 0)
+            {
+                player.pause();
+                player.displace(skip);
+            }
         }
     });
 
+}
+
+function ui_canresize()
+{
+    return !$("#annotateoptionsresize").attr("checked"); 
 }
 
 function ui_setupslider(player)
@@ -241,10 +259,10 @@ function ui_setupslider(player)
         }
     });
 
-    /*slider.children(".ui-slider-handle").hide();
+    /*slider.children(".ui-slider-handle").hide();*/
     slider.children(".ui-slider-range").css({
         "background-color": "#868686",
-        "background-image": "none"});*/
+        "background-image": "none"});
 
     slider.css({
         marginTop: "6px",
@@ -254,6 +272,48 @@ function ui_setupslider(player)
 
     player.onupdate.push(function() {
         slider.slider({value: player.frame});
+    });
+}
+
+function ui_iskeyframe(frame, job)
+{
+    return frame == job.stop || (frame - job.start) % job.skip == 0;
+}
+
+function ui_setupclickskip(job, player, tracks, objectui)
+{
+    if (job.skip <= 0)
+    {
+        return;
+    }
+
+    player.onupdate.push(function() {
+        if (ui_iskeyframe(player.frame, job))
+        {
+            console.log("Key frame hit");
+            player.pause();
+            $("#newobjectbutton").button("option", "disabled", false);
+            $("#playbutton").button("option", "disabled", false);
+            tracks.draggable(true);
+            tracks.resizable(ui_canresize());
+            objectui.enable();
+        }
+        else
+        {
+            $("#newobjectbutton").button("option", "disabled", true);
+            $("#playbutton").button("option", "disabled", true);
+            tracks.draggable(false);
+            tracks.resizable(false);
+            objectui.disable();
+        }
+    });
+    
+    $("#playerslider").bind("slidestop", function() {
+        if (!ui_iskeyframe(player.frame, job))
+        {
+            console.log("Fixing slider to key frame");
+            player.seek(player.frame - (player.frame - job.start) % job.skip);
+        }
     });
 }
 

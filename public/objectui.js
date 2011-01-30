@@ -11,7 +11,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
     this.drawer = new BoxDrawer(videoframe);
 
-    this.newobjectbuttonenabled = true;
     this.counter = 0;
 
     this.currentobject = null;
@@ -21,7 +20,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
     this.startnewobject = function()
     {
-        if (!this.newobjectbuttonenabled)
+        if (this.button.button("option", "disabled"))
         {
             return;
         }
@@ -38,7 +37,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.drawer.color = this.currentcolor[0];
         this.drawer.enable();
 
-        this.newobjectbuttonenabled = false;
+        this.button.button("option", "disabled", true);
 
         this.currentobject = new TrackObject(this.job, this.player, container, this.currentcolor);
         this.currentobject.statedraw();
@@ -85,7 +84,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.currentobject.track.highlight(false);
 
         this.button.button("option", "disabled", false);
-        this.newobjectbuttonenabled = true;
 
         this.counter++;
     }
@@ -95,8 +93,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.button.button({
             icons: {
                 primary: "ui-icon-plusthick",
-                disabled: false
-            }
+            },
+            disabled: false
         }).click(function() {
             me.startnewobject();
         });
@@ -115,6 +113,22 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         html += "<p>Click the above button to create your first annotation of an object.</p>";
 
         this.instructions = $(html).appendTo(this.container);
+    }
+
+    this.disable = function()
+    {
+        for (var i in this.objects)
+        {
+            this.objects[i].disable();
+        }
+    }
+
+    this.enable = function()
+    {
+        for (var i in this.objects)
+        {
+            this.objects[i].enable();
+        }
     }
 
     this.setup();
@@ -288,6 +302,24 @@ function TrackObject(job, player, container, color)
                 me.remove();
             }
         });
+    }
+
+    this.disable = function()
+    {
+        if (this.ready)
+        {
+            $("#trackobject" + this.id + "lost").attr("disabled", true);
+            $("#trackobject" + this.id + "occluded").attr("disabled", true);
+        }
+    }
+
+    this.enable = function()
+    {
+        if (this.ready)
+        {
+            $("#trackobject" + this.id + "lost").attr("disabled", false);
+            $("#trackobject" + this.id + "occluded").attr("disabled", false);
+        }
     }
 
     this.statefoldup = function()

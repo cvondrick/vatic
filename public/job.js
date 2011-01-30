@@ -17,6 +17,7 @@ function Job(data)
     console.log("  Stop: " + this.stop);
     console.log("  Width: " + this.width);
     console.log("  Height: " + this.height);
+    console.log("  Skip: " + this.skip);
     console.log("  Job ID: " + this.jobid);
     console.log("  Labels: ");
     for (var i in this.labels)
