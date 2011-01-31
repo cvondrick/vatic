@@ -14,6 +14,7 @@ def getjob(id):
         job = session.query(Job).get(id)
         segment = job.segment
         video = segment.video
+        group = job.hit.group
         labels = dict((l.id, l.text) for l in video.labels)
     finally:
         session.close()
@@ -24,6 +25,7 @@ def getjob(id):
             "width":  video.width,
             "height": video.height,
             "skip":   video.skip,
+            "perobject": group.perobject,
             "jobid":  job.id,
             "labels": labels}
 

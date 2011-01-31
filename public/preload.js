@@ -15,37 +15,27 @@ function preload(queue, onprogress)
 
     function process(remaining, count)
     {
-        var pool = 3;
-
         if (remaining.length >= 1)
         {
-            var roundcount = 0;
-            for (var i = 0; i < Math.min(remaining.length, pool); i++)
-            {
-                (function() { // closure
-                    var image = new Image();
-                    image.onload = function() {
-                        // force the browser to cache it
-                        $("<img src='" + this.src + "'>").appendTo("#preloadpit");
+            var image = new Image();
+            image.onload = function() {
+                
+                // force the browser to cache it
+                $("<img src='" + remaining[0] + "'>").appendTo("#preloadpit");
 
-                        roundcount += 1;
+                if (onprogress)
+                {
+                    onprogress((count + 1) / (remaining.length + count))
+                }
+                remaining.shift();
 
-                        if (onprogress)
-                        {
-                            onprogress((count + roundcount) / (remaining.length + count))
-                        }
 
-                        if (roundcount == pool)
-                        {
-                            // javascript's version of tail recursion
-                            window.setTimeout(function() {
-                                process(remaining, count + roundcount);
-                            }, 1);
-                        }
-                    }
-                    image.src = remaining.shift();
-                })();
+                // javascript's version of tail recursion
+                window.setTimeout(function() {
+                    process(remaining, count + 1);
+                }, 1);
             }
+            image.src = remaining[0];
         }
         else
         {

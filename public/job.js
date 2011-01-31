@@ -8,6 +8,7 @@ function Job(data)
     this.width = parseInt(data["width"]);
     this.height = parseInt(data["height"]);
     this.skip = parseInt(data["skip"]);
+    this.perobject = parseFloat(data["perobject"]);
     this.jobid = parseInt(data["jobid"]);
     this.labels = data["labels"];
 
@@ -18,6 +19,7 @@ function Job(data)
     console.log("  Width: " + this.width);
     console.log("  Height: " + this.height);
     console.log("  Skip: " + this.skip);
+    console.log("  Per Object:" + this.perobject);
     console.log("  Job ID: " + this.jobid);
     console.log("  Labels: ");
     for (var i in this.labels)

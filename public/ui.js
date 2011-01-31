@@ -396,6 +396,23 @@ function ui_showinstructions(job)
     h.append("<h1>Important Instructions</h1>");
     h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool.</p>");
 
+    h.append("<h2>Crash Course</h2>");
+    var str = "<ul>";
+    str += "<li>Annotate every object of interest, even if stationary or obstructed.</li>";
+    str += "<li>Make your boxes as tight as possible.</li>";
+    if (job.perobject > 0)
+    {
+        var amount = Math.floor(job.perobject * 100);
+        str += "<li>We will pay you " + amount + "&cent; for each object you annotate.</li>";
+    }
+    if (job.skip > 0)
+    {
+        str += "<li>When the video pauses, adjust your annotations.</li>";
+    }
+    str += "<li>We will hand review your work.</li>";
+    str += "</ul>";
+    h.append(str);
+
     h.append("<h2>Getting Started</h2>");
     h.append("<img src='box.jpg' align='right'>");
     h.append("<p>Click the <strong>New Object</strong> button to start annotating your first object. Position your cursor over the view screen to click on the corner of an object of interest. Use the cross hairs to line up your click. Click on another corner to finish drawing the box. The rectangle should tightly and completely enclose the object you are annotating. Resize the box, if necessary, by dragging the edges of the box.</p>");
@@ -412,7 +429,14 @@ function ui_showinstructions(job)
         h.append("<p>Press the <strong>Play</strong> button. The video will begin to play forward. After the object you are tracking has moved a bit, click <strong>Pause</strong>. Using your mouse, drag-and-drop the box to the correct position and resize if necessary. Continue in this fashion until you have reached the end of the video.</p>");
     }
 
-    h.append("<p>Once you have reached the end, you should rewind by pressing the rewind button (next to Play) and repeat this process for every object of interest. You are welcome to annotate multiple objects each playthrough.</p>");
+    if (job.perobject > 0)
+    {
+        h.append("<p>Once you have reached the end, you should rewind by pressing the rewind button (next to Play) and repeat this process for every object of interest. You are welcome to annotate multiple objects each playthrough. We will pay you a bonus for every object that you annotate.</p>");
+    }
+    else
+    {
+        h.append("<p>Once you have reached the end, you should rewind by pressing the rewind button (next to Play) and repeat this process for every object of interest. You are welcome to annotate multiple objects each playthrough.</p>");
+    }
 
     h.append("<img src='outsideoccluded.jpg' align='right'>");
     h.append("<p>If an object leaves the screen, mark the <strong>Outside of view frame</strong> checkbox for the corresponding tracking rectangle. Make sure you click the right button. When you mouse over the controls, the corresponding rectangle will light up in the view screen. Likewise, if the object you are tracking is still in the view frame but the view is obstructed (e.g., inside a car), mark the <strong>Occluded or obstructed</strong> checkbox. When the object becomes visible again, remember to uncheck these boxes.</p>");
@@ -424,7 +448,15 @@ function ui_showinstructions(job)
 
     h.append("<h3>Label Every Object</h3>")
     h.append("<img src='everyobject.jpg'>");
-    h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once. Even if the object does not move, you must label it.</p>");
+
+    if (job.perobject > 0)
+    {
+        h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once. Even if the object does not move, you must label it. We will pay you a bonus for every object you annotate.</p>");
+    }
+    else
+    {
+        h.append("<p>Every object of interest should be labeled for the entire video. The above work was accepted because every object has a box around it. An object is not labeled more than once. Even if the object does not move, you must label it.</p>");
+    }
 
     h.append("<h3>Boxes Are Tight</h3>");
     h.append("<table><tr><td><img src='tight-good.jpg'></td><td><img src='tight-bad.jpg'></td></tr><tr><th>Good</th><th>Bad</th></tr></table>");
