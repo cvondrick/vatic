@@ -403,7 +403,12 @@ function ui_showinstructions(job)
     if (job.perobject > 0)
     {
         var amount = Math.floor(job.perobject * 100);
-        str += "<li>We will pay you " + amount + "&cent; for each object you annotate.</li>";
+        str += "<li>We will pay you <strong>" + amount + "&cent; for each object</strong> you annotate.</li>";
+    }
+    if (job.completion > 0)
+    {
+        var amount = Math.floor(job.completion * 100);
+        str += "<li>We will award you a <strong>bonus of " + amount + "&cent; if you annotate every object</strong>.</li>";
     }
     if (job.skip > 0)
     {

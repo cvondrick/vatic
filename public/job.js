@@ -9,6 +9,7 @@ function Job(data)
     this.height = parseInt(data["height"]);
     this.skip = parseInt(data["skip"]);
     this.perobject = parseFloat(data["perobject"]);
+    this.completion = parseFloat(data["completion"]);
     this.jobid = parseInt(data["jobid"]);
     this.labels = data["labels"];
 

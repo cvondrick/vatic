@@ -26,6 +26,7 @@ def getjob(id):
             "height": video.height,
             "skip":   video.skip,
             "perobject": group.perobject,
+            "completion": group.bonus,
             "jobid":  job.id,
             "labels": labels}
 

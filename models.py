@@ -44,8 +44,7 @@ class Segment(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     videoslug = Column(String(250), ForeignKey(Video.slug))
-    video = relationship(Video, cascade = "all,delete,delete-orphan",
-        single_parent = True, backref = "segments")
+    video = relationship(Video, cascade = "all", backref = "segments")
     start = Column(Integer);
     stop = Column(Integer);
 
@@ -54,19 +53,17 @@ class Job(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     segmentid = Column(Integer, ForeignKey(Segment.id))
-    segment = relationship(Segment, cascade = "all,delete",
-        single_parent = True, backref = "jobs")
+    segment = relationship(Segment, cascade = "all", backref = "jobs")
     hitid = Column(String(30), ForeignKey(turkic.models.HIT.id))
     hit = relationship(turkic.models.HIT, cascade = "all",
-        backref = "job", single_parent = True, uselist = False)
+        backref = "job", uselist = False)
     
 class Path(turkic.database.Base):
     __tablename__ = "paths"
     
     id = Column(Integer, primary_key = True)
     jobid = Column(Integer, ForeignKey(Job.id))
-    job = relationship(Job, cascade = "all, delete",
-        single_parent = True, backref = "paths")
+    job = relationship(Job, cascade = "all", backref = "paths")
     labelid = Column(Integer, ForeignKey(Label.id))
     label = relationship(Label, cascade = "none", backref = "paths")
 
@@ -78,8 +75,7 @@ class Box(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     pathid = Column(Integer, ForeignKey(Path.id))
-    path = relationship(Path, cascade = "all, delete", 
-        single_parent = True, backref = "boxes")
+    path = relationship(Path, cascade = "all", backref = "boxes")
     xtl = Column(Integer)
     ytl = Column(Integer)
     xbr = Column(Integer)
