@@ -324,3 +324,15 @@ class dump(DumpCommand):
                 file.write(" \"")
                 file.write(track.label)
                 file.write("\"\n")
+
+@handler("List all videos loaded")
+class list(Command):
+    def __call__(self, args):
+        session = database.connect()
+        try:
+            videos = session.query(Video)
+            for video in videos:
+                print video.slug
+        finally:
+            session.close()
+
