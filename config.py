@@ -1,6 +1,6 @@
 signature = "Qdy65mPoD7yUuDlfSwyBY6XCDPaEPg4hfMSpM8rt"
 accesskey = "AKIAIOZDXRMCRUIHDQSQ"
-sandbox   = True
+sandbox   = False
 localhost = "http://video-deepthought.ics.uci.edu/"
 database  = "mysql://root@localhost/turkic"
 

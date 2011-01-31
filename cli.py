@@ -163,6 +163,36 @@ class load(LoadCommand):
         finally:
             session.close()
 
+@handler("Deletes an already imported video")
+class delete(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("slug")
+        parser.add_argument("--force", action="store_true", default=False)
+        return parser
+
+    def __call__(self, args):
+        session = database.connect()
+        try:
+            video = session.query(Video).filter(Video.slug == args.slug).one()
+
+            query = session.query(Path)
+            query = query.join(Job)
+            query = query.join(Segment)
+            query = query.join(Video)
+            query = query.filter(Video.slug == video.slug)
+            numpaths = query.count()
+            if numpaths and not args.force:
+                print "Video has {0} paths. Use --force to delete.".format(numpaths)
+                return
+
+            session.delete(video)
+            session.commit()
+
+            print "Deleted video and associated data."
+        finally:
+            session.close()
+
 class DumpCommand(Command):
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("slug")
