@@ -58,6 +58,7 @@ class load(LoadCommand):
         parser.add_argument("labels", nargs="+")
         parser.add_argument("--length", type=int, default = 300)
         parser.add_argument("--overlap", type=int, default = 20)
+        parser.add_argument("--skip", type=int, default = 0)
         return parser
 
     def title(self, args):
@@ -120,7 +121,8 @@ class load(LoadCommand):
                           location = args.location, 
                           width = width,
                           height = height,
-                          totalframes = maxframes)
+                          totalframes = maxframes,
+                          skip = args.skip)
             session.add(video)
 
             print "Binding labels..."

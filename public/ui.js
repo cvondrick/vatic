@@ -39,8 +39,9 @@ function ui_setup(job)
 
 
     $("#videoframe").css({"width": job.width + "px",
-                          "height": job.height + "px"})
-                    .parent().css("width", job.width + "px");
+                          "height": job.height + "px",
+                          "margin": "0 auto"})
+                    .parent().css("width", Math.max("720", job.width) + "px");
 
     $("#sidebar").css("height", job.height + "px");
 
