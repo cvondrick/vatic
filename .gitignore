@@ -1,2 +1,4 @@
 *.pyc
 config.py
+tmp
+backups
