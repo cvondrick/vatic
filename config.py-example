@@ -1,7 +1,7 @@
-signature = "Qdy65mPoD7yUuDlfSwyBY6XCDPaEPg4hfMSpM8rt"
-accesskey = "AKIAIOZDXRMCRUIHDQSQ"
+signature = ""
+accesskey = ""
 sandbox   = False
-localhost = "http://video-deepthought.ics.uci.edu/"
+localhost = "http://example.edu/"
 database  = "mysql://root@localhost/turkic"
 
 # probably no need to mess below this line
