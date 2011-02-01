@@ -116,6 +116,10 @@ class load(LoadCommand):
 
         session = database.connect() 
         try:
+            if session.query(Video).filter(Video.slug == args.slug).count() > 0:
+                print "Video {0} already exists!".format(args.slug)
+                return
+
             # create video
             video = Video(slug = args.slug,
                           location = args.location, 
@@ -136,9 +140,10 @@ class load(LoadCommand):
             print "Creating symbolic link..."
             symlink = "public/frames/{0}".format(video.slug)
             try:
-                os.symlink(video.location, symlink)
+                os.remove(symlink)
             except:
-                print "Cannot create symbolic link!"
+                pass
+            os.symlink(video.location, symlink)
 
             print "Creating segments..."
             
@@ -174,6 +179,10 @@ class delete(Command):
     def __call__(self, args):
         session = database.connect()
         try:
+            if session.query(Video).filter(Video.slug == args.slug).count() == 0:
+                print "Video {0} does not exist!".format(args.slug)
+                return
+
             video = session.query(Video).filter(Video.slug == args.slug).one()
 
             query = session.query(Path)
@@ -208,6 +217,9 @@ class DumpCommand(Command):
         response = []
         session = database.connect()
         try:
+            if session.query(Video).filter(Video.slug == args.slug).count() == 0:
+                print "Video {0} does not exist!".format(args.slug)
+                return
             video = session.query(Video).filter(Video.slug == args.slug).one()
             for segment in video.segments:
                 for job in segment.jobs:
