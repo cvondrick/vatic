@@ -11,7 +11,7 @@ import vision.visualize
 import vision.track.interpolation
 import turkic.models
 from models import *
-
+import cStringIO
 
 @handler("Decompresses an entire video into frames")
 class extract(Command):
@@ -254,12 +254,14 @@ class dump(DumpCommand):
         parser.add_argument("--xml", "-x", action="store_true", default=False)
         parser.add_argument("--json", "-j", action="store_true", default=False)
         parser.add_argument("--matlab", "-ml", action="store_true", default=False)
+        parser.add_argument("--pickle", "-p", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
-        file = sys.stdout
         if args.output:
             file = open(args.output, 'w')
+        else:
+            file = cStringIO.StringIO()
 
         video, data = self.getdata(args)
 
@@ -269,18 +271,17 @@ class dump(DumpCommand):
             self.dumpjson(file, data)
         elif args.matlab:
             self.dumpmatlab(file, data)
+        elif args.pickle:
+            self.dumppickle(file, data)
         else:
             self.dumptext(file, data)
 
         if args.output:
             file.close()
+        else:
+            sys.stdout.write(file.getvalue())
 
     def dumpmatlab(self, file, data):
-        from scipy.io import savemat as savematlab
-        if file is sys.stdout:
-            print "Cannot output matlab to stdout, specify -o"
-            return
-
         results = []
         for id, track in enumerate(data):
             for box in track.boxes:
@@ -296,6 +297,7 @@ class dump(DumpCommand):
                 data['label'] = track.label
                 results.append(data)
 
+        from scipy.io import savemat as savematlab
         savematlab(file,
             {"annotations": results}, oned_as="row")
 
@@ -315,23 +317,37 @@ class dump(DumpCommand):
         file.write("</annotations>\n")
 
     def dumpjson(self, file, data):
-        file.write("annotations: {\n")
+        annotations = {}
         for id, track in enumerate(data):
-            file.write("\t{0}: {{\n".format(id))
-            file.write("\t\tlabel: \"{0}\",\n".format(track.label))
-            file.write("\t\tboxes: {\n")
+            result = {}
+            result['label'] = track.label
+            boxes = {}
             for box in track.boxes:
-                file.write("\t\t\t{0}: {{\n".format(box.frame))
-                file.write("\t\t\t\txtl: {0},\n".format(box.xtl))
-                file.write("\t\t\t\tytl: {0},\n".format(box.ytl))
-                file.write("\t\t\t\txbr: {0},\n".format(box.xbr))
-                file.write("\t\t\t\tybr: {0},\n".format(box.ybr))
-                file.write("\t\t\t\toutside: {0},\n".format(box.lost))
-                file.write("\t\t\t\toccluded: {0}\n".format(box.occluded))
-                file.write("\t\t\t},\n")
-            file.write("\t\t},\n")
-            file.write("\t},\n")
-        file.write("}\n");
+                boxdata = {}
+                boxdata['xtl'] = box.xtl
+                boxdata['ytl'] = box.ytl
+                boxdata['xbr'] = box.xbr
+                boxdata['ybr'] = box.ybr
+                boxdata['outside'] = box.lost
+                boxdata['occluded'] = box.occluded
+                boxes[int(box.frame)] = boxdata
+            result['boxes'] = boxes
+            annotations[int(id)] = result
+
+        import json
+        json.dump(annotations, file)
+        file.write("\n")
+
+    def dumppickle(self, file, data):
+        annotations = []
+        for track in data:
+            result = {}
+            result['label'] = track.label
+            result['boxes'] = track.boxes
+            annotations.append(result)
+
+        import pickle
+        pickle.dump(annotations, file, protocol = 2)
 
     def dumptext(self, file, data):
         for id, track in enumerate(data):
