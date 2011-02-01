@@ -430,10 +430,18 @@ function Track(player, color, position)
      */
     this.pollposition = function()
     {
+        var hidden = this.handle.is(":hidden'");
+        this.handle.show();
+
         var pos = this.handle.position();
         var width = this.handle.width();
         var height = this.handle.height();
         var offset = this.player.handle.offset();
+
+        if (hidden)
+        {
+            this.handle.hide();
+        }
 
         var xtl = pos.left - offset.left;
         var ytl = pos.top - offset.top;
