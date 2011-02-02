@@ -71,7 +71,7 @@ class load(LoadCommand):
         return "Draw boxes around objects moving around in a video."
 
     def cost(self, args):
-        return 1.00
+        return 0.05
 
     def duration(self, args):
         return 7200 * 3
