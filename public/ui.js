@@ -199,7 +199,7 @@ function ui_setupkeyboardshortcuts(job, player)
 
         var keycode = e.keyCode ? e.keyCode : e.which;
         
-        if (keycode == 32)
+        if (keycode == 32 || keycode == 112)
         {
             $("#playbutton").click();
         }
@@ -485,7 +485,7 @@ function ui_showinstructions(job)
     h.append("<p>These keyboard shortcuts are available for your convenience:</p>");
     h.append('<ul class="keyboardshortcuts">' +
         '<li><code>n</code> creates a new object</li>' +
-        '<li><code>[space]</code> toggles play/pause on the video</li>' +
+        '<li><code>p</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
         '<li><code>.</code> jump the video forward a bit</li>' +
         '<li><code>,</code> jump the video backward a bit</li>' +
