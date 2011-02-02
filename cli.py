@@ -188,8 +188,7 @@ class delete(Command):
             query = session.query(Path)
             query = query.join(Job)
             query = query.join(Segment)
-            query = query.join(Video)
-            query = query.filter(Video.slug == video.slug)
+            query = query.filter(Segment.videoslug == video.slug)
             numpaths = query.count()
             if numpaths and not args.force:
                 print "Video has {0} paths. Use --force to delete.".format(numpaths)
@@ -393,4 +392,3 @@ class list(Command):
                 print video.slug
         finally:
             session.close()
-
