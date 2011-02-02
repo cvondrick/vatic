@@ -12,6 +12,7 @@ import vision.track.interpolation
 import turkic.models
 from models import *
 import cStringIO
+import Image, ImageDraw, ImageFont
 
 @handler("Decompresses an entire video into frames")
 class extract(Command):
@@ -219,9 +220,10 @@ class DumpCommand(Command):
     parent.add_argument("--merge", "-m", action="store_true", default=False)
 
     class Tracklet(object):
-        def __init__(self, label, boxes):
+        def __init__(self, label, boxes, workers):
             self.label = label
             self.boxes = sorted(boxes, key = lambda x: x.frame)
+            self.workers = workers
 
     def getdata(self, args):
         response = []
@@ -233,16 +235,18 @@ class DumpCommand(Command):
             video = session.query(Video).filter(Video.slug == args.slug).one()
             for segment in video.segments:
                 for job in segment.jobs:
+                    worker = job.hit.workerid
                     for path in job.paths:
                         tracklet = DumpCommand.Tracklet(path.label.text,
-                                                        path.getboxes())
+                                                        path.getboxes(),
+                                                        [worker])
                         response.append(tracklet)
 
             if args.interpolate:
                 interpolated = []
                 for track in response:
                     path = vision.track.interpolation.LinearFill(track.boxes)
-                    tracklet = DumpCommand.Tracklet(track.label, path)
+                    tracklet = DumpCommand.Tracklet(track.label, path, track.workers)
                     interpolated.append(tracklet)
                 response = interpolated
 
@@ -266,7 +270,42 @@ class visualize(DumpCommand):
         
         print "Highlighting frames..."
         it = vision.visualize.highlight_paths(video, paths)
+        it = self.augment(args, video, data, it)
         vision.visualize.save(it, lambda x: "{0}/{1}.jpg".format(args.output, x))
+
+    def augment(self, args, video, data, frames):
+        offset = 100
+        for im, frame in frames:
+            aug = Image.new(im.mode, (im.size[0], im.size[1] + offset))
+            aug.paste("black")
+            aug.paste(im, (0, 0))
+            draw = ImageDraw.ImageDraw(aug)
+
+            s = im.size[1]
+            font = ImageFont.truetype("arial.ttf", 14)
+
+            # extract some data
+            workerids = set()
+            sum = 0
+            for track in data:
+                if frame in (x.frame for x in track.boxes):
+                    for worker in track.workers:
+                        if worker not in workerids:
+                            workerids.add(worker)
+                    sum += 1
+            ypos = s + 5
+            for worker in workerids:
+                draw.text((5, ypos), worker, fill="white", font = font)
+                ypos += draw.textsize(worker, font = font)[1] + 3
+
+            size = draw.textsize(video.slug, font = font)
+            draw.text((im.size[0] - size[0] - 5, s + 5), video.slug, font = font)
+
+            text = "{0} annotations".format(sum)
+            numsize = draw.textsize(text, font = font)
+            draw.text((im.size[0] - numsize[0] - 5, s + 5 + size[1] + 3), text, font = font)
+
+            yield aug, frame
 
 @handler("Dumps the tracking data")
 class dump(DumpCommand):
