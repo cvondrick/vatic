@@ -58,7 +58,7 @@ class Job(turkic.database.Base):
     segment = relationship(Segment, cascade = "all", backref = "jobs")
     hitid = Column(String(30), ForeignKey(turkic.models.HIT.id))
     hit = relationship(turkic.models.HIT, cascade = "all",
-        backref = "job", uselist = False)
+        backref = backref("job", uselist = False))
     
 class Path(turkic.database.Base):
     __tablename__ = "paths"
@@ -102,7 +102,7 @@ class PerObjectBonus(turkic.models.BonusSchedule):
         return (self.amount, "per object")
 
     def award(self, hit):
-        paths = len(hit.job.segment.paths)
+        paths = len(hit.job.paths)
         hit.awardbonus(paths * self.amount, "For {0} objects".format(paths))
 
 class CompletionBonus(turkic.models.BonusSchedule):
