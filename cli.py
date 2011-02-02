@@ -59,6 +59,8 @@ class load(LoadCommand):
         parser.add_argument("--length", type=int, default = 300)
         parser.add_argument("--overlap", type=int, default = 20)
         parser.add_argument("--skip", type=int, default = 0)
+        parser.add_argument("--per-object-bonus", type=float)
+        parser.add_argument("--completion-bonus", type=float,)
         return parser
 
     def title(self, args):
@@ -126,7 +128,9 @@ class load(LoadCommand):
                           width = width,
                           height = height,
                           totalframes = maxframes,
-                          skip = args.skip)
+                          skip = args.skip,
+                          perobjectbonus = args.per_object_bonus,
+                          completionbonus = args.completion_bonus)
             session.add(video)
 
             print "Binding labels..."
@@ -161,6 +165,13 @@ class load(LoadCommand):
                 job.hit = hit
                 session.add(hit)
                 session.add(job)
+
+            if args.per_object_bonus:
+                group.schedules.append(
+                    PerObjectBonus(amount = args.per_object_bonus))
+            if args.completion_bonus:
+                group.schedules.append(
+                    CompletionBonus(amount = args.completion_bonus))
 
             session.add(group)
             session.commit()

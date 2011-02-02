@@ -1,6 +1,6 @@
 import turkic.database
 import turkic.models
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, Table
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship, backref
 import Image
 import vision
@@ -19,6 +19,8 @@ class Video(turkic.database.Base):
     totalframes = Column(Integer)
     location = Column(String(250))
     skip = Column(Integer, default = 0, nullable = False)
+    perobjectbonus = Column(Float, default = 0)
+    completionbonus = Column(Float, default = 0)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)
@@ -87,3 +89,32 @@ class Box(turkic.database.Base):
     def getbox(self):
         return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,
                           self.frame, self.outside, self.occluded)
+
+class PerObjectBonus(turkic.models.BonusSchedule):
+    __tablename__ = "per_object_bonuses"
+    __mapper_args__ = {"polymorphic_identity": "per_object_bonuses"}
+
+    id = Column(Integer, ForeignKey(turkic.models.BonusSchedule.id), 
+        primary_key = True)
+    amount = Column(Float, default = 0.0, nullable = False)
+
+    def description(self):
+        return (self.amount, "per object")
+
+    def award(self, hit):
+        paths = len(hit.job.segment.paths)
+        hit.awardbonus(paths * self.amount, "For {0} objects".format(paths))
+
+class CompletionBonus(turkic.models.BonusSchedule):
+    __tablename__ = "completion_bonuses"
+    __mapper_args__ = {"polymorphic_identity": "completion_bonuses"}
+
+    id = Column(Integer, ForeignKey(turkic.models.BonusSchedule.id),
+        primary_key = True)
+    amount = Column(Float, default = 0.0, nullable = False)
+
+    def description(self):
+        return (self.amount, "if complete")
+
+    def award(self, hit):
+        hit.awardbonus(self.amount, "For complete annotation.")
