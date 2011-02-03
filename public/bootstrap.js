@@ -28,8 +28,18 @@ $(document).ready(function()
         death("Missing Job Id");
         return;
     }
-    server_request("getjob", [parameters["id"]], function(data) {
-        loadingscreen(new Job(data));
+
+    function dispatch(training)
+    {
+        server_request("getjob", [parameters["id"], training], function(data) {
+            loadingscreen(job_import(data));
+        });
+    }
+
+    worker_isnewuser(function() {
+        dispatch(true);
+    }, function() {
+        dispatch(false);
     });
 });
 

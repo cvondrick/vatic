@@ -12,15 +12,19 @@ video_labels = Table("videos2labels", turkic.database.Base.metadata,
 class Video(turkic.database.Base):
     __tablename__ = "videos"
 
-    slug = Column(String(250), primary_key = True)
-    labels = relationship("Label", secondary = video_labels, backref = "videos")
-    width = Column(Integer)
-    height = Column(Integer)
-    totalframes = Column(Integer)
-    location = Column(String(250))
-    skip = Column(Integer, default = 0, nullable = False)
-    perobjectbonus = Column(Float, default = 0)
-    completionbonus = Column(Float, default = 0)
+    slug              = Column(String(250), primary_key = True)
+    labels            = relationship("Label",
+                          secondary = video_labels, backref = "videos")
+    width             = Column(Integer)
+    height            = Column(Integer)
+    totalframes       = Column(Integer)
+    location          = Column(String(250))
+    skip              = Column(Integer, default = 0, nullable = False)
+    perobjectbonus    = Column(Float, default = 0)
+    completionbonus   = Column(Float, default = 0)
+    trainingvideoid   = Column(String(250), ForeignKey(slug))
+    trainingvideo     = relationship("Video", backref = "videos",
+                        remote_side = slug)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)
@@ -35,6 +39,12 @@ class Video(turkic.database.Base):
             path = "{0}/{1}".format(base, path)
         return path
 
+    @property
+    def groundtruth(self):
+        if not self.istraining:
+            raise RuntimeError("{0} is not a training video.".format(slug))
+        return self.segments[0].jobs[0].paths
+
 class Label(turkic.database.Base):
     __tablename__ = "labels"
 
@@ -47,19 +57,29 @@ class Segment(turkic.database.Base):
     id = Column(Integer, primary_key = True)
     videoslug = Column(String(250), ForeignKey(Video.slug))
     video = relationship(Video, cascade = "all", backref = "segments")
-    start = Column(Integer);
-    stop = Column(Integer);
+    start = Column(Integer)
+    stop = Column(Integer)
 
-class Job(turkic.database.Base):
-    __tablename__ = "segment_jobs"
+class Job(turkic.models.HIT):
+    __tablename__ = "jobs"
+    __mapper_args__ = {"polymorphic_identity": "jobs"}
 
-    id = Column(Integer, primary_key = True)
+    id = Column(Integer, ForeignKey(turkic.models.HIT.id), primary_key = True)
     segmentid = Column(Integer, ForeignKey(Segment.id))
     segment = relationship(Segment, cascade = "all", backref = "jobs")
-    hitid = Column(String(30), ForeignKey(turkic.models.HIT.id))
-    hit = relationship(turkic.models.HIT, cascade = "all",
-        backref = backref("job", uselist = False))
-    
+
+    def getpage(self):
+        return "?id={0}".format(self.id)
+
+    def markverified(self, status):
+        replacement = Job(segment = self.segment, group = self.group)
+
+        self.segment = self.segment.video.trainingsegment
+        self.worker.markverified(status)
+        self.verification = True
+
+        return replacement
+
 class Path(turkic.database.Base):
     __tablename__ = "paths"
     
@@ -71,7 +91,7 @@ class Path(turkic.database.Base):
 
     def getboxes(self):
         return [x.getbox() for x in self.boxes]
-        
+
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
 

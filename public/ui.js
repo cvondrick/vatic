@@ -356,7 +356,8 @@ function ui_submit(job, tracks)
         return;
     }
 
-    if (tracks.count() == 0 && !window.confirm("You have not labeled anything. Do you still wish to submit?"))
+    if (tracks.count() == 0 && !window.confirm("You have not labeled " +
+        "anything. Do you still wish to submit?"))
     {
         return;
     }
@@ -365,13 +366,15 @@ function ui_submit(job, tracks)
 
     $('<div id="turkic_overlay"></div>').appendTo("#container");
 
-    var note = $("<div id='submitdialog'>Saving...</div>").appendTo("#container")
+    var note = $("<div id='submitdialog'>Saving...</div>").
+        appendTo("#container")
 
     mturk_submit(function(redirect) {
-        server_post("savejob", [job.jobid], tracks.serialize(), function(data) {
-            note.html("Saved!");
-            redirect();
-        });
+        server_post("savejob", [job.jobid, job.training],
+            tracks.serialize(), function(data) {
+                note.html("Saved!");
+                redirect();
+            });
     });
 }
 

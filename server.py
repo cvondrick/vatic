@@ -8,33 +8,39 @@ import cStringIO
 from models import *
 
 @handler()
-def getjob(id):
+def getjob(id, training):
     session = database.connect()
     try:
         job = session.query(Job).get(id)
         segment = job.segment
         video = segment.video
-        group = job.hit.group
         labels = dict((l.id, l.text) for l in video.labels)
     finally:
         session.close()
 
-    return {"start":  segment.start,
-            "stop":   segment.stop,
-            "slug":   video.slug,
-            "width":  video.width,
-            "height": video.height,
-            "skip":   video.skip,
-            "perobject": video.perobjectbonus,
-            "completion": video.completionbonus,
-            "jobid":  job.id,
-            "labels": labels}
+    return {"start":        segment.start,
+            "stop":         segment.stop,
+            "slug":         video.slug,
+            "width":        video.width,
+            "height":       video.height,
+            "skip":         video.skip,
+            "perobject":    video.perobjectbonus,
+            "completion":   video.completionbonus,
+            "jobid":        job.id,
+            "labels":       labels,
+            "training":     training}
 
 @handler(post = "json")
-def savejob(id, tracks):
+def savejob(id, training, tracks):
     session = database.connect()
     try:
         job = session.query(Job).get(id)
+
+        if training:
+            replacement = job.markverified(True)
+            replacement.publish()
+            session.add(replacement)
+
         for label, track in tracks:
             path = Path(job = job)
             path.label = session.query(Label).get(label)
@@ -50,10 +56,9 @@ def savejob(id, tracks):
                 box.frame = frame
                 path.boxes.append(box)
             job.paths.append(path)
-        job.hit.numobjects = len(tracks)
 
         session.add(job)
         session.commit()
+        return True
     finally:
         session.close()
-    return True

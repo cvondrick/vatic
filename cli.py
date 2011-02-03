@@ -61,7 +61,9 @@ class load(LoadCommand):
         parser.add_argument("--overlap", type=int, default = 20)
         parser.add_argument("--skip", type=int, default = 0)
         parser.add_argument("--per-object-bonus", type=float)
-        parser.add_argument("--completion-bonus", type=float,)
+        parser.add_argument("--completion-bonus", type=float)
+        parser.add_argument("--training")
+        parser.add_argument("--trainer")
         return parser
 
     def title(self, args):
@@ -119,9 +121,20 @@ class load(LoadCommand):
 
         session = database.connect() 
         try:
-            if session.query(Video).filter(Video.slug == args.slug).count() > 0:
+            if session.query(Video).get(args.slug):
                 print "Video {0} already exists!".format(args.slug)
                 return
+
+            if args.trainer:
+                trainer = session.query(Video).get(args.trainer)
+                if not trainer:
+                    print "Trainer {0} does not exist!".format(args.trainer)
+                    return
+                if not trainer.istraining:
+                    print "Video {0} is not for training!".format(args.trainer)
+                    return
+            else:
+                trainer = None
 
             # create video
             video = Video(slug = args.slug,
@@ -131,7 +144,9 @@ class load(LoadCommand):
                           totalframes = maxframes,
                           skip = args.skip,
                           perobjectbonus = args.per_object_bonus,
-                          completionbonus = args.completion_bonus)
+                          completionbonus = args.completion_bonus,
+                          istraining = args.training,
+                          trainingvideo = trainer)
             session.add(video)
 
             print "Binding labels..."
@@ -150,22 +165,27 @@ class load(LoadCommand):
                 pass
             os.symlink(video.location, symlink)
 
-            print "Creating segments..."
-            
-            # create shots and jobs
-            for start in range(0, video.totalframes, args.length):
-                stop = min(start + args.length + args.overlap + 1, video.totalframes)
-                segment = Segment(start = start, stop = stop, video = video)
-                job = Job(segment = segment)
+            if args.training:
+                print "Setting up trainer"
+                segment = Segment(start = 0,
+                                  stop = video.totalframes,
+                                  video = video)
+                job = Job(segment = segment, group = group, ready = False)
                 session.add(segment)
                 session.add(job)
-                session.commit()
 
-                hit = turkic.models.HIT(group = group, 
-                                        page = "?id={0}".format(job.id))
-                job.hit = hit
-                session.add(hit)
-                session.add(job)
+            else:
+                print "Creating segments..."
+                # create shots and jobs
+                for start in range(0, video.totalframes, args.length):
+                    stop = min(start + args.length + args.overlap + 1,
+                               video.totalframes)
+                    segment = Segment(start = start,
+                                      stop = stop,
+                                      video = video)
+                    job = Job(segment = segment, group = group)
+                    session.add(segment)
+                    session.add(job)
 
             if args.per_object_bonus:
                 group.schedules.append(
@@ -176,7 +196,11 @@ class load(LoadCommand):
 
             session.add(group)
             session.commit()
-            print "Video imported and ready for publication."
+
+            if args.trainer:
+                print "Video imported and ready for training." 
+            else:
+                print "Video imported and ready for publication."
         finally:
             session.close()
 

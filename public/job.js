@@ -2,31 +2,16 @@ function Job(data)
 {
     var me = this;
 
-    this.slug = data["slug"];
-    this.start = parseInt(data["start"]);
-    this.stop = parseInt(data["stop"]);
-    this.width = parseInt(data["width"]);
-    this.height = parseInt(data["height"]);
-    this.skip = parseInt(data["skip"]);
-    this.perobject = parseFloat(data["perobject"]);
-    this.completion = parseFloat(data["completion"]);
-    this.jobid = parseInt(data["jobid"]);
-    this.labels = data["labels"];
-
-    console.log("Job configured!");
-    console.log("  Slug: " + this.slug);
-    console.log("  Start: " + this.start);
-    console.log("  Stop: " + this.stop);
-    console.log("  Width: " + this.width);
-    console.log("  Height: " + this.height);
-    console.log("  Skip: " + this.skip);
-    console.log("  Per Object:" + this.perobject);
-    console.log("  Job ID: " + this.jobid);
-    console.log("  Labels: ");
-    for (var i in this.labels)
-    {
-        console.log("    " + i + " = " + this.labels[i]);
-    }
+    this.slug = null;
+    this.start = null;
+    this.stop = null; 
+    this.width = null; 
+    this.height = null; 
+    this.skip = null; 
+    this.perobject = null;
+    this.completion = null;
+    this.thisid = null;
+    this.labels = null;
 
     this.frameurl = function(i)
     {
@@ -34,5 +19,36 @@ function Job(data)
         folder2 = parseInt(Math.floor(i / 10000));
         return "frames/" + me.slug + 
             "/" + folder2 + "/" + folder1 + "/" + parseInt(i) + ".jpg";
+    }
+}
+
+function job_import(data)
+{
+    var job = new Job();
+    job.slug = data["slug"];
+    job.start = parseInt(data["start"]);
+    job.stop = parseInt(data["stop"]);
+    job.width = parseInt(data["width"]);
+    job.height = parseInt(data["height"]);
+    job.skip = parseInt(data["skip"]);
+    job.perobject = parseFloat(data["perobject"]);
+    job.completion = parseFloat(data["completion"]);
+    job.jobid = parseInt(data["jobid"]);
+    job.labels = data["labels"];
+    job.training = data["training"];
+
+    console.log("Job configured!");
+    console.log("  Slug: " + job.slug);
+    console.log("  Start: " + job.start);
+    console.log("  Stop: " + job.stop);
+    console.log("  Width: " + job.width);
+    console.log("  Height: " + job.height);
+    console.log("  Skip: " + job.skip);
+    console.log("  Per Object:" + job.perobject);
+    console.log("  Job ID: " + job.jobid);
+    console.log("  Labels: ");
+    for (var i in job.labels)
+    {
+        console.log("    " + i + " = " + job.labels[i]);
     }
 }
