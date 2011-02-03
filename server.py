@@ -3,14 +3,19 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import config
 from turkic.server import handler, application
-from turkic.database import Session
+from turkic.database import session
 import cStringIO
 from models import *
 
 @handler()
 def getjob(id, training):
-    job = Session.query(Job).get(id)
-    segment = job.segment
+    job = session.query(Job).get(id)
+
+    if training:
+        segment = job.video.trainingvideo.trainingsegment
+    else:
+        segment = job.segment
+
     video = segment.video
     labels = dict((l.id, l.text) for l in video.labels)
 
@@ -28,16 +33,16 @@ def getjob(id, training):
 
 @handler(post = "json")
 def savejob(id, training, tracks):
-    job = Session.query(Job).get(id)
+    job = session.query(Job).get(id)
 
     if training:
         replacement = job.markverified(True)
         replacement.publish()
-        Session.add(replacement)
+        session.add(replacement)
 
     for label, track in tracks:
         path = Path(job = job)
-        path.label = Session.query(Label).get(label)
+        path.label = session.query(Label).get(label)
 
         for frame, userbox in track.items():
             box = Box(path = path)
@@ -51,6 +56,6 @@ def savejob(id, training, tracks):
             path.boxes.append(box)
         job.paths.append(path)
 
-    Session.add(job)
-    Session.commit()
+    session.add(job)
+    session.commit()
     return True

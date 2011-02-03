@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship, backref
 import Image
 import vision
+import random
 
 video_labels = Table("videos2labels", turkic.database.Base.metadata,
     Column("video_slug", String(250), ForeignKey("videos.slug")),
@@ -41,10 +42,10 @@ class Video(turkic.database.Base):
         return path
 
     @property
-    def groundtruth(self):
+    def trainingsegment(self):
         if not self.istraining:
-            raise RuntimeError("{0} is not a training video.".format(slug))
-        return self.segments[0].jobs[0].paths
+            raise RuntimeError("Video is not a training video!")
+        return self.segments[0]
 
 class Label(turkic.database.Base):
     __tablename__ = "labels"

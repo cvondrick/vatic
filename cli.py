@@ -5,7 +5,7 @@ import argparse
 import config
 import shutil
 from turkic.cli import handler, importparser, Command, LoadCommand
-from turkic.database import Session
+from turkic.database import session
 from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
@@ -118,7 +118,7 @@ class load(LoadCommand):
             print "First frame dimensions differs from last frame"
             return
 
-        if Session.query(Video).filter(Video.slug == args.slug).count() > 0:
+        if session.query(Video).filter(Video.slug == args.slug).count() > 0:
             print "Video {0} already exists!".format(args.slug)
             return
 
@@ -132,25 +132,25 @@ class load(LoadCommand):
                         perobjectbonus = args.per_object_bonus,
                         completionbonus = args.completion_bonus)
 
-        Session.add(video)
+        session.add(video)
 
         print "Binding labels..."
 
         # create labels
         for labeltext in args.labels:
             label = Label(text = labeltext)
-            Session.add(label)
+            session.add(label)
             video.labels.append(label)
 
         print "Creating symbolic link..."
         symlink = "public/frames/{0}".format(video.slug)
 
-        if Session.query(Video).get(args.slug):
+        if session.query(Video).get(args.slug):
             print "Video {0} already exists!".format(args.slug)
             return
 
         if args.trainer:
-            trainer = Session.query(Video).get(args.trainer)
+            trainer = session.query(Video).get(args.trainer)
             if not trainer:
                 print "Trainer {0} does not exist!".format(args.trainer)
                 return
@@ -170,14 +170,14 @@ class load(LoadCommand):
                         perobjectbonus = args.per_object_bonus,
                         completionbonus = args.completion_bonus,
                         trainingvideo = trainer)
-        Session.add(video)
+        session.add(video)
 
         print "Binding labels..."
 
         # create labels
         for labeltext in args.labels:
             label = Label(text = labeltext)
-            Session.add(label)
+            session.add(label)
             video.labels.append(label)
 
         print "Creating symbolic link..."
@@ -197,8 +197,8 @@ class load(LoadCommand):
                                 stop = stop,
                                 video = video)
             job = Job(segment = segment, group = group)
-            Session.add(segment)
-            Session.add(job)
+            session.add(segment)
+            session.add(job)
 
         if args.per_object_bonus:
             group.schedules.append(
@@ -207,8 +207,8 @@ class load(LoadCommand):
             group.schedules.append(
                 CompletionBonus(amount = args.completion_bonus))
 
-        Session.add(group)
-        Session.commit()
+        session.add(group)
+        session.commit()
 
         print "Video imported and ready for publication."
 
@@ -220,7 +220,7 @@ class training(Command):
         return parser
 
     def __call__(self, args):
-        video = Session.query(Video).get(args.slug)
+        video = session.query(Video).get(args.slug)
         if not video:
             print "Video {0} not found!".format(video.slug)
         if video.istraining:
@@ -234,8 +234,8 @@ class training(Command):
                         "shots".format(video.slug))
                 job.ready = False
 
-        Session.add(video)
-        Session.commit()
+        session.add(video)
+        session.commit()
 
         print "Annotate ground truth at:"
         for segment in video.segments:
@@ -250,13 +250,13 @@ class delete(Command):
         return parser
 
     def __call__(self, args):
-        if Session.query(Video).filter(Video.slug == args.slug).count() == 0:
+        if session.query(Video).filter(Video.slug == args.slug).count() == 0:
             print "Video {0} does not exist!".format(args.slug)
             return
 
-        video = Session.query(Video).filter(Video.slug == args.slug).one()
+        video = session.query(Video).filter(Video.slug == args.slug).one()
 
-        query = Session.query(Path)
+        query = session.query(Path)
         query = query.join(Job)
         query = query.join(Segment)
         query = query.filter(Segment.videoslug == video.slug)
@@ -265,8 +265,8 @@ class delete(Command):
             print "Video has {0} paths. Use --force to delete.".format(numpaths)
             return
 
-        Session.delete(video)
-        Session.commit()
+        session.delete(video)
+        session.commit()
 
         print "Deleted video and associated data."
 
@@ -284,10 +284,10 @@ class DumpCommand(Command):
 
     def getdata(self, args):
         response = []
-        if Session.query(Video).filter(Video.slug == args.slug).count() == 0:
+        if session.query(Video).filter(Video.slug == args.slug).count() == 0:
             print "Video {0} does not exist!".format(args.slug)
             return
-        video = Session.query(Video).filter(Video.slug == args.slug).one()
+        video = session.query(Video).filter(Video.slug == args.slug).one()
         for segment in video.segments:
             for job in segment.jobs:
                 worker = job.hit.workerid
@@ -488,6 +488,6 @@ class dump(DumpCommand):
 @handler("List all videos loaded")
 class list(Command):
     def __call__(self, args):
-        videos = Session.query(Video)
+        videos = session.query(Video)
         for video in videos:
             print video.slug
