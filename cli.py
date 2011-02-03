@@ -22,8 +22,10 @@ class extract(Command):
         parser.add_argument("output")
         parser.add_argument("--width", default=720, type=int)
         parser.add_argument("--height", default=480, type=int)
-        parser.add_argument("--no-resize", action="store_true", default = False)
-        parser.add_argument("--no-cleanup", action="store_true", default=False)
+        parser.add_argument("--no-resize",
+            action="store_true", default = False)
+        parser.add_argument("--no-cleanup",
+            action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -35,7 +37,8 @@ class extract(Command):
         try:
             for frame, image in enumerate(sequence):
                 if frame % 100 == 0:
-                    print "Decoding frames {0} to {1}".format(frame, frame + 100)
+                    print ("Decoding frames {0} to {1}"
+                        .format(frame, frame + 100))
                 if not args.no_resize:
                     image.thumbnail((args.width, args.height), Image.BILINEAR)
                 path = Video.getframepath(frame, args.output)
@@ -262,7 +265,8 @@ class delete(Command):
         query = query.filter(Segment.videoslug == video.slug)
         numpaths = query.count()
         if numpaths and not args.force:
-            print "Video has {0} paths. Use --force to delete.".format(numpaths)
+            print ("Video has {0} paths. Use --force to delete."
+                .format(numpaths))
             return
 
         session.delete(video)
@@ -273,7 +277,8 @@ class delete(Command):
 class DumpCommand(Command):
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("slug")
-    parent.add_argument("--interpolate", "-i", action="store_true", default=False)
+    parent.add_argument("--interpolate", "-i",
+        action="store_true", default=False)
     parent.add_argument("--merge", "-m", action="store_true", default=False)
 
     class Tracklet(object):
@@ -301,7 +306,8 @@ class DumpCommand(Command):
             interpolated = []
             for track in response:
                 path = vision.track.interpolation.LinearFill(track.boxes)
-                tracklet = DumpCommand.Tracklet(track.label, path, track.workers)
+                tracklet = DumpCommand.Tracklet(track.label,
+                                                path, track.workers)
                 interpolated.append(tracklet)
             response = interpolated
 
@@ -324,7 +330,9 @@ class visualize(DumpCommand):
         print "Highlighting frames..."
         it = vision.visualize.highlight_paths(video, paths)
         it = self.augment(args, video, data, it)
-        vision.visualize.save(it, lambda x: "{0}/{1}.jpg".format(args.output, x))
+
+        vision.visualize.save(it,
+            lambda x: "{0}/{1}.jpg".format(args.output, x))
 
     def augment(self, args, video, data, frames):
         offset = 100
@@ -352,11 +360,13 @@ class visualize(DumpCommand):
                 ypos += draw.textsize(worker, font = font)[1] + 3
 
             size = draw.textsize(video.slug, font = font)
-            draw.text((im.size[0] - size[0] - 5, s + 5), video.slug, font = font)
+            draw.text((im.size[0] - size[0] - 5, s + 5),
+                      video.slug, font = font)
 
             text = "{0} annotations".format(sum)
             numsize = draw.textsize(text, font = font)
-            draw.text((im.size[0] - numsize[0] - 5, s + 5 + size[1] + 3), text, font = font)
+            draw.text((im.size[0] - numsize[0] - 5, s + 5 + size[1] + 3),
+                      text, font = font)
 
             yield aug, frame
 
@@ -365,10 +375,14 @@ class dump(DumpCommand):
     def setup(self):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("--output", "-o")
-        parser.add_argument("--xml", "-x", action="store_true", default=False)
-        parser.add_argument("--json", "-j", action="store_true", default=False)
-        parser.add_argument("--matlab", "-ml", action="store_true", default=False)
-        parser.add_argument("--pickle", "-p", action="store_true", default=False)
+        parser.add_argument("--xml", "-x",
+            action="store_true", default=False)
+        parser.add_argument("--json", "-j",
+            action="store_true", default=False)
+        parser.add_argument("--matlab", "-ml",
+            action="store_true", default=False)
+        parser.add_argument("--pickle", "-p",
+            action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -418,7 +432,8 @@ class dump(DumpCommand):
     def dumpxml(self, file, data):
         file.write("<annotations count=\"{0}\">\n".format(len(data)))
         for id, track in enumerate(data):
-            file.write("\t<track id=\"{0}\" label=\"{1}\">\n".format(id, track.label))
+            file.write("\t<track id=\"{0}\" label=\"{1}\">\n"
+                .format(id, track.label))
             for box in track.boxes:
                 file.write("\t\t<box frame=\"{0}\"".format(box.frame))
                 file.write(" xtl=\"{0}\"".format(box.xtl))
