@@ -5,7 +5,7 @@ import argparse
 import config
 import shutil
 from turkic.cli import handler, importparser, Command, LoadCommand
-from turkic import database
+from turkic.database import Session
 from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
@@ -118,79 +118,99 @@ class load(LoadCommand):
             print "First frame dimensions differs from last frame"
             return
 
-        session = database.connect() 
-        try:
-            if session.query(Video).get(args.slug):
-                print "Video {0} already exists!".format(args.slug)
+        if Session.query(Video).filter(Video.slug == args.slug).count() > 0:
+            print "Video {0} already exists!".format(args.slug)
+            return
+
+        # create video
+        video = Video(slug = args.slug,
+                        location = args.location, 
+                        width = width,
+                        height = height,
+                        totalframes = maxframes,
+                        skip = args.skip,
+                        perobjectbonus = args.per_object_bonus,
+                        completionbonus = args.completion_bonus)
+
+        Session.add(video)
+
+        print "Binding labels..."
+
+        # create labels
+        for labeltext in args.labels:
+            label = Label(text = labeltext)
+            Session.add(label)
+            video.labels.append(label)
+
+        print "Creating symbolic link..."
+        symlink = "public/frames/{0}".format(video.slug)
+
+        if Session.query(Video).get(args.slug):
+            print "Video {0} already exists!".format(args.slug)
+            return
+
+        if args.trainer:
+            trainer = Session.query(Video).get(args.trainer)
+            if not trainer:
+                print "Trainer {0} does not exist!".format(args.trainer)
                 return
+            if not trainer.istraining:
+                print "Video {0} is not for training!".format(args.trainer)
+                return
+        else:
+            trainer = None
 
-            if args.trainer:
-                trainer = session.query(Video).get(args.trainer)
-                if not trainer:
-                    print "Trainer {0} does not exist!".format(args.trainer)
-                    return
-                if not trainer.istraining:
-                    print "Video {0} is not for training!".format(args.trainer)
-                    return
-            else:
-                trainer = None
+        # create video
+        video = Video(slug = args.slug,
+                        location = args.location, 
+                        width = width,
+                        height = height,
+                        totalframes = maxframes,
+                        skip = args.skip,
+                        perobjectbonus = args.per_object_bonus,
+                        completionbonus = args.completion_bonus,
+                        trainingvideo = trainer)
+        Session.add(video)
 
-            # create video
-            video = Video(slug = args.slug,
-                          location = args.location, 
-                          width = width,
-                          height = height,
-                          totalframes = maxframes,
-                          skip = args.skip,
-                          perobjectbonus = args.per_object_bonus,
-                          completionbonus = args.completion_bonus,
-                          trainingvideo = trainer)
-            session.add(video)
+        print "Binding labels..."
 
-            print "Binding labels..."
+        # create labels
+        for labeltext in args.labels:
+            label = Label(text = labeltext)
+            Session.add(label)
+            video.labels.append(label)
 
-            # create labels
-            for labeltext in args.labels:
-                label = Label(text = labeltext)
-                session.add(label)
-                video.labels.append(label)
+        print "Creating symbolic link..."
+        symlink = "public/frames/{0}".format(video.slug)
+        try:
+            os.remove(symlink)
+        except:
+            pass
+        os.symlink(video.location, symlink)
 
-            print "Creating symbolic link..."
-            symlink = "public/frames/{0}".format(video.slug)
-            try:
-                os.remove(symlink)
-            except:
-                pass
-            os.symlink(video.location, symlink)
+        print "Creating segments..."
+        # create shots and jobs
+        for start in range(0, video.totalframes, args.length):
+            stop = min(start + args.length + args.overlap + 1,
+                        video.totalframes)
+            segment = Segment(start = start,
+                                stop = stop,
+                                video = video)
+            job = Job(segment = segment, group = group)
+            Session.add(segment)
+            Session.add(job)
 
-            print "Creating segments..."
-            # create shots and jobs
-            for start in range(0, video.totalframes, args.length):
-                stop = min(start + args.length + args.overlap + 1,
-                            video.totalframes)
-                segment = Segment(start = start,
-                                    stop = stop,
-                                    video = video)
-                job = Job(segment = segment, group = group)
-                session.add(segment)
-                session.add(job)
+        if args.per_object_bonus:
+            group.schedules.append(
+                PerObjectBonus(amount = args.per_object_bonus))
+        if args.completion_bonus:
+            group.schedules.append(
+                CompletionBonus(amount = args.completion_bonus))
 
-            if args.per_object_bonus:
-                group.schedules.append(
-                    PerObjectBonus(amount = args.per_object_bonus))
-            if args.completion_bonus:
-                group.schedules.append(
-                    CompletionBonus(amount = args.completion_bonus))
+        Session.add(group)
+        Session.commit()
 
-            session.add(group)
-            session.commit()
-
-            if args.trainer:
-                print "Video imported and ready for training." 
-            else:
-                print "Video imported and ready for publication."
-        finally:
-            session.close()
+        print "Video imported and ready for publication."
 
 @handler("Sets a video as a training video")
 class training(Command):
@@ -200,30 +220,26 @@ class training(Command):
         return parser
 
     def __call__(self, args):
-        session = database.connect()
-        try:
-            video = session.query(Video).get(args.slug)
-            if not video:
-                print "Video {0} not found!".format(video.slug)
-            if video.istraining:
-                print "Video {0} already training video!".format(video.slug)
+        video = Session.query(Video).get(args.slug)
+        if not video:
+            print "Video {0} not found!".format(video.slug)
+        if video.istraining:
+            print "Video {0} already training video!".format(video.slug)
 
-            video.istraining = True
-            for segment in video.segments:
-                for job in segment.jobs:
-                    if job.published:
-                        print ("Video {0} already has published "
-                            "shots".format(video.slug))
-                    job.ready = False
+        video.istraining = True
+        for segment in video.segments:
+            for job in segment.jobs:
+                if job.published:
+                    print ("Video {0} already has published "
+                        "shots".format(video.slug))
+                job.ready = False
 
-            session.add(video)
-            session.commit()
+        Session.add(video)
+        Session.commit()
 
-            print "Annotate ground truth at:"
-            for segment in video.segments:
-                print segment.jobs[0].offlineurl()
-        finally:
-            session.close()
+        print "Annotate ground truth at:"
+        for segment in video.segments:
+            print segment.jobs[0].offlineurl()
 
 @handler("Deletes an already imported video")
 class delete(Command):
@@ -234,29 +250,25 @@ class delete(Command):
         return parser
 
     def __call__(self, args):
-        session = database.connect()
-        try:
-            if session.query(Video).filter(Video.slug == args.slug).count() == 0:
-                print "Video {0} does not exist!".format(args.slug)
-                return
+        if Session.query(Video).filter(Video.slug == args.slug).count() == 0:
+            print "Video {0} does not exist!".format(args.slug)
+            return
 
-            video = session.query(Video).filter(Video.slug == args.slug).one()
+        video = Session.query(Video).filter(Video.slug == args.slug).one()
 
-            query = session.query(Path)
-            query = query.join(Job)
-            query = query.join(Segment)
-            query = query.filter(Segment.videoslug == video.slug)
-            numpaths = query.count()
-            if numpaths and not args.force:
-                print "Video has {0} paths. Use --force to delete.".format(numpaths)
-                return
+        query = Session.query(Path)
+        query = query.join(Job)
+        query = query.join(Segment)
+        query = query.filter(Segment.videoslug == video.slug)
+        numpaths = query.count()
+        if numpaths and not args.force:
+            print "Video has {0} paths. Use --force to delete.".format(numpaths)
+            return
 
-            session.delete(video)
-            session.commit()
+        Session.delete(video)
+        Session.commit()
 
-            print "Deleted video and associated data."
-        finally:
-            session.close()
+        print "Deleted video and associated data."
 
 class DumpCommand(Command):
     parent = argparse.ArgumentParser(add_help=False)
@@ -272,32 +284,28 @@ class DumpCommand(Command):
 
     def getdata(self, args):
         response = []
-        session = database.connect()
-        try:
-            if session.query(Video).filter(Video.slug == args.slug).count() == 0:
-                print "Video {0} does not exist!".format(args.slug)
-                return
-            video = session.query(Video).filter(Video.slug == args.slug).one()
-            for segment in video.segments:
-                for job in segment.jobs:
-                    worker = job.hit.workerid
-                    for path in job.paths:
-                        tracklet = DumpCommand.Tracklet(path.label.text,
-                                                        path.getboxes(),
-                                                        [worker])
-                        response.append(tracklet)
+        if Session.query(Video).filter(Video.slug == args.slug).count() == 0:
+            print "Video {0} does not exist!".format(args.slug)
+            return
+        video = Session.query(Video).filter(Video.slug == args.slug).one()
+        for segment in video.segments:
+            for job in segment.jobs:
+                worker = job.hit.workerid
+                for path in job.paths:
+                    tracklet = DumpCommand.Tracklet(path.label.text,
+                                                    path.getboxes(),
+                                                    [worker])
+                    response.append(tracklet)
 
-            if args.interpolate:
-                interpolated = []
-                for track in response:
-                    path = vision.track.interpolation.LinearFill(track.boxes)
-                    tracklet = DumpCommand.Tracklet(track.label, path, track.workers)
-                    interpolated.append(tracklet)
-                response = interpolated
+        if args.interpolate:
+            interpolated = []
+            for track in response:
+                path = vision.track.interpolation.LinearFill(track.boxes)
+                tracklet = DumpCommand.Tracklet(track.label, path, track.workers)
+                interpolated.append(tracklet)
+            response = interpolated
 
-            return video, response
-        finally:
-            session.close()
+        return video, response
 
 @handler("Highlights a video sequence")
 class visualize(DumpCommand):
@@ -480,10 +488,6 @@ class dump(DumpCommand):
 @handler("List all videos loaded")
 class list(Command):
     def __call__(self, args):
-        session = database.connect()
-        try:
-            videos = session.query(Video)
-            for video in videos:
-                print video.slug
-        finally:
-            session.close()
+        videos = Session.query(Video)
+        for video in videos:
+            print video.slug
