@@ -117,7 +117,7 @@ class load(LoadCommand):
             print "First frame dimensions differs from last frame"
             return
 
-        if session.query(Video).filter(Video.slug == args.slug).count() > 0:
+        if Session.query(Video).filter(Video.slug == args.slug).count() > 0:
             print "Video {0} already exists!".format(args.slug)
             return
 
