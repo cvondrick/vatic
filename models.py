@@ -25,6 +25,7 @@ class Video(turkic.database.Base):
     trainingvideoid   = Column(String(250), ForeignKey(slug))
     trainingvideo     = relationship("Video", backref = "videos",
                         remote_side = slug)
+    istraining        = Column(Boolean, default = False)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)

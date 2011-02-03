@@ -62,7 +62,6 @@ class load(LoadCommand):
         parser.add_argument("--skip", type=int, default = 0)
         parser.add_argument("--per-object-bonus", type=float)
         parser.add_argument("--completion-bonus", type=float)
-        parser.add_argument("--training")
         parser.add_argument("--trainer")
         return parser
 
@@ -145,7 +144,6 @@ class load(LoadCommand):
                           skip = args.skip,
                           perobjectbonus = args.per_object_bonus,
                           completionbonus = args.completion_bonus,
-                          istraining = args.training,
                           trainingvideo = trainer)
             session.add(video)
 
@@ -165,27 +163,17 @@ class load(LoadCommand):
                 pass
             os.symlink(video.location, symlink)
 
-            if args.training:
-                print "Setting up trainer"
-                segment = Segment(start = 0,
-                                  stop = video.totalframes,
-                                  video = video)
-                job = Job(segment = segment, group = group, ready = False)
+            print "Creating segments..."
+            # create shots and jobs
+            for start in range(0, video.totalframes, args.length):
+                stop = min(start + args.length + args.overlap + 1,
+                            video.totalframes)
+                segment = Segment(start = start,
+                                    stop = stop,
+                                    video = video)
+                job = Job(segment = segment, group = group)
                 session.add(segment)
                 session.add(job)
-
-            else:
-                print "Creating segments..."
-                # create shots and jobs
-                for start in range(0, video.totalframes, args.length):
-                    stop = min(start + args.length + args.overlap + 1,
-                               video.totalframes)
-                    segment = Segment(start = start,
-                                      stop = stop,
-                                      video = video)
-                    job = Job(segment = segment, group = group)
-                    session.add(segment)
-                    session.add(job)
 
             if args.per_object_bonus:
                 group.schedules.append(
@@ -201,6 +189,39 @@ class load(LoadCommand):
                 print "Video imported and ready for training." 
             else:
                 print "Video imported and ready for publication."
+        finally:
+            session.close()
+
+@handler("Sets a video as a training video")
+class training(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("slug")
+        return parser
+
+    def __call__(self, args):
+        session = database.connect()
+        try:
+            video = session.query(Video).get(args.slug)
+            if not video:
+                print "Video {0} not found!".format(video.slug)
+            if video.istraining:
+                print "Video {0} already training video!".format(video.slug)
+
+            video.istraining = True
+            for segment in video.segments:
+                for job in segment.jobs:
+                    if job.published:
+                        print ("Video {0} already has published "
+                            "shots".format(video.slug))
+                    job.ready = False
+
+            session.add(video)
+            session.commit()
+
+            print "Annotate ground truth at:"
+            for segment in video.segments:
+                print segment.jobs[0].offlineurl()
         finally:
             session.close()
 
