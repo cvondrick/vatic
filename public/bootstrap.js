@@ -33,6 +33,7 @@ $(document).ready(function()
 
     function dispatch(training)
     {
+        training = training ? 1 : 0;
         server_request("getjob", [parameters["id"], training], function(data) {
             loadingscreen(job_import(data));
         });

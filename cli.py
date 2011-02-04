@@ -65,7 +65,10 @@ class load(LoadCommand):
         parser.add_argument("--skip", type=int, default = 0)
         parser.add_argument("--per-object-bonus", type=float)
         parser.add_argument("--completion-bonus", type=float)
-        parser.add_argument("--trainer")
+        parser.add_argument("--train-with")
+        parser.add_argument("--for-training", action="store_true")
+        parser.add_argument("--for-training-start", type=int)
+        parser.add_argument("--for-training-stop", type=int)
         return parser
 
     def title(self, args):
@@ -125,11 +128,14 @@ class load(LoadCommand):
             print "Video {0} already exists!".format(args.slug)
             return
 
-        if args.trainer:
-            print "Looking for trainer..."
-            trainer = session.query(Video).get(args.trainer)
+        if args.train_with:
+            if args.for_training:
+                print "Training video cannot require training"
+                return
+            print "Looking for training video..."
+            trainer = session.query(Video).get(args.train_with)
             if not trainer:
-                print "Trainer {0} does not exist!".format(args.trainer)
+                print "Video {0} does not exist!".format(args.train_with)
                 return
         else:
             trainer = None
@@ -143,7 +149,8 @@ class load(LoadCommand):
                         skip = args.skip,
                         perobjectbonus = args.per_object_bonus,
                         completionbonus = args.completion_bonus,
-                        trainingvideo = trainer)
+                        trainwith = trainer,
+                        isfortraining = args.for_training)
 
         session.add(video)
 
@@ -155,17 +162,40 @@ class load(LoadCommand):
             session.add(label)
             video.labels.append(label)
 
+        print "Creating symbolic link..."
+        symlink = "public/frames/{0}".format(video.slug)
+        try:
+            os.remove(symlink)
+        except:
+            pass
+        os.symlink(video.location, symlink)
+
         print "Creating segments..."
         # create shots and jobs
-        for start in range(0, video.totalframes, args.length):
-            stop = min(start + args.length + args.overlap + 1,
-                        video.totalframes)
-            segment = Segment(start = start,
-                                stop = stop,
-                                video = video)
-            job = Job(segment = segment, group = group)
-            session.add(segment)
-            session.add(job)
+       
+        if args.for_training:
+                segment = Segment(video = video)
+                if args.for_training_start:
+                    segment.start = args.for_training_start
+                else:
+                    segment.start = 0
+                if args.for_training_stop:
+                    segment.stop = args.for_training_stop
+                else:
+                    segment.stop = video.totalframes
+                job = Job(segment = segment, group = group, ready = False)
+                session.add(segment)
+                session.add(job)
+        else:
+            for start in range(0, video.totalframes, args.length):
+                stop = min(start + args.length + args.overlap + 1,
+                            video.totalframes)
+                segment = Segment(start = start,
+                                    stop = stop,
+                                    video = video)
+                job = Job(segment = segment, group = group)
+                session.add(segment)
+                session.add(job)
 
         if args.per_object_bonus:
             group.schedules.append(
@@ -177,10 +207,17 @@ class load(LoadCommand):
         session.add(group)
         session.commit()
 
-        print "Video loaded successfully."
+        if args.for_training:
+            print "Video loaded and ready for ground truth:"
+            print ""
+            print "\t{0}".format(job.offlineurl(config.localhost))
+            print ""
+            print "Visit this URL to provide training with ground truth."
+        else:
+            print "Video loaded and ready for publication."
 
 @handler("Sets a video as a training video")
-class training(Command):
+class train(Command):
     def setup(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("slug")

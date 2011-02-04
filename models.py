@@ -23,10 +23,10 @@ class Video(turkic.database.Base):
     skip              = Column(Integer, default = 0, nullable = False)
     perobjectbonus    = Column(Float, default = 0)
     completionbonus   = Column(Float, default = 0)
-    trainingvideoid   = Column(String(250), ForeignKey(slug))
-    trainingvideo     = relationship("Video", backref = "videos",
+    trainwithid       = Column(String(250), ForeignKey(slug))
+    trainwith         = relationship("Video", backref = "videos",
                         remote_side = slug)
-    istraining        = Column(Boolean, default = False)
+    isfortraining     = Column(Boolean, default = False)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)
@@ -43,7 +43,7 @@ class Video(turkic.database.Base):
 
     @property
     def trainingsegment(self):
-        if not self.istraining:
+        if not self.isfortraining:
             raise RuntimeError("Video is not a training video!")
         return self.segments[0]
 

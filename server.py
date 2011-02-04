@@ -11,8 +11,8 @@ from models import *
 def getjob(id, training):
     job = session.query(Job).get(id)
 
-    if training and job.segment.video.trainingvideo:
-        segment = job.segment.video.trainingvideo.trainingsegment
+    if int(training) and job.segment.video.trainwith:
+        segment = job.segment.video.trainwith.trainingsegment
     else:
         segment = job.segment
 
@@ -35,7 +35,7 @@ def getjob(id, training):
 def savejob(id, training, tracks):
     job = session.query(Job).get(id)
 
-    if training:
+    if int(training):
         replacement = job.markverified(True)
         replacement.publish()
         session.add(replacement)
