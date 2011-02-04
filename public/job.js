@@ -51,4 +51,6 @@ function job_import(data)
     {
         console.log("    " + i + " = " + job.labels[i]);
     }
+
+    return job;
 }

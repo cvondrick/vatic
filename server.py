@@ -11,8 +11,8 @@ from models import *
 def getjob(id, training):
     job = session.query(Job).get(id)
 
-    if training:
-        segment = job.video.trainingvideo.trainingsegment
+    if training and job.segment.video.trainingvideo:
+        segment = job.segment.video.trainingvideo.trainingsegment
     else:
         segment = job.segment
 

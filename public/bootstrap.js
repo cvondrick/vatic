@@ -4,6 +4,8 @@ var container;
 
 $(document).ready(function()
 {
+    console.log("Booting...");
+
     container = $("#container");
 
     if ($.browser.msie)
@@ -36,9 +38,11 @@ $(document).ready(function()
         });
     }
 
-    worker_isnewuser(function() {
+    worker_needsverification(function() {
+        console.log("Worker needs training");
         dispatch(true);
     }, function() {
+        console.log("Worker is verified");
         dispatch(false);
     });
 });
