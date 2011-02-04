@@ -1,4 +1,4 @@
-var development = false;
+var development = true;
 
 var container;
 
@@ -51,12 +51,24 @@ $(document).ready(function()
 function loadingscreen(job)
 {
     var ls = $("<div id='loadingscreen'></div>");
-    ls.append("<div id='loadingscreeninstructions' class='button'>Show Instructions</div>");
+    ls.append("<div id='loadingscreeninstructions' class='button'>Show " +
+        "Instructions</div>");
     ls.append("<div id='loadingscreentext'>Downloading the video...</div>");
     ls.append("<div id='loadingscreenslider'></div>");
-    ls.append("<div id='loadingscreentip'>You are welcome to work on other " +
-        "HITs while you wait for the download to complete. When the download " +
-        "finishes, we'll play a gentle musical tune to notify you.</div>");
+
+    if (!mturk_isassigned())
+    {
+        ls.append("<div class='loadingscreentip'><strong>Tip:</strong> You " +
+            "are strongly recommended to accept the task before the " +
+            "download completes. When you accept, you will have to restart " +
+            "the download.</div>");
+    }
+
+    ls.append("<div class='loadingscreentip'>You are welcome to work on " +
+        "other HITs while you wait for the download to complete. When the " +
+        "download finishes, we'll play a gentle musical tune to notify " + 
+        "you.</div>");
+
     container.html(ls);
 
     if (!development && !mturk_isoffline())

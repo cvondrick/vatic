@@ -98,11 +98,11 @@ code
     font-family : Arial;
 }
 
-#loadingscreentip
+.loadingscreentip
 {
     font-family : Arial;
     margin-top : 25px;
-    color : #666;
+    color : #333;
 }
 
 #loadingscreeninstructions
