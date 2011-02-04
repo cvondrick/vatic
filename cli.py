@@ -121,44 +121,15 @@ class load(LoadCommand):
             print "First frame dimensions differs from last frame"
             return
 
-        if session.query(Video).filter(Video.slug == args.slug).count() > 0:
-            print "Video {0} already exists!".format(args.slug)
-            return
-
-        # create video
-        video = Video(slug = args.slug,
-                        location = args.location, 
-                        width = width,
-                        height = height,
-                        totalframes = maxframes,
-                        skip = args.skip,
-                        perobjectbonus = args.per_object_bonus,
-                        completionbonus = args.completion_bonus)
-
-        session.add(video)
-
-        print "Binding labels..."
-
-        # create labels
-        for labeltext in args.labels:
-            label = Label(text = labeltext)
-            session.add(label)
-            video.labels.append(label)
-
-        print "Creating symbolic link..."
-        symlink = "public/frames/{0}".format(video.slug)
-
         if session.query(Video).get(args.slug):
             print "Video {0} already exists!".format(args.slug)
             return
 
         if args.trainer:
+            print "Looking for trainer..."
             trainer = session.query(Video).get(args.trainer)
             if not trainer:
                 print "Trainer {0} does not exist!".format(args.trainer)
-                return
-            if not trainer.istraining:
-                print "Video {0} is not for training!".format(args.trainer)
                 return
         else:
             trainer = None
@@ -173,6 +144,7 @@ class load(LoadCommand):
                         perobjectbonus = args.per_object_bonus,
                         completionbonus = args.completion_bonus,
                         trainingvideo = trainer)
+
         session.add(video)
 
         print "Binding labels..."
@@ -182,14 +154,6 @@ class load(LoadCommand):
             label = Label(text = labeltext)
             session.add(label)
             video.labels.append(label)
-
-        print "Creating symbolic link..."
-        symlink = "public/frames/{0}".format(video.slug)
-        try:
-            os.remove(symlink)
-        except:
-            pass
-        os.symlink(video.location, symlink)
 
         print "Creating segments..."
         # create shots and jobs
@@ -213,36 +177,58 @@ class load(LoadCommand):
         session.add(group)
         session.commit()
 
-        print "Video imported and ready for publication."
+        print "Video loaded successfully."
 
 @handler("Sets a video as a training video")
 class training(Command):
     def setup(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("slug")
+        parser.add_argument("--start", type=int, default=None)
+        parser.add_argument("--stop", type=int, default=None)
         return parser
 
     def __call__(self, args):
         video = session.query(Video).get(args.slug)
+
         if not video:
             print "Video {0} not found!".format(video.slug)
-        if video.istraining:
-            print "Video {0} already training video!".format(video.slug)
+            return
 
-        video.istraining = True
+        if video.istraining:
+            print "Video {0} is already training video!".format(video.slug)
+            return
+
         for segment in video.segments:
             for job in segment.jobs:
                 if job.published:
                     print ("Video {0} already has published "
-                        "shots".format(video.slug))
-                job.ready = False
+                        "shots!".format(video.slug))
+                    return
+
+        video.istraining = True
+        segment = video.segments[0]
+        if args.start is not None:
+            segment.start = args.start
+        if args.stop is not None:
+            segment.stop = args.stop
+        for job in segment.jobs:
+            job.ready = False
+
+        if segment.start >= segment.stop:
+            print "Illegal segment boundries"
+            return
+
+        # cleanup
+        for oldsegment in  video.segments[1:]:
+            session.delete(oldsegment.job)
+            session.delete(oldsegment)
 
         session.add(video)
         session.commit()
 
-        print "Annotate ground truth at:"
-        for segment in video.segments:
-            print segment.jobs[0].offlineurl()
+        print ("Annotate ground truth at: {0}"
+            .format(segment.jobs[0].offlineurl(config.localhost)))
 
 @handler("Deletes an already imported video")
 class delete(Command):
