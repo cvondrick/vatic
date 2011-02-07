@@ -124,33 +124,34 @@ class load(LoadCommand):
             print "First frame dimensions differs from last frame"
             return
 
-        if session.query(Video).get(args.slug):
+        if session.query(Video).filter(Video.slug == args.slug).count():
             print "Video {0} already exists!".format(args.slug)
             return
 
         if args.train_with:
             if args.for_training:
-                print "Training video cannot require training"
+                print "A training video cannot require training"
                 return
             print "Looking for training video..."
-            trainer = session.query(Video).get(args.train_with)
-            if not trainer:
-                print "Video {0} does not exist!".format(args.train_with)
+            trainer = session.query(Video).filter(Video.slug == args.train_with)
+            if not trainer.count():
+                print "Training video {0} does not exist!".format(args.train_with)
                 return
+            trainer = trainer.one()
         else:
             trainer = None
 
         # create video
         video = Video(slug = args.slug,
-                        location = args.location, 
-                        width = width,
-                        height = height,
-                        totalframes = maxframes,
-                        skip = args.skip,
-                        perobjectbonus = args.per_object_bonus,
-                        completionbonus = args.completion_bonus,
-                        trainwith = trainer,
-                        isfortraining = args.for_training)
+                      location = args.location, 
+                      width = width,
+                      height = height,
+                      totalframes = maxframes,
+                      skip = args.skip,
+                      perobjectbonus = args.per_object_bonus,
+                      completionbonus = args.completion_bonus,
+                      trainwith = trainer,
+                      isfortraining = args.for_training)
 
         session.add(video)
 
@@ -158,8 +159,12 @@ class load(LoadCommand):
 
         # create labels
         for labeltext in args.labels:
-            label = Label(text = labeltext)
-            session.add(label)
+            query = session.query(Label).filter(Label.text == labeltext)
+            if query.count() > 0:
+                label = query.one()
+            else:
+                label = Label(text = labeltext)
+                session.add(label)
             video.labels.append(label)
 
         print "Creating symbolic link..."
@@ -226,11 +231,13 @@ class train(Command):
         return parser
 
     def __call__(self, args):
-        video = session.query(Video).get(args.slug)
+        video = session.query(Video).filter(Video.slug == args.slug)
 
-        if not video:
+        if not video.count():
             print "Video {0} not found!".format(video.slug)
             return
+
+        video = video.one()
 
         if video.istraining:
             print "Video {0} is already training video!".format(video.slug)
@@ -276,16 +283,16 @@ class delete(Command):
         return parser
 
     def __call__(self, args):
-        if session.query(Video).filter(Video.slug == args.slug).count() == 0:
+        video = session.query(Video).filter(Video.slug == args.slug)
+        if not video.count():
             print "Video {0} does not exist!".format(args.slug)
             return
-
-        video = session.query(Video).filter(Video.slug == args.slug).one()
+        video = video.one()
 
         query = session.query(Path)
         query = query.join(Job)
         query = query.join(Segment)
-        query = query.filter(Segment.videoslug == video.slug)
+        query = query.filter(Segment.video == video)
         numpaths = query.count()
         if numpaths and not args.force:
             print ("Video has {0} paths. Use --force to delete."
@@ -312,10 +319,12 @@ class DumpCommand(Command):
 
     def getdata(self, args):
         response = []
-        if session.query(Video).filter(Video.slug == args.slug).count() == 0:
+        video = session.query(Video).filter(Video.slug == args.slug)
+        if video.count() == 0:
             print "Video {0} does not exist!".format(args.slug)
             return
-        video = session.query(Video).filter(Video.slug == args.slug).one()
+        video = video.one()
+
         for segment in video.segments:
             for job in segment.jobs:
                 worker = job.hit.workerid
@@ -528,4 +537,9 @@ class list(Command):
     def __call__(self, args):
         videos = session.query(Video)
         for video in videos:
-            print video.slug
+            flags = " "
+            if video.isfortraining:
+                flags = "T"
+            elif video.trainwithid:
+                flags = "t"
+            print "{0} {1}".format(flags, video.slug)

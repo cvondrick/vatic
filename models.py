@@ -1,32 +1,34 @@
 import turkic.database
 import turkic.models
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, Boolean, Table
+from sqlalchemy import Column, Integer, Float, String, Boolean, Text
+from sqlalchemy import ForeignKey, Table
 from sqlalchemy.orm import relationship, backref
 import Image
 import vision
 import random
 
 video_labels = Table("videos2labels", turkic.database.Base.metadata,
-    Column("video_slug", String(250), ForeignKey("videos.slug")),
+    Column("video_id", Integer, ForeignKey("videos.id")),
     Column("label_id", Integer, ForeignKey("labels.id")))
 
 class Video(turkic.database.Base):
-    __tablename__ = "videos"
+    __tablename__   = "videos"
 
-    slug              = Column(String(250), primary_key = True)
-    labels            = relationship("Label",
-                          secondary = video_labels, backref = "videos")
-    width             = Column(Integer)
-    height            = Column(Integer)
-    totalframes       = Column(Integer)
-    location          = Column(String(250))
-    skip              = Column(Integer, default = 0, nullable = False)
-    perobjectbonus    = Column(Float, default = 0)
-    completionbonus   = Column(Float, default = 0)
-    trainwithid       = Column(String(250), ForeignKey(slug))
-    trainwith         = relationship("Video", backref = "videos",
-                        remote_side = slug)
-    isfortraining     = Column(Boolean, default = False)
+    id              = Column(Integer, primary_key = True)
+    slug            = Column(String(250), index = True)
+    labels          = relationship("Label",
+                                   secondary = video_labels,
+                                   backref = "videos")
+    width           = Column(Integer)
+    height          = Column(Integer)
+    totalframes     = Column(Integer)
+    location        = Column(String(250))
+    skip            = Column(Integer, default = 0, nullable = False)
+    perobjectbonus  = Column(Float, default = 0)
+    completionbonus = Column(Float, default = 0)
+    trainwithid     = Column(Integer, ForeignKey(id))
+    trainwith       = relationship("Video", remote_side = id)
+    isfortraining   = Column(Boolean, default = False)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)
@@ -41,12 +43,6 @@ class Video(turkic.database.Base):
             path = "{0}/{1}".format(base, path)
         return path
 
-    @property
-    def trainingsegment(self):
-        if not self.isfortraining:
-            raise RuntimeError("Video is not a training video!")
-        return self.segments[0]
-
 class Label(turkic.database.Base):
     __tablename__ = "labels"
 
@@ -57,7 +53,7 @@ class Segment(turkic.database.Base):
     __tablename__ = "segments"
 
     id = Column(Integer, primary_key = True)
-    videoslug = Column(String(250), ForeignKey(Video.slug))
+    videoid = Column(Integer, ForeignKey(Video.id))
     video = relationship(Video, cascade = "all", backref = "segments")
     start = Column(Integer)
     stop = Column(Integer)
@@ -66,21 +62,33 @@ class Job(turkic.models.HIT):
     __tablename__ = "jobs"
     __mapper_args__ = {"polymorphic_identity": "jobs"}
 
-    id = Column(Integer, ForeignKey(turkic.models.HIT.id), primary_key = True)
-    segmentid = Column(Integer, ForeignKey(Segment.id))
-    segment = relationship(Segment, cascade = "all", backref = "jobs")
+    id             = Column(Integer, ForeignKey(turkic.models.HIT.id),
+                            primary_key = True)
+    segmentid      = Column(Integer, ForeignKey(Segment.id))
+    segment        = relationship(Segment, cascade = "all", backref = "jobs")
+    trainingresult = Column(Boolean)
 
     def getpage(self):
         return "?id={0}".format(self.id)
 
-    def markverified(self, status):
+    def markastraining(self):
+        """
+        Marks this job as the result of a training run. This will automatically
+        swap this job over to the training video and produce a replacement.
+        """
         replacement = Job(segment = self.segment, group = self.group)
-
-        self.segment = self.segment.video.trainingsegment
-        self.worker.markverified(status)
-        self.verification = True
-
+        self.segment = self.segment.video.trainwith.segments[0]
+        self.group = self.segment.jobs[0].group
         return replacement
+
+    def marktrainingresult(self, status):
+        """
+        Marks the training result of tho job.
+        """
+        self.trainingresult = status
+        self.worker.verified = status
+        if not self.worker.verified:
+            self.worker.block()
 
 class Path(turkic.database.Base):
     __tablename__ = "paths"

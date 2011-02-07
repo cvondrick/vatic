@@ -7,12 +7,16 @@ from turkic.database import session
 import cStringIO
 from models import *
 
+import logging
+logging.getLogger("turkic").setLevel(logging.DEBUG)
+
 @handler()
 def getjob(id, training):
     job = session.query(Job).get(id)
 
     if int(training) and job.segment.video.trainwith:
-        segment = job.segment.video.trainwith.trainingsegment
+        # swap segment with the training segment
+        segment = job.segment.video.trainwith.segments[0]
     else:
         segment = job.segment
 
@@ -36,7 +40,7 @@ def savejob(id, training, tracks):
     job = session.query(Job).get(id)
 
     if int(training):
-        replacement = job.markverified(True)
+        replacement = job.markastraining()
         replacement.publish()
         session.add(replacement)
 
@@ -55,6 +59,9 @@ def savejob(id, training, tracks):
             box.frame = frame
             path.boxes.append(box)
         job.paths.append(path)
+
+    if int(training):
+        job.marktrainingresult(True)
 
     session.add(job)
     session.commit()
