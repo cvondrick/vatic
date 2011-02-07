@@ -6,6 +6,7 @@ from turkic.server import handler, application
 from turkic.database import session
 import cStringIO
 from models import *
+import qa
 
 import logging
 logging.getLogger("turkic").setLevel(logging.DEBUG)
@@ -40,7 +41,7 @@ def savejob(id, training, tracks):
     job = session.query(Job).get(id)
 
     if int(training):
-        replacement = job.markastraining()
+        replacement, trainingjob = job.markastraining()
         replacement.publish()
         session.add(replacement)
 
@@ -61,7 +62,8 @@ def savejob(id, training, tracks):
         job.paths.append(path)
 
     if int(training):
-        job.marktrainingresult(True)
+        passed = qa.validate(job, trainingjob, qa.strict(0.5))
+        job.marktrainingresult(passed)
 
     session.add(job)
     session.commit()

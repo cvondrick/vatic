@@ -77,9 +77,10 @@ class Job(turkic.models.HIT):
         swap this job over to the training video and produce a replacement.
         """
         replacement = Job(segment = self.segment, group = self.group)
+        trainingjob = self.segment.video.trainwith.segments[0].jobs[0]
         self.segment = self.segment.video.trainwith.segments[0]
         self.group = self.segment.jobs[0].group
-        return replacement
+        return replacement, trainingjob
 
     def marktrainingresult(self, status):
         """
@@ -89,6 +90,9 @@ class Job(turkic.models.HIT):
         self.worker.verified = status
         if not self.worker.verified:
             self.worker.block()
+
+    def __iter__(self):
+        return self.paths
 
 class Path(turkic.database.Base):
     __tablename__ = "paths"
