@@ -1,7 +1,7 @@
 import turkic.database
 import turkic.models
 from sqlalchemy import Column, Integer, Float, String, Boolean, Text
-from sqlalchemy import ForeignKey, Table
+from sqlalchemy import ForeignKey, Table, PickleType
 from sqlalchemy.orm import relationship, backref
 import Image
 import vision
@@ -29,6 +29,7 @@ class Video(turkic.database.Base):
     trainwithid     = Column(Integer, ForeignKey(id))
     trainwith       = relationship("Video", remote_side = id)
     isfortraining   = Column(Boolean, default = False)
+    trainvalidator  = Column(PickleType, nullable = True, default = None)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)
@@ -80,6 +81,9 @@ class Job(turkic.models.HIT):
         trainingjob = self.segment.video.trainwith.segments[0].jobs[0]
         self.segment = self.segment.video.trainwith.segments[0]
         self.group = self.segment.jobs[0].group
+
+        logger.debug("Job is now training and replacement built")
+
         return replacement, trainingjob
 
     def marktrainingresult(self, status):
@@ -89,7 +93,10 @@ class Job(turkic.models.HIT):
         self.trainingresult = status
         self.worker.verified = status
         if not self.worker.verified:
+            logger.debug("Worker failed training, so blocking")
             self.worker.block()
+        else:
+            logger.debug("Worker passed training successfully")
 
     def __iter__(self):
         return self.paths
@@ -137,7 +144,10 @@ class PerObjectBonus(turkic.models.BonusSchedule):
 
     def award(self, hit):
         paths = len(hit.job.paths)
-        hit.awardbonus(paths * self.amount, "For {0} objects".format(paths))
+        amount = paths * self.amount
+        hit.awardbonus(amount, "For {0} objects".format(paths))
+        logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
+                        .format(amount, paths))
 
 class CompletionBonus(turkic.models.BonusSchedule):
     __tablename__ = "completion_bonuses"
@@ -152,3 +162,5 @@ class CompletionBonus(turkic.models.BonusSchedule):
 
     def award(self, hit):
         hit.awardbonus(self.amount, "For complete annotation.")
+        logger.debug("Awarded completion bonus of ${0:.2f}"
+                        .format(self.amount))

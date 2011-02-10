@@ -10,6 +10,7 @@ from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
 import turkic.models
+import qa
 from models import *
 import cStringIO
 import Image, ImageDraw, ImageFont
@@ -69,6 +70,8 @@ class load(LoadCommand):
         parser.add_argument("--for-training", action="store_true")
         parser.add_argument("--for-training-start", type=int)
         parser.add_argument("--for-training-stop", type=int)
+        parser.add_argument("--for-training-overlap", type=float, default=0.5)
+        parser.add_argument("--for-training-data", default = None)
         return parser
 
     def title(self, args):
@@ -133,9 +136,11 @@ class load(LoadCommand):
                 print "A training video cannot require training"
                 return
             print "Looking for training video..."
-            trainer = session.query(Video).filter(Video.slug == args.train_with)
+            trainer = session.query(Video)
+            trainer = trainer.filter(Video.slug == args.train_with)
             if not trainer.count():
-                print "Training video {0} does not exist!".format(args.train_with)
+                print ("Training video {0} does not exist!"
+                    .format(args.train_with))
                 return
             trainer = trainer.one()
         else:
@@ -153,11 +158,16 @@ class load(LoadCommand):
                       trainwith = trainer,
                       isfortraining = args.for_training)
 
+        if args.for_training:
+            video.trainvalidator = qa.strict(args.for_training_overlap)
+            print "Training validator is {0}".format(video.trainvalidator)
+
         session.add(video)
 
         print "Binding labels..."
 
         # create labels
+        labelcache = {}
         for labeltext in args.labels:
             query = session.query(Label).filter(Label.text == labeltext)
             if query.count() > 0:
@@ -166,6 +176,7 @@ class load(LoadCommand):
                 label = Label(text = labeltext)
                 session.add(label)
             video.labels.append(label)
+            labelcache[labeltext] = label
 
         print "Creating symbolic link..."
         symlink = "public/frames/{0}".format(video.slug)
@@ -210,69 +221,43 @@ class load(LoadCommand):
                 CompletionBonus(amount = args.completion_bonus))
 
         session.add(group)
+
+        if args.for_training and args.for_training_data:
+            print ("Loading training ground truth annotations from {0}"
+                        .format(args.for_training_data))
+            with open(args.for_training_data, "r") as file:
+                pathcache = {}
+                for line in file:
+                    (id, xtl, ytl, xbr, ybr,
+                     frame, outside, occluded, label) = line.split(" ")
+
+                    if id not in pathcache:
+                        label = labelcache[label.strip()[1:-1]]
+                        pathcache[id] = Path(job = job, label = label)
+
+                    box = Box(path = pathcache[id])
+                    box.xtl = int(xtl)
+                    box.ytl = int(ytl)
+                    box.xbr = int(xbr)
+                    box.ybr = int(ybr)
+                    box.frame = int(frame)
+                    box.outside = int(outside)
+                    box.occluded = int(outside)
+                    pathcache[id].boxes.append(box)
+
         session.commit()
 
         if args.for_training:
-            print "Video loaded and ready for ground truth:"
-            print ""
-            print "\t{0}".format(job.offlineurl(config.localhost))
-            print ""
-            print "Visit this URL to provide training with ground truth."
+            if args.for_training and args.for_training_data:
+                print "Video and ground truth loaded."
+            else:
+                print "Video loaded and ready for ground truth:"
+                print ""
+                print "\t{0}".format(job.offlineurl(config.localhost))
+                print ""
+                print "Visit this URL to provide training with ground truth."
         else:
             print "Video loaded and ready for publication."
-
-@handler("Sets a video as a training video")
-class train(Command):
-    def setup(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("slug")
-        parser.add_argument("--start", type=int, default=None)
-        parser.add_argument("--stop", type=int, default=None)
-        return parser
-
-    def __call__(self, args):
-        video = session.query(Video).filter(Video.slug == args.slug)
-
-        if not video.count():
-            print "Video {0} not found!".format(video.slug)
-            return
-
-        video = video.one()
-
-        if video.istraining:
-            print "Video {0} is already training video!".format(video.slug)
-            return
-
-        for segment in video.segments:
-            for job in segment.jobs:
-                if job.published:
-                    print ("Video {0} already has published "
-                        "shots!".format(video.slug))
-                    return
-
-        video.istraining = True
-        segment = video.segments[0]
-        if args.start is not None:
-            segment.start = args.start
-        if args.stop is not None:
-            segment.stop = args.stop
-        for job in segment.jobs:
-            job.ready = False
-
-        if segment.start >= segment.stop:
-            print "Illegal segment boundries"
-            return
-
-        # cleanup
-        for oldsegment in  video.segments[1:]:
-            session.delete(oldsegment.job)
-            session.delete(oldsegment)
-
-        session.add(video)
-        session.commit()
-
-        print ("Annotate ground truth at: {0}"
-            .format(segment.jobs[0].offlineurl(config.localhost)))
 
 @handler("Deletes an already imported video")
 class delete(Command):
@@ -327,7 +312,7 @@ class DumpCommand(Command):
 
         for segment in video.segments:
             for job in segment.jobs:
-                worker = job.hit.workerid
+                worker = job.workerid
                 for path in job.paths:
                     tracklet = DumpCommand.Tracklet(path.label.text,
                                                     path.getboxes(),
