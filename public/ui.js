@@ -47,8 +47,8 @@ function ui_setup(job)
 
 
     $("#bottombar").append("<div id='playerslider'></div>");
+    $("#bottombar").append("<div class='button' id='rewindbutton'>Rewind</div> ");
     $("#bottombar").append("<div class='button' id='playbutton'>Play</div> ");
-    $("#bottombar").append("<div class='button' id='rewindbutton'>Rewind</div>");
 
     $("#topbar").append("<div id='newobjectcontainer'>" +
         "<div class='button' id='newobjectbutton'>New Object</div></div>");
@@ -119,7 +119,6 @@ function ui_setupbuttons(job, player, tracks)
         player.pause();
         player.seek(player.job.start);
     }).button({
-        text: false,
         disabled: true,
         icons: {
             primary: "ui-icon-seek-first"
@@ -269,7 +268,7 @@ function ui_setupslider(player)
 
     slider.css({
         marginTop: "6px",
-        width: "590px",
+        width: "520px",
         float: "right"
     });
 
@@ -356,15 +355,15 @@ function ui_submit(job, tracks)
         return;
     }
 
-    if (tracks.count() == 0 && !window.confirm("You have not labeled " +
-        "anything. Do you still wish to submit?"))
+    $('<div id="turkic_overlay"></div>').appendTo("#container");
+
+    if (!confirm("Please confirm your submission and double check your work. We will hand review this submission:\n\n  1) Did you label every object for the entire video?\n  2) Are the boxes as tight as possible?\n  3) Did you review the entire video (use the rewind button) to make sure everything is correct?\n\nIf you are confident in your answers, press Ok. Otherwise, click Cancel to review your work."))
     {
+        $("#turkic_overlay").remove();
         return;
     }
 
     ui_disable();
-
-    $('<div id="turkic_overlay"></div>').appendTo("#container");
 
     var note = $("<div id='submitdialog'>Saving...</div>").
         appendTo("#container")
@@ -401,7 +400,7 @@ function ui_showinstructions(job)
 
     h.append("<h2>Crash Course</h2>");
     var str = "<ul>";
-    str += "<li>Annotate every object of interest, even if stationary or obstructed.</li>";
+    str += "<li>Annotate <strong>every object</strong> of interest. This includes stationary objects, obstructed objects, and moving objects.</li>";
     str += "<li>Make your boxes as tight as possible.</li>";
     if (job.perobject > 0)
     {

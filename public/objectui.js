@@ -297,7 +297,7 @@ function TrackObject(job, player, container, color)
         this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-trash' id='trackobject" + this.id + "delete'></div></div>");
 
         $("#trackobject" + this.id + "delete").click(function() {
-            if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? This cannot be undone!"))
+            if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? If the object just left the view screen, click the \"Outside of view frame\" check box instead."))
             {
                 me.remove();
             }
