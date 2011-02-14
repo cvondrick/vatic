@@ -307,7 +307,7 @@ class DumpCommand(Command):
         video = session.query(Video).filter(Video.slug == args.slug)
         if video.count() == 0:
             print "Video {0} does not exist!".format(args.slug)
-            return
+            raise SystemExit()
         video = video.one()
 
         for segment in video.segments:

@@ -7,7 +7,6 @@ True
 """
 
 import munkres
-from vision.track.interpolation import LinearFill
 import logging
 
 logger = logging.getLogger("vatic.qa")
@@ -24,8 +23,8 @@ class strict(object):
         """
         Compares 'first' with 'second' to see if they agree.
         """
-        firstboxes  = LinearFill(first.getboxes())
-        secondboxes = LinearFill(second.getboxes())
+        firstboxes  = first.getboxes(interpolate = True)
+        secondboxes = second.getboxes(interpolate = True)
 
         horrible = max(len(firstboxes), len(secondboxes)) + 1
         if first.label != second.label:

@@ -51,15 +51,14 @@ def savejob(id, training, tracks):
 
     if int(training):
         replacement, trainingjob = job.markastraining()
-        logger.debug("Republishing replacement for training")
-        replacement.publish()
-        session.add(replacement)
 
     logger.debug("Saving {0} total tracks".format(len(tracks)))
 
     for label, track in tracks:
         path = Path(job = job)
         path.label = session.query(Label).get(label)
+        
+        logger.debug("Received a {0} track".format(path.label.text))
 
         for frame, userbox in track.items():
             box = Box(path = path)
@@ -70,17 +69,23 @@ def savejob(id, training, tracks):
             box.occluded = int(userbox[4])
             box.outside = int(userbox[5])
             box.frame = int(frame)
-            path.boxes.append(box)
+
+            logger.debug("Received box {0}".format(str(box.getbox())))
+
         job.paths.append(path)
 
     if int(training):
-        validator = trainingjob.segment.video.trainingvalidator
+        validator = trainingjob.segment.video.trainvalidator
         passed = qa.validate(job.paths, trainingjob.paths, validator)
         job.marktrainingresult(passed)
         if passed:
             logger.debug("Worker passed the training")
         else:
             logger.debug("Worker FAILED the training")
+
+        replacement.publish()
+        logger.debug("Republished replacement for training")
+        session.add(replacement)
 
     session.add(job)
     session.commit()

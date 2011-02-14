@@ -5,7 +5,11 @@ from sqlalchemy import ForeignKey, Table, PickleType
 from sqlalchemy.orm import relationship, backref
 import Image
 import vision
+from vision.track.interpolation import LinearFill
 import random
+import logging
+
+logger = logging.getLogger("vatic.models")
 
 video_labels = Table("videos2labels", turkic.database.Base.metadata,
     Column("video_id", Integer, ForeignKey("videos.id")),
@@ -94,7 +98,7 @@ class Job(turkic.models.HIT):
         self.worker.verified = status
         if not self.worker.verified:
             logger.debug("Worker failed training, so blocking")
-            self.worker.block()
+            self.worker.block("Failed training")
         else:
             logger.debug("Worker passed training successfully")
 
@@ -110,8 +114,16 @@ class Path(turkic.database.Base):
     labelid = Column(Integer, ForeignKey(Label.id))
     label = relationship(Label, cascade = "none", backref = "paths")
 
-    def getboxes(self):
-        return [x.getbox() for x in self.boxes]
+    interpolatecache = None
+
+    def getboxes(self, interpolate = False):
+        if interpolate:
+            if not self.interpolatecache:
+                self.interpolatecache = LinearFill(
+                    [x.getbox() for x in self.boxes])
+            return self.interpolatecache
+        else:
+            return [x.getbox() for x in self.boxes]
 
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
