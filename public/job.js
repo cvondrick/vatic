@@ -35,7 +35,7 @@ function job_import(data)
     job.completion = parseFloat(data["completion"]);
     job.jobid = parseInt(data["jobid"]);
     job.labels = data["labels"];
-    job.training = data["training"];
+    job.training = parseInt(data["training"]);
 
     console.log("Job configured!");
     console.log("  Slug: " + job.slug);
@@ -45,6 +45,7 @@ function job_import(data)
     console.log("  Height: " + job.height);
     console.log("  Skip: " + job.skip);
     console.log("  Per Object:" + job.perobject);
+    console.log("  Training: " + job.training);
     console.log("  Job ID: " + job.jobid);
     console.log("  Labels: ");
     for (var i in job.labels)

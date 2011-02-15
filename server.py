@@ -12,16 +12,18 @@ import logging
 logger = logging.getLogger("vatic.server")
 
 @handler()
-def getjob(id, training):
+def getjob(id, verified):
     job = session.query(Job).get(id)
 
     logger.debug("Found job {0}".format(job.id))
 
-    if int(training) and job.segment.video.trainwith:
+    if int(verified) and job.segment.video.trainwith:
         # swap segment with the training segment
+        training = True
         segment = job.segment.video.trainwith.segments[0]
         logger.debug("Swapping actual segment with training segment")
     else:
+        training = False
         segment = job.segment
 
     video = segment.video
@@ -40,16 +42,16 @@ def getjob(id, training):
             "perobject":    video.perobjectbonus,
             "completion":   video.completionbonus,
             "jobid":        job.id,
-            "labels":       labels,
-            "training":     training}
+            "training":     int(training),
+            "labels":       labels}
 
 @handler(post = "json")
-def savejob(id, training, tracks):
+def savejob(id, verified, tracks):
     job = session.query(Job).get(id)
 
     logger.debug("Found job {0}".format(job.id))
 
-    if int(training):
+    if int(verified) and job.segment.video.trainwith:
         replacement, trainingjob = job.markastraining()
 
     logger.debug("Saving {0} total tracks".format(len(tracks)))
@@ -74,7 +76,7 @@ def savejob(id, training, tracks):
 
         job.paths.append(path)
 
-    if int(training):
+    if int(verified):
         validator = trainingjob.segment.video.trainvalidator
         passed = qa.validate(job.paths, trainingjob.paths, validator)
         job.marktrainingresult(passed)

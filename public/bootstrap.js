@@ -39,12 +39,12 @@ $(document).ready(function()
         });
     }
 
-    worker_needsverification(function() {
-        console.log("Worker needs training");
-        dispatch(true);
-    }, function() {
+    worker_isverified(function() {
         console.log("Worker is verified");
         dispatch(false);
+    }, function() {
+        console.log("Worker is NOT verified");
+        dispatch(true);
     });
 });
 
