@@ -155,7 +155,7 @@ class PerObjectBonus(turkic.models.BonusSchedule):
         return (self.amount, "per object")
 
     def award(self, hit):
-        paths = len(hit.job.paths)
+        paths = len(hit.paths)
         amount = paths * self.amount
         hit.awardbonus(amount, "For {0} objects".format(paths))
         logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
