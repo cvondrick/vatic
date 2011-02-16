@@ -71,7 +71,6 @@ class Job(turkic.models.HIT):
                             primary_key = True)
     segmentid      = Column(Integer, ForeignKey(Segment.id))
     segment        = relationship(Segment, cascade = "all", backref = "jobs")
-    trainingresult = Column(Boolean)
 
     def getpage(self):
         return "?id={0}".format(self.id)
@@ -82,25 +81,20 @@ class Job(turkic.models.HIT):
         swap this job over to the training video and produce a replacement.
         """
         replacement = Job(segment = self.segment, group = self.group)
-        trainingjob = self.segment.video.trainwith.segments[0].jobs[0]
         self.segment = self.segment.video.trainwith.segments[0]
         self.group = self.segment.jobs[0].group
 
         logger.debug("Job is now training and replacement built")
 
-        return replacement, trainingjob
+        return replacement
 
-    def marktrainingresult(self, status):
-        """
-        Marks the training result of tho job.
-        """
-        self.trainingresult = status
-        self.worker.verified = status
-        if not self.worker.verified:
-            logger.debug("Worker failed training, so blocking")
-            self.worker.block("Failed training")
-        else:
-            logger.debug("Worker passed training successfully")
+    @property
+    def trainingjob(self):
+        return self.segment.video.trainwith.segments[0].jobs[0]
+
+    @property
+    def validator(self):
+        return self.segment.video.trainvalidator
 
     def __iter__(self):
         return self.paths
@@ -117,13 +111,14 @@ class Path(turkic.database.Base):
     interpolatecache = None
 
     def getboxes(self, interpolate = False):
+        result = [x.getbox() for x in self.boxes]
+        result.sort(key = lambda x: x.frame)
         if interpolate:
             if not self.interpolatecache:
                 self.interpolatecache = LinearFill(
                     [x.getbox() for x in self.boxes])
-            return self.interpolatecache
-        else:
-            return [x.getbox() for x in self.boxes]
+            result = self.interpolatecache
+        return result
 
 class Box(turkic.database.Base):
     __tablename__ = "boxes"

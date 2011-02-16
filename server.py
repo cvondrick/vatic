@@ -45,19 +45,12 @@ def getjob(id, verified):
             "training":     int(training),
             "labels":       labels}
 
-@handler(post = "json")
-def savejob(id, verified, tracks):
-    job = session.query(Job).get(id)
 
-    logger.debug("Found job {0}".format(job.id))
-
-    if int(verified) and job.segment.video.trainwith:
-        replacement, trainingjob = job.markastraining()
-
-    logger.debug("Saving {0} total tracks".format(len(tracks)))
-
+def readpaths(tracks):
+    paths = []
+    logger.debug("Reading {0} total tracks".format(len(tracks)))
     for label, track in tracks:
-        path = Path(job = job)
+        path = Path()
         path.label = session.query(Label).get(label)
         
         logger.debug("Received a {0} track".format(path.label.text))
@@ -74,21 +67,34 @@ def savejob(id, verified, tracks):
 
             logger.debug("Received box {0}".format(str(box.getbox())))
 
-        job.paths.append(path)
+        paths.append(path)
+    return paths
 
-    if int(verified):
-        validator = trainingjob.segment.video.trainvalidator
-        passed = qa.validate(job.paths, trainingjob.paths, validator)
-        job.marktrainingresult(passed)
-        if passed:
-            logger.debug("Worker passed the training")
-        else:
-            logger.debug("Worker FAILED the training")
-
-        replacement.publish()
-        logger.debug("Republished replacement for training")
-        session.add(replacement)
+@handler(post = "json")
+def savejob(id, tracks):
+    job = session.query(Job).get(id)
+    job.paths = readpaths(tracks)
 
     session.add(job)
     session.commit()
-    return True
+
+@handler(post = "json")
+def validatejob(id, tracks):
+    job = session.query(Job).get(id)
+    paths = readpaths(tracks)
+
+    return qa.validate(paths, job.trainingjob.paths,
+                       job.trainingjob.validator)
+
+@handler()
+def respawnjob(id):
+    job = session.query(Job).get(id)
+
+    replacement = job.markastraining()
+    replacement.publish()
+
+    job.worker.verified = True
+
+    session.add(job)
+    session.add(replacement)
+    session.commit()

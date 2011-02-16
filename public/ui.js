@@ -347,6 +347,7 @@ function ui_setupsubmit(job, tracks)
 
 function ui_submit(job, tracks)
 {
+    console.dir(tracks);
     console.log("Start submit - status: " + tracks.serialize());
 
     if (!mturk_submitallowed())
@@ -355,26 +356,44 @@ function ui_submit(job, tracks)
         return;
     }
 
-    $('<div id="turkic_overlay"></div>').appendTo("#container");
-
-    if (!confirm("Please confirm your submission and double check your work. We will hand review this submission:\n\n  1) Did you label every object for the entire video?\n  2) Are the boxes as tight as possible?\n  3) Did you review the entire video (use the rewind button) to make sure everything is correct?\n\nIf you are confident in your answers, press Ok. Otherwise, click Cancel to review your work."))
+    if (job.training)
     {
-        $("#turkic_overlay").remove();
-        return;
-    }
+        console.log("Submit redirect to train validate");
 
-    ui_disable();
-
-    var note = $("<div id='submitdialog'>Saving...</div>").
-        appendTo("#container")
-
-    mturk_submit(function(redirect) {
-        server_post("savejob", [job.jobid, job.training],
-            tracks.serialize(), function(data) {
-                note.html("Saved!");
-                redirect();
+        server_post("validatejob", [job.jobid], tracks.serialize(),
+            function(valid) {
+                if (valid)
+                {
+                    console.log("Validation was successful");
+                    mturk_submit(function(redirect) {
+                        server_request("respawnjob", [job.jobid], function() {
+                            redirect();
+                        });
+                    });
+                }
+                else
+                {
+                    console.log("Validation failed!");
+                    window.alert("Validation failed!");
+                }
             });
-    });
+    }
+    else
+    {
+        $('<div id="turkic_overlay"></div>').appendTo("#container");
+        ui_disable();
+
+        var note = $("<div id='submitdialog'>Saving...</div>").
+            appendTo("#container")
+
+        mturk_submit(function(redirect) {
+            server_post("savejob", [job.jobid],
+                tracks.serialize(), function(data) {
+                    note.html("Saved!");
+                    redirect();
+                });
+        });
+    }
 }
 
 function ui_showinstructions(job)

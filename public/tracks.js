@@ -838,7 +838,7 @@ function Journal()
         var itemtime = null;
         for (var t in this.annotations)
         {
-            if (t > itemtime)
+            if (itemtime == null || t > itemtime)
             {
                 item = this.annotations[t];
                 itemtime = t;
@@ -863,6 +863,7 @@ function Journal()
             var dat = this.annotations[frame];
             str += "\"" + frame + "\":" + dat.serialize() + ",";
         }
+
         if (this.artificialrightframe != null && this.annotations[this.artificialrightframe] == null)
         {
             console.log("Using artificial in serialization");
