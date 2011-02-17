@@ -2,7 +2,7 @@
 Quality assurance routines that take a list of candidate paths and compare
 with a list of ground truth tracks.
 
->>> validate(candidates, truth, strict(0.5))
+>>> validate(candidates, truth, tolerable(0.5))
 True
 """
 
@@ -11,13 +11,14 @@ import logging
 
 logger = logging.getLogger("vatic.qa")
 
-class strict(object):
+class tolerable(object):
     """
-    Tests if two paths agree by very strict guidelines and only grants
-    forgiveness on the overlap.
+    Tests if two paths agree by tolerable guidelines.
     """
-    def __init__(self, overlap = 0.5):
+    def __init__(self, overlap = 0.5, tolerance = 0.1, mistakes = 0):
         self.overlap = overlap
+        self.tolerance = tolerance
+        self.mistakes = mistakes
 
     def __call__(self, first, second):
         """
@@ -40,25 +41,28 @@ class strict(object):
         linearly filled.
         """
         cost = 0
+        lostdisagree = 0
         for f, s in zip(first, second):
             if f.lost != s.lost:
-                cost += 1
+                lostdisagree += 1
             elif f.percentoverlap(s) < self.overlap:
                 cost += 1
+        if lostdisagree / float(len(first)) > self.tolerance:
+            cost += lostdisagree - float(len(first)) * self.tolerance
         return cost
 
     def validate(self, matches):
         """
         Validates whether the matches are sufficient and exact enough.
         """
-        return all(x[2] == 0 for x in matches)
+        return sum(x[2] for x in matches) <= self.mistakes
 
     def __hash__(self):
         """
         Computes a hash for this type. Breaks duck typing because we hash on
         the type of the object as well.
         """
-        return hash((type(self), self.overlap))
+        return hash((type(self), self.overlap, self.tolerance, self.mistakes))
 
     def __eq__(self, other):
         """
@@ -66,7 +70,10 @@ class strict(object):
         must now match.
         """
         try:
-            return self.overlap == other.overlap and type(self) is type(other)
+            return (self.overlap == other.overlap and
+                    self.tolerance == other.tolerance and 
+                    self.mistakes == other.mistakes and
+                    type(self) is type(other))
         except AttributeError:
             return False
 
@@ -80,33 +87,24 @@ class strict(object):
         return repr(self)
 
     def __repr__(self):
-        return "strict({0})".format(self.overlap)
+        return "tolerable({0}, {1}, {2})".format(self.overlap,
+                                                 self.tolerance,
+                                                 self.mistakes)
 
-class ignorelost(strict):
-    """
-    Computes a more relaxed overlap where lost frames can disagree.
-    """
-    def overlapcost(self, first, second):
-        second = dict((s.frame, s) for s in second)
-        cost = 0
-        for f in first:
-            if f.frame in second and not f.lost and not pboxes[p.frame].lost:
-                if f.percent_overlap(second[s.frame]) < overlap:
-                    cost += 1
-        return cost
-
-    def __repr__(self):
-        return "ignorelost({0})".format(self.overlap)
-
-def validate(first, second, method = strict(0.5)):
+def validate(first, second, method = tolerable(0.5)):
     """
     Uses 'method' to validate the assignment to make sure it's adequate. 
 
     If 'method' does not have a 'validate' method, assume 0 cost is required.
     """
-    return method.validate(match(first, second, method))
+    try:
+        method.validate
+    except:
+        return all(x[2] == 0 for x in match(first, second, method))
+    else:
+        return method.validate(match(first, second, method))
 
-def match(first, second, method = strict(0.5)):
+def match(first, second, method = tolerable(0.5)):
     """
     Attempts to match every path in 'first' with a path in 'second'. Returns 
     the association along with its score. 
@@ -160,8 +158,8 @@ if __name__ == "__main__":
                               xbr = 80, ybr = 90,
                               frame = 100, outside = 0, occluded = 0))
 
-    assert strict(0.5)(spampath, spampath) == 0
-    assert validate([spampath], [spampath], strict(0.5)) == True
+    assert tolerable(0.5)(spampath, spampath) == 0
+    assert validate([spampath], [spampath], tolerable(0.5)) == True
 
     hampath   = Path(label = spamlabel)
     hampath.boxes.append(Box(xtl = 10, ytl = 20,
@@ -171,8 +169,8 @@ if __name__ == "__main__":
                              xbr = 85, ybr = 95,
                              frame = 100, outside = 0, occluded = 0))
 
-    assert strict(0.25)(spampath, hampath) == 0
-    assert validate([spampath], [hampath], strict(0.25)) == True
+    assert tolerable(0.25)(spampath, hampath) == 0
+    assert validate([spampath], [hampath], tolerable(0.25)) == True
 
     hamlabel  = Label(text = "pam")
     hampath   = Path(label = hamlabel)
@@ -183,8 +181,8 @@ if __name__ == "__main__":
                              xbr = 80, ybr = 90,
                              frame = 100, outside = 0, occluded = 0))
 
-    assert strict(0.1)(spampath, hampath) > 0
-    assert validate([spampath], [hampath], strict(0.1)) == False
+    assert tolerable(0.1)(spampath, hampath) > 0
+    assert validate([spampath], [hampath], tolerable(0.1)) == False
 
     eggpath = Path(label = hamlabel)
     eggpath.boxes.append(Box(xtl = 10, ytl = 20,
@@ -203,7 +201,7 @@ if __name__ == "__main__":
                                  frame = 100, outside = 0, occluded = 0))
 
     matrix = buildmatrix([eggpath, spampath],
-                         [hampath, sausagepath], strict(0.5))
+                         [hampath, sausagepath], tolerable(0.5))
     assert matrix[0][0] == 0
     assert matrix[1][1] == 0
     assert matrix[0][1] > 0
@@ -213,7 +211,7 @@ if __name__ == "__main__":
     # spampath = sausagepath
 
     matches = match([eggpath, spampath],
-                    [hampath, sausagepath], strict(0.5))
+                    [hampath, sausagepath], tolerable(0.5))
     assert matches[0][0] is eggpath
     assert matches[0][1] is hampath
     assert matches[0][2] == 0
@@ -230,7 +228,7 @@ if __name__ == "__main__":
                                frame = 100, outside = 0, occluded = 0))
 
     matches = match([eggpath, spampath, baconpath],
-                    [hampath, sausagepath], strict(0.5))
+                    [hampath, sausagepath], tolerable(0.5))
     assert matches[0][0] is eggpath
     assert matches[0][1] is hampath
     assert matches[1][0] is spampath
@@ -239,7 +237,7 @@ if __name__ == "__main__":
     assert matches[2][1] is None
 
     matches = match([hampath, sausagepath],
-                    [eggpath, spampath, baconpath], strict(0.5))
+                    [eggpath, spampath, baconpath], tolerable(0.5))
     assert matches[0][0] is hampath
     assert matches[0][1] is eggpath
     assert matches[1][0] is sausagepath
@@ -248,7 +246,7 @@ if __name__ == "__main__":
     assert matches[2][1] is baconpath
 
     assert validate([spampath, baconpath, eggpath],
-                    [hampath, sausagepath], strict(0.5)) == False
+                    [hampath, sausagepath], tolerable(0.5)) == False
 
     assert validate([spampath, eggpath],
-                    [hampath, sausagepath], strict(0.5)) == True
+                    [hampath, sausagepath], tolerable(0.5)) == True

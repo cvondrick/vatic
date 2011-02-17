@@ -71,6 +71,7 @@ class load(LoadCommand):
         parser.add_argument("--for-training-start", type=int)
         parser.add_argument("--for-training-stop", type=int)
         parser.add_argument("--for-training-overlap", type=float, default=0.5)
+        parser.add_argument("--for-training-tolerance", type=float, default=0.1)
         parser.add_argument("--for-training-data", default = None)
         return parser
 
@@ -159,7 +160,8 @@ class load(LoadCommand):
                       isfortraining = args.for_training)
 
         if args.for_training:
-            video.trainvalidator = qa.strict(args.for_training_overlap)
+            video.trainvalidator = qa.tolerable(args.for_training_overlap,
+                                                args.for_training_tolerance)
             print "Training validator is {0}".format(video.trainvalidator)
 
         session.add(video)
