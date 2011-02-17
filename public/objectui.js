@@ -101,7 +101,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         function convert(box)
         {
             return new Position(box[0], box[1], box[2], box[3],
-                                box[5], box[6]);
+                                box[6], box[5]);
         }
 
         var track = tracks.add(path[0][4], convert(path[0]),
@@ -114,6 +114,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         obj.initialize(this.counter, track, this.tracks);
         obj.finalize(label);
         obj.statefolddown();
+        obj.updatecheckboxes();
         this.counter++;
 
         return obj;
@@ -321,9 +322,7 @@ function TrackObject(job, player, container, color)
         });
 
         this.player.onupdate.push(function() {
-            var e = me.track.journal.estimate(me.player.frame);
-            $("#trackobject" + me.id + "lost").attr("checked", e.outside);
-            $("#trackobject" + me.id + "occluded").attr("checked", e.occluded);
+            me.updatecheckboxes();
         });
 
         //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
@@ -335,6 +334,13 @@ function TrackObject(job, player, container, color)
                 me.remove();
             }
         });
+    }
+
+    this.updatecheckboxes = function()
+    {
+        var e = this.track.journal.estimate(this.player.frame);
+        $("#trackobject" + this.id + "lost").attr("checked", e.outside);
+        $("#trackobject" + this.id + "occluded").attr("checked", e.occluded);
     }
 
     this.disable = function()

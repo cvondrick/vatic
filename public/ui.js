@@ -382,27 +382,16 @@ function ui_submit(job, tracks)
     var overlay = $('<div id="turkic_overlay"></div>').appendTo("#container");
     ui_disable();
 
-    if (job.training)
+    var note = $("<div id='submitdialog'></div>").appendTo("#container");
+
+    function validatejob(callback)
     {
-        console.log("Submit redirect to train validate");
-
-        var note = $("<div id='submitdialog'>Checking...</div>").
-            appendTo("#container")
-
         server_post("validatejob", [job.jobid], tracks.serialize(),
             function(valid) {
                 if (valid)
                 {
                     console.log("Validation was successful");
-                    mturk_submit(function(redirect) {
-                        server_request("respawnjob", [job.jobid], function() {
-                            note.html("Good Work!");
-
-                            window.setTimeout(function() {
-                                redirect();
-                            }, 1000);
-                        });
-                    });
+                    callback();
                 }
                 else
                 {
@@ -414,28 +403,64 @@ function ui_submit(job, tracks)
                 }
             });
     }
+
+    function respawnjob(callback)
+    {
+        server_request("respawnjob", [job.jobid], function() {
+            callback();
+        });
+    }
+    
+    function savejob(callback)
+    {
+        server_post("savejob", [job.jobid],
+            tracks.serialize(), function(data) {
+                callback()
+            });
+    }
+
+    function finishsubmit(redirect)
+    {
+        if (mturk_isoffline())
+        {
+            window.setTimeout(function() {
+                note.remove();
+                overlay.remove();
+                ui_enable();
+            }, 1000);
+        }
+        else
+        {
+            window.setTimeout(function() {
+                redirect();
+            }, 1000);
+        }
+    }
+
+    if (job.training)
+    {
+        console.log("Submit redirect to train validate");
+
+        note.html("Checking...");
+        validatejob(function() {
+            savejob(function() {
+                mturk_submit(function(redirect) {
+                    respawnjob(function() {
+                        note.html("Good work!");
+                        finishsubmit(redirect);
+                    });
+                });
+            });
+        });
+    }
     else
     {
-        var note = $("<div id='submitdialog'>Saving...</div>").
-            appendTo("#container")
-
-        mturk_submit(function(redirect) {
-            server_post("savejob", [job.jobid],
-                tracks.serialize(), function(data) {
-                    note.html("Saved!");
-                    if (mturk_isoffline())
-                    {
-                        window.setTimeout(function() {
-                            note.remove();
-                            overlay.remove();
-                            ui_enable();
-                        }, 1000);
-                    }
-                    else
-                    {
-                        redirect();
-                    }
-                });
+        note.html("Saving...");
+        savejob(function() {
+            mturk_submit(function(redirect) {
+                note.html("Saved!");
+                finishsubmit(redirect);
+            });
         });
     }
 }
