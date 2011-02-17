@@ -13,6 +13,7 @@ function ui_build(job)
     ui_setupsubmit(job, tracks);
     ui_setupclickskip(job, player, tracks, objectui);
     ui_setupkeyboardshortcuts(job, player);
+    ui_loadprevious(job, objectui);
 
     $("#newobjectbutton").click(function() {
         if (!mturk_submitallowed())
@@ -337,6 +338,16 @@ function ui_setupclickskip(job, player, tracks, objectui)
 
     $("#playerslider").bind("slidestop", function() {
         ui_snaptokeyframe(job, player);
+    });
+}
+
+function ui_loadprevious(job, objectui)
+{
+    server_request("getboxesforjob", [job.jobid], function(data) {
+        for (var i in data)
+        {
+            objectui.injectnewobject(data[i]["label"], data[i]["boxes"]);
+        }
     });
 }
 

@@ -281,7 +281,6 @@ function TrackCollection(player, job)
     this.add = function(frame, position, color)
     {
         var track = new Track(this.player, color, position);
-
         this.tracks.push(track);
 
         console.log("Added new track");
@@ -295,7 +294,8 @@ function TrackCollection(player, job)
     }
 
     /*
-     * Changes the draggable functionality. If true, allow dragging, otherwise disable.
+     * Changes the draggable functionality. If true, allow dragging,
+     * otherwise disable.
      */
     this.draggable = function(value)
     {

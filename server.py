@@ -45,6 +45,14 @@ def getjob(id, verified):
             "training":     int(training),
             "labels":       labels}
 
+@handler()
+def getboxesforjob(id):
+    job = session.query(Job).get(id)
+    result = []
+    for path in job.paths:
+        result.append({"label": path.labelid,
+                       "boxes": [tuple(x) for x in path.getboxes()]})
+    return result
 
 def readpaths(tracks):
     paths = []
@@ -73,7 +81,12 @@ def readpaths(tracks):
 @handler(post = "json")
 def savejob(id, tracks):
     job = session.query(Job).get(id)
-    job.paths = readpaths(tracks)
+
+    for path in job.paths:
+        session.delete(path)
+    session.commit()
+    for path in readpaths(tracks):
+        job.paths.append(path)
 
     session.add(job)
     session.commit()

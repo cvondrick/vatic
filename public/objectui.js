@@ -29,8 +29,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         console.log("Starting new track object");
 
-        this.player.pause();
-
         this.instructions.fadeOut();
 
         this.currentcolor = this.pickcolor();
@@ -39,7 +37,9 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         this.button.button("option", "disabled", true);
 
-        this.currentobject = new TrackObject(this.job, this.player, container, this.currentcolor);
+        this.currentobject = new TrackObject(this.job, this.player,
+                                             this.container,
+                                             this.currentcolor);
         this.currentobject.statedraw();
 
         this.tracks.resizable(false);
@@ -86,6 +86,35 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.button.button("option", "disabled", false);
 
         this.counter++;
+    }
+
+    this.injectnewobject = function(label, path)
+    {
+        console.log("Injecting existing object");
+
+        this.currentcolor = this.pickcolor();
+        var obj = new TrackObject(this.job, this.player,
+                                  container, this.currentcolor);
+
+        function convert(box)
+        {
+            return new Position(box[0], box[1], box[2], box[3],
+                                box[5], box[6]);
+        }
+
+        var track = tracks.add(path[0][4], convert(path[0]),
+                               this.currentcolor[0]);
+        for (var i = 1; i < path.length; i++)
+        {
+            track.journal.mark(path[i][4], convert(path[i]));
+        }
+
+        obj.initialize(this.counter, track, this.tracks);
+        obj.finalize(label);
+        obj.statefolddown();
+        this.counter++;
+
+        return obj;
     }
 
     this.setup = function()
@@ -239,22 +268,24 @@ function TrackObject(job, player, container, color)
             me.classifyinst.slideUp(null, function() {
                 me.classifyinst.remove(); 
             });
-            me.finalize();
+
+            for (var i in me.job.labels)
+            {
+                var id = "classification" + me.id + "_" + i;
+                if ($("#" + id + ":checked").size() > 0)
+                {
+                    me.finalize(i);
+                    break;
+                }
+            }
+
         });
     }
     
-    this.finalize = function()
+    this.finalize = function(labelid)
     {
-        for (var i in this.job.labels)
-        {
-            var id = "classification" + this.id + "_" + i;
-            if ($("#" + id + ":checked").size() > 0)
-            {
-                this.label = i;
-                this.track.label = i;
-                break;
-            }
-        }
+        this.label = labelid;
+        this.track.label = labelid;
 
         this.headerdetails = $("<div style='float:right;'></div>").appendTo(this.handle);
         this.header = $("<p class='trackobjectheader'><strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong></p>").appendTo(this.handle).hide().slideDown();

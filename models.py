@@ -59,7 +59,8 @@ class Segment(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     videoid = Column(Integer, ForeignKey(Video.id))
-    video = relationship(Video, cascade = "all", backref = "segments")
+    video = relationship(Video, backref = backref("segments",
+                                                  cascade = "all,delete"))
     start = Column(Integer)
     stop = Column(Integer)
 
@@ -70,7 +71,9 @@ class Job(turkic.models.HIT):
     id             = Column(Integer, ForeignKey(turkic.models.HIT.id),
                             primary_key = True)
     segmentid      = Column(Integer, ForeignKey(Segment.id))
-    segment        = relationship(Segment, cascade = "all", backref = "jobs")
+    segment        = relationship(Segment,
+                                  backref = backref("jobs",
+                                                    cascade = "all,delete"))
 
     def getpage(self):
         return "?id={0}".format(self.id)
@@ -104,7 +107,7 @@ class Path(turkic.database.Base):
     
     id = Column(Integer, primary_key = True)
     jobid = Column(Integer, ForeignKey(Job.id))
-    job = relationship(Job, cascade = "all", backref = "paths")
+    job = relationship(Job, backref = backref("paths", cascade="all,delete"))
     labelid = Column(Integer, ForeignKey(Label.id))
     label = relationship(Label, cascade = "none", backref = "paths")
 
@@ -124,7 +127,8 @@ class Box(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     pathid = Column(Integer, ForeignKey(Path.id))
-    path = relationship(Path, cascade = "all", backref = "boxes")
+    path = relationship(Path,
+                        backref = backref("boxes", cascade = "all,delete"))
     xtl = Column(Integer)
     ytl = Column(Integer)
     xbr = Column(Integer)
