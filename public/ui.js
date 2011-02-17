@@ -96,6 +96,11 @@ function ui_setup(job)
 
     $("#submitbar").append("<div id='submitbutton' class='button'>Submit HIT</div>");
 
+    if (mturk_isoffline())
+    {
+        $("#submitbutton").html("Save Work");
+    }
+
     return screen;
 }
 
@@ -391,8 +396,11 @@ function ui_submit(job, tracks)
                     console.log("Validation was successful");
                     mturk_submit(function(redirect) {
                         server_request("respawnjob", [job.jobid], function() {
-                            note.html("Saved!");
-                            redirect();
+                            note.html("Good Work!");
+
+                            window.setTimeout(function() {
+                                redirect();
+                            }, 1000);
                         });
                     });
                 }
@@ -415,7 +423,18 @@ function ui_submit(job, tracks)
             server_post("savejob", [job.jobid],
                 tracks.serialize(), function(data) {
                     note.html("Saved!");
-                    redirect();
+                    if (mturk_isoffline())
+                    {
+                        window.setTimeout(function() {
+                            note.remove();
+                            overlay.remove();
+                            ui_enable();
+                        }, 1000);
+                    }
+                    else
+                    {
+                        redirect();
+                    }
                 });
         });
     }
