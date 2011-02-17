@@ -115,8 +115,7 @@ class Path(turkic.database.Base):
         result.sort(key = lambda x: x.frame)
         if interpolate:
             if not self.interpolatecache:
-                self.interpolatecache = LinearFill(
-                    [x.getbox() for x in self.boxes])
+                self.interpolatecache = LinearFill(result)
             result = self.interpolatecache
         return result
 

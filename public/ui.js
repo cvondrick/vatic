@@ -13,6 +13,13 @@ function ui_build(job)
     ui_setupsubmit(job, tracks);
     ui_setupclickskip(job, player, tracks, objectui);
     ui_setupkeyboardshortcuts(job, player);
+
+    $("#newobjectbutton").click(function() {
+        if (!mturk_submitallowed())
+        {
+            $("#turkic_acceptfirst").effect("pulsate");
+        }
+    });
 }
 
 function ui_setup(job)
@@ -356,9 +363,15 @@ function ui_submit(job, tracks)
         return;
     }
 
+    var overlay = $('<div id="turkic_overlay"></div>').appendTo("#container");
+    ui_disable();
+
     if (job.training)
     {
         console.log("Submit redirect to train validate");
+
+        var note = $("<div id='submitdialog'>Checking...</div>").
+            appendTo("#container")
 
         server_post("validatejob", [job.jobid], tracks.serialize(),
             function(valid) {
@@ -367,22 +380,23 @@ function ui_submit(job, tracks)
                     console.log("Validation was successful");
                     mturk_submit(function(redirect) {
                         server_request("respawnjob", [job.jobid], function() {
+                            note.html("Saved!");
                             redirect();
                         });
                     });
                 }
                 else
                 {
+                    note.remove();
+                    overlay.remove();
+                    ui_enable();
                     console.log("Validation failed!");
-                    window.alert("Validation failed!");
+                    ui_submit_failedvalidation();
                 }
             });
     }
     else
     {
-        $('<div id="turkic_overlay"></div>').appendTo("#container");
-        ui_disable();
-
         var note = $("<div id='submitdialog'>Saving...</div>").
             appendTo("#container")
 
@@ -394,6 +408,36 @@ function ui_submit(job, tracks)
                 });
         });
     }
+}
+
+function ui_submit_failedvalidation()
+{
+    $('<div id="turkic_overlay"></div>').appendTo("#container");
+    var h = $('<div id="failedverificationdialog"></div>')
+    h.appendTo("#container");
+
+    h.append("<h1>Low Quality Work</h1>");
+    h.append("<p>Sorry, but your work is low quality. We would normally <strong>reject this assignment</strong>, but we are giving you the opportunity to correct your mistakes since you are a new user.</p>");
+    
+    h.append("<p>Please review the instructions, double check your annotations, and submit again. Remember:</p>");
+
+    var str = "<ul>";
+    str += "<li>You must label every object.</li>";
+    str += "<li>You must draw your boxes as tightly as possible.</li>";
+    str += "</ul>";
+
+    h.append(str);
+
+    h.append("<p>When you are ready to continue, press the button below.</p>");
+
+    $('<div class="button" id="failedverificationbutton">Try Again</div>').appendTo(h).button({
+        icons: {
+            primary: "ui-icon-refresh"
+        }
+    }).click(function() {
+        $("#turkic_overlay").remove();
+        h.remove();
+    }).wrap("<div style='text-align:center;padding:5x 0;' />");
 }
 
 function ui_showinstructions(job)

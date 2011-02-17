@@ -133,7 +133,11 @@ def buildmatrix(first, second, method):
     """
     costs = [[method(f,s) for s in second] for f in first]
 
-    horrible = [max(max(costs)) + 1]
+    if len(first) and len(second):
+        horrible = [max(max(costs)) + 1]
+    else:
+        horrible = [1e10]
+
     if len(first) > len(second):
         for row in costs:
             row.extend(horrible * (len(first) - len(second)))
