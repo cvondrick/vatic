@@ -230,6 +230,10 @@ function BoxDrawer(container)
         }
     });
 
+    container.click(function(e) {
+        e.stopPropagation();
+    });
+
     container.mousemove(function(e) {
         var offset = container.offset();
         var xc = e.pageX - offset.left;

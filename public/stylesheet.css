@@ -1,3 +1,12 @@
+body
+{
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
 label, .button
 {
     font-size : 12px !important;

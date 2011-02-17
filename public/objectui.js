@@ -92,6 +92,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     {
         console.log("Injecting existing object");
 
+        this.instructions.fadeOut();
+
         this.currentcolor = this.pickcolor();
         var obj = new TrackObject(this.job, this.player,
                                   container, this.currentcolor);
@@ -275,6 +277,7 @@ function TrackObject(job, player, container, color)
                 if ($("#" + id + ":checked").size() > 0)
                 {
                     me.finalize(i);
+                    me.statefolddown();
                     break;
                 }
             }
@@ -298,7 +301,6 @@ function TrackObject(job, player, container, color)
             me.click();
         });
 
-        this.statefolddown();
         this.ready = true;
         this._callback(this.onready);
     }
