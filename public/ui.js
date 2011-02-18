@@ -353,7 +353,13 @@ function ui_setupclickskip(job, player, tracks, objectui)
 
 function ui_loadprevious(job, objectui)
 {
+    var overlay = $('<div id="turkic_overlay"></div>').appendTo("#container");
+    var note = $("<div id='submitdialog'>One moment...</div>").appendTo("#container");
+
     server_request("getboxesforjob", [job.jobid], function(data) {
+        overlay.remove();
+        note.remove();
+
         for (var i in data)
         {
             objectui.injectnewobject(data[i]["label"], data[i]["boxes"]);
@@ -597,6 +603,17 @@ function ui_showinstructions(job)
     h.append("<img src='sequence3.jpg'> ");
     h.append("<img src='sequence4.jpg'><br>");
     h.append("<p>The entire video sequence must be labeled. When an object moves, you must update its position. A box must describe only one object. You should never change which object identity a particular box tracks.</p>");
+
+    h.append("<h3>Disappearing and Reappearing Objects</h3>");
+    h.append("<p>In order for your work to be accepted, you must correctly label objects as they enter and leave the scene. We want you to annotate the moment each object enters and leaves the scene. As it is often difficult to pinpoint the exact moment an object enters or leaves the scene, we allow some mistakes here, but only slightly!</p>");
+
+    h.append("<img src='entering1.png'> <img src='entering2.png'> <img src='entering3.png'> <img src='entering4.png'><br>");
+
+    h.append("<p>If one object enters another object (such as a person getting inside a car), you should mark the disappearing object as outside of the view frame. Likewise, you should start annotating an object the moment it steps out of the enclosing object.</p>");
+
+    h.append("<img src='outofcar1.png'> <img src='outofcar2.png'> <img src='outofcar3.png'> <br>");
+
+    h.append("<p>If an object disappears from the scene and the exact same object reappears later in the scene, you must mark that object as back inside the view frame. Do <em>not</em> draw a new object for its second appearance. Simply find the corresponding right-column rectangle and uncheck the <strong>Outside of view frame</strong> checkbox and position the box.</p>");
 
     h.append("<h2>Advanced Features</h2>");
     h.append("<p>We have provided some advanced tools for videos that are especially difficult. Clicking the <strong>Options</strong> button will enable the advanced options.</p>");

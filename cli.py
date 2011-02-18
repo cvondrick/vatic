@@ -72,6 +72,7 @@ class load(LoadCommand):
         parser.add_argument("--for-training-stop", type=int)
         parser.add_argument("--for-training-overlap", type=float, default=0.5)
         parser.add_argument("--for-training-tolerance", type=float, default=0.1)
+        parser.add_argument("--for-training-mistakes", type=int, default=0)
         parser.add_argument("--for-training-data", default = None)
         return parser
 
@@ -161,7 +162,8 @@ class load(LoadCommand):
 
         if args.for_training:
             video.trainvalidator = qa.tolerable(args.for_training_overlap,
-                                                args.for_training_tolerance)
+                                                args.for_training_tolerance,
+                                                args.for_training_mistakes)
             print "Training validator is {0}".format(video.trainvalidator)
 
         session.add(video)
@@ -285,6 +287,12 @@ class delete(Command):
             print ("Video has {0} paths. Use --force to delete."
                 .format(numpaths))
             return
+
+        for segment in video.segments:
+            for job in segment.jobs:
+                if job.published:
+                    hitid = job.disable()
+                    print "Disabled {0}".format(hitid)
 
         session.delete(video)
         session.commit()

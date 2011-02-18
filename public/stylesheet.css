@@ -190,7 +190,7 @@ code
     left : 50%;
     width : 550px;
     margin-left : -275px;
-    z-index : 10000;
+    z-index : 10000000;
     padding : 10px;
     border : 5px solid #EB1414;
     background-color : #FFC2C2;

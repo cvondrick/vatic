@@ -41,21 +41,18 @@ class tolerable(object):
         linearly filled.
         """
         cost = 0
-        lostdisagree = 0
         for f, s in zip(first, second):
             if f.lost != s.lost:
-                lostdisagree += 1
+                cost += 1
             elif f.percentoverlap(s) < self.overlap:
                 cost += 1
-        if lostdisagree / float(len(first)) > self.tolerance:
-            cost += lostdisagree - float(len(first)) * self.tolerance
-        return cost
+        return max(0, cost - float(len(first)) * self.tolerance)
 
     def validate(self, matches):
         """
         Validates whether the matches are sufficient and exact enough.
         """
-        return sum(x[2] for x in matches) <= self.mistakes
+        return sum(x[2] != 0 for x in matches) <= self.mistakes
 
     def __hash__(self):
         """
@@ -142,7 +139,9 @@ def buildmatrix(first, second, method):
     elif len(first) < len(second):
         costs.extend([horrible * len(second)] * (len(second) - len(first)))
 
-    logger.debug("Built matrix: {0}".format(str(costs)))
+    if logger.isEnabledFor(logging.DEBUG):
+        for cost in costs:
+            logger.debug(cost)
     return costs
 
 if __name__ == "__main__":
