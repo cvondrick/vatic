@@ -447,6 +447,16 @@ function Track(player, color, position)
             this.handle.hide();
         }
 
+        if (width < 1)
+        {
+            width = 1;
+        }
+
+        if (height < 1)
+        {
+            height = 1;
+        }
+
         var xtl = pos.left - offset.left;
         var ytl = pos.top - offset.top;
         var xbr = xtl + width + this.htmloffset;
