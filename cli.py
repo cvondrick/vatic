@@ -370,7 +370,7 @@ class visualize(DumpCommand):
             for track in data:
                 if frame in (x.frame for x in track.boxes):
                     for worker in track.workers:
-                        if worker not in workerids:
+                        if worker not in workerids and worker is not None:
                             workerids.add(worker)
                     sum += 1
             ypos = s + 5

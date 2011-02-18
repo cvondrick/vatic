@@ -194,7 +194,7 @@ function ui_setupbuttons(job, player, tracks)
     });
 
     $("#annotateoptionshideboxes").button().click(function() {
-        tracks.visible($(this).attr("checked"));
+        tracks.visible(!$(this).attr("checked"));
     });
 }
 
@@ -258,6 +258,11 @@ function ui_setupkeyboardshortcuts(job, player)
 function ui_canresize()
 {
     return !$("#annotateoptionsresize").attr("checked"); 
+}
+
+function ui_areboxeshidden()
+{
+    return $("#annotateoptionshideboxes").attr("checked");
 }
 
 function ui_setupslider(player)

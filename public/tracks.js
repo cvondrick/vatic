@@ -652,13 +652,13 @@ function Track(player, color, position)
 
     this.visible = function(value)
     {
-        if (value)
+        if (value && !this.pollposition().outside)
         {
-            this.handle.hide();
+            this.handle.show();
         }
         else
         {
-            this.handle.show();
+            this.handle.hide();
         }
     }
 
