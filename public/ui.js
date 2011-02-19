@@ -527,6 +527,7 @@ function ui_showinstructions(job)
     h.append("<h1>Important Instructions</h1>");
     h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool.</p>");
 
+
     h.append("<h2>Crash Course</h2>");
     var str = "<ul>";
     str += "<li>Annotate <strong>every object</strong> of interest. This includes stationary objects, obstructed objects, and moving objects.</li>";
@@ -583,7 +584,8 @@ function ui_showinstructions(job)
     h.append("<p>We will hand review your work and we will only accept high quality work. Your annotations are not compared against other workers. Follow these guidelines to ensure your work is accepted:</p>");
 
     h.append("<h3>Label Every Object</h3>")
-    h.append("<img src='everyobject.jpg'>");
+    h.append("<img src='secret.png'>");
+    //h.append("<img src='everyobject.jpg'>");
 
     if (job.perobject > 0)
     {
