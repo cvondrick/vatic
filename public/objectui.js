@@ -113,7 +113,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         obj.initialize(this.counter, track, this.tracks);
         obj.finalize(label);
-        obj.statefolddown();
+        obj.statefoldup();
         obj.updatecheckboxes();
         this.counter++;
 
@@ -225,6 +225,14 @@ function TrackObject(job, player, container, color)
         this.id = id;
         this.track = track;
         this.tracks = tracks;
+
+        this.track.onmouseover.push(function() {
+            me.mouseover();
+        });
+
+        this.track.onmouseout.push(function() {
+            me.mouseout();
+        });
     }
 
     this.remove = function()
@@ -389,10 +397,7 @@ function TrackObject(job, player, container, color)
 
     this.mouseover = function()
     {
-        this.handle.css({
-            'border-color': me.color[0],
-            'background-color': me.color[1],
-        });
+        this.highlight();
 
         if (this.track)
         {
@@ -407,12 +412,17 @@ function TrackObject(job, player, container, color)
         }
     }
 
-    this.mouseout = function()
+    this.highlight = function()
     {
         this.handle.css({
-            'border-color': me.color[2],
-            'background-color': me.color[2],
+            'border-color': me.color[0],
+            'background-color': me.color[1],
         });
+    }
+
+    this.mouseout = function()
+    {
+        this.unhighlight();
 
         if (this.track)
         {
@@ -424,6 +434,14 @@ function TrackObject(job, player, container, color)
         {
             this.opencloseicon.removeClass("ui-icon-triangle-1-se");
         }
+    }
+
+    this.unhighlight = function()
+    {
+        this.handle.css({
+            'border-color': me.color[2],
+            'background-color': me.color[2],
+        });
     }
 
     this.click = function()

@@ -419,6 +419,9 @@ function Track(player, color, position)
     this.htmloffset = 3;
     this.deleted = false;
 
+    this.onmouseover = [];
+    this.onmouseout = [];
+
     this.journal.mark(this.player.job.start,
         new Position(position.xtl, position.ytl,
                      position.xbr, position.ybr, 
@@ -585,6 +588,10 @@ function Track(player, color, position)
                 handles: "n,w,s,e",
                 start: function() {
                     player.pause();
+                    for (var i in me.onmouseover)
+                    {
+                        me.onmouseover[i]();
+                    }
                 },
                 stop: function() {
                     me.fixposition();
@@ -599,6 +606,20 @@ function Track(player, color, position)
                 stop: function() { 
                     me.fixposition();
                     me.recordposition();                
+                }
+            });
+
+            this.handle.mouseover(function() {
+                for (var i in me.onmouseover)
+                {
+                    me.onmouseover[i]();
+                }
+            });
+
+            this.handle.mouseout(function() {
+                for (var i in me.onmouseout)
+                {
+                    me.onmouseout[i]();
                 }
             });
         }
@@ -633,7 +654,6 @@ function Track(player, color, position)
             width: (position.width - this.htmloffset) + "px",
             height: (position.height - this.htmloffset) + "px"
         });
-
     }
 
     this.draggable = function(value)
