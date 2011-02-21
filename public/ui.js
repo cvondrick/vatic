@@ -390,6 +390,18 @@ function ui_submit(job, tracks)
         return;
     }
 
+    if (mturk_isassigned() && !mturk_isoffline())
+    {
+        if (!window.confirm("Are you sure you are ready to submit? Please " + 
+                            "make sure that the entire video is labeled and " +
+                            "your annotations are tight.\n\nTo submit, " +
+                            "press OK. Otherwise, press Cancel to keep " +
+                            "working."))
+        {
+            return;
+        }
+    }
+
     var overlay = $('<div id="turkic_overlay"></div>').appendTo("#container");
     ui_disable();
 
