@@ -6,7 +6,7 @@ from turkic.server import handler, application
 from turkic.database import session
 import cStringIO
 from models import *
-import qa
+import match
 
 import logging
 logger = logging.getLogger("vatic.server")
@@ -96,8 +96,8 @@ def validatejob(id, tracks):
     job = session.query(Job).get(id)
     paths = readpaths(tracks)
 
-    return qa.validate(paths, job.trainingjob.paths,
-                       job.trainingjob.validator)
+    return match.validate(paths, job.trainingjob.paths,
+                          job.trainingjob.validator)
 
 @handler()
 def respawnjob(id):

@@ -10,7 +10,7 @@ from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
 import turkic.models
-import qa
+import match
 from models import *
 import cStringIO
 import Image, ImageDraw, ImageFont
@@ -161,9 +161,9 @@ class load(LoadCommand):
                       isfortraining = args.for_training)
 
         if args.for_training:
-            video.trainvalidator = qa.tolerable(args.for_training_overlap,
-                                                args.for_training_tolerance,
-                                                args.for_training_mistakes)
+            video.trainvalidator = match.tolerable(args.for_training_overlap,
+                                                   args.for_training_tolerance,
+                                                   args.for_training_mistakes)
             print "Training validator is {0}".format(video.trainvalidator)
 
         session.add(video)
