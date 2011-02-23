@@ -56,7 +56,7 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
     """
     paths = {}
     for path in segments[0].paths:
-        paths[path.id] = path.getboxes(), path
+        paths[path.id] = path.getboxes(), [path]
     for x, y in zip(segments, segments[1:]):
         for first, second, score in match(x.paths, y.paths, method):
             if second is None:

@@ -322,6 +322,7 @@ class DumpCommand(Command):
         video = video.one()
 
         if args.merge:
+            print merge.merge(video.segments)
             for boxes, paths in merge.merge(video.segments):
                 workers = list(set(x.job.workerid for x in paths))
                 tracklet = DumpCommand.Tracklet(paths[0].label.text,
