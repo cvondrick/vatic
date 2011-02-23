@@ -99,9 +99,9 @@ def mergepath(left, right):
     boundary = (max(x for x in left if x.frame <= rightmin),
                 min(x for x in left if x.frame >= rightmin))
     leftfill = Linear(boundary[0], boundary[1])
+    pivot    = [x for x in leftfill if x.frame == rightmin - 1][0]
 
-    response = []
-    response.extend(x for x in left     if x.frame < boundary[0].frame)
-    response.extend(x for x in leftfill if x.frame < rightmin)
+    response = [x for x in left if x.frame <= boundary[0].frame]
+    response.append(pivot)
     response.extend(right)
     return response
