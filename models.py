@@ -64,6 +64,13 @@ class Segment(turkic.database.Base):
     start = Column(Integer)
     stop = Column(Integer)
 
+    @property
+    def paths(self):
+        paths = []
+        for job in self.jobs:
+            paths.extend(job.paths)
+        return paths
+
 class Job(turkic.models.HIT):
     __tablename__ = "jobs"
     __mapper_args__ = {"polymorphic_identity": "jobs"}

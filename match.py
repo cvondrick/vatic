@@ -11,6 +11,9 @@ def match(first, second, method):
     method may provide some help. Further, if len(first) != len(second), then
     some elements will be associated with None.
     """
+    if len(first) == len(second) == 0:
+        return []
+
     costs = buildmatrix(first, second, method)
     response = []
 

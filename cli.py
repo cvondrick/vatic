@@ -321,14 +321,21 @@ class DumpCommand(Command):
             raise SystemExit()
         video = video.one()
 
-        for segment in video.segments:
-            for job in segment.jobs:
-                worker = job.workerid
-                for path in job.paths:
-                    tracklet = DumpCommand.Tracklet(path.label.text,
-                                                    path.getboxes(),
-                                                    [worker])
-                    response.append(tracklet)
+        if args.merge:
+            for boxes, paths in merge.merge(video.segments):
+                workers = list(set(x.job.workerid for x in paths))
+                tracklet = DumpCommand.Tracklet(paths[0].label.text,
+                                                boxes, workers)
+                response.append(tracklet)
+        else:
+            for segment in video.segments:
+                for job in segment.jobs:
+                    worker = job.workerid
+                    for path in job.paths:
+                        tracklet = DumpCommand.Tracklet(path.label.text,
+                                                        path.getboxes(),
+                                                        [worker])
+                        response.append(tracklet)
 
         if args.interpolate:
             interpolated = []
@@ -528,8 +535,8 @@ class dump(DumpCommand):
                 file.write(track.label)
                 file.write("\"\n")
 
-@handler("List all videos loaded")
-class list(Command):
+@handler("List all videos loaded", "list")
+class listvideos(Command):
     def __call__(self, args):
         videos = session.query(Video)
         for video in videos:

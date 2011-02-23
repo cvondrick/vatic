@@ -6,6 +6,7 @@ Merges paths across segments. Typical usage:
 """
 
 from match import match
+from vision.track.interpolation import LinearFill
 
 def percentoverlap(first, second):
     """
@@ -37,7 +38,8 @@ def overlapsize(first, second):
     """
     Counts the number of frames in first that temporally overlap with second.
     """
-    return len(set(f.frame for f in first) & set(s.frame for s in second))
+    return len(set(f.frame for f in first.getboxes()) &
+               set(s.frame for s in second.getboxes()))
 
 def merge(segments, method = percentoverlap, threshold = 0.5):
     """
@@ -53,15 +55,34 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
     horrible match, then 'threshold' = 0.5 is pretty good.
     """
     paths = {}
-    for path in segments[0].path:
+    for path in segments[0].paths:
         paths[path.id] = path.getboxes(), path
     for x, y in zip(segments, segments[1:]):
-        for first, second, score in match(x, y, method):
+        for first, second, score in match(x.paths, y.paths, method):
+            if second is None:
+                continue
             if first is None or score > threshold * overlapsize(first, second):
-                paths[second.id] = second.getboxes(), second
-            elif first is not None and second is not None: 
+                paths[second.id] = second.getboxes(), [second]
+            else:
                 paths[second.id] = paths[first.id]
-                paths[second.id][0].extend(second.getboxes())
+                paths[second.id][0] = mergepath(paths[second.id][0],
+                                                second.getboxes())
                 paths[second.id][1].append(second)
                 del paths[first.id]
     return paths.values()
+
+def mergepath(left, right):
+    """
+    Takes two paths, left and right, and combines them into a single path by
+    removing the duplicate annotations in the overlap region.
+    """
+    rightmin = min(x.frame for x in right)
+    boundary = (max(x for x in left if x.frame <= rightmin),
+                min(x for x in left if x.frame >= rightmin))
+    leftfill = LinearFill(boundary[0], boundary[1])
+
+    response = []
+    response.extend(x for x in left     if x.frame < boundary[0].frame)
+    response.extend(x for x in leftfill if x.frame < rightmin)
+    response.extend(right)
+    return response
