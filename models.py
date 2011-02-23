@@ -129,6 +129,9 @@ class Path(turkic.database.Base):
             result = self.interpolatecache
         return result
 
+    def __repr__(self):
+        return "<Path {0}>".format(self.id)
+
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
 
