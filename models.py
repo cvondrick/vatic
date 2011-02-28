@@ -165,9 +165,12 @@ class PerObjectBonus(turkic.models.BonusSchedule):
     def award(self, hit):
         paths = len(hit.paths)
         amount = paths * self.amount
-        hit.awardbonus(amount, "For {0} objects".format(paths))
-        logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
-                        .format(amount, paths))
+        if amount > 0:
+            hit.awardbonus(amount, "For {0} objects".format(paths))
+            logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
+                            .format(amount, paths))
+        else:
+            logger.debug("No award for per-object bonus because 0 paths")
 
 class CompletionBonus(turkic.models.BonusSchedule):
     __tablename__ = "completion_bonuses"
