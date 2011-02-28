@@ -1,7 +1,7 @@
 """
 Merges paths across segments. Typical usage:
 
->>> for boxes, path in merge(segments):
+>>> for boxes, paths in merge(segments):
 ...     pass
 """
 
