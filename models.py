@@ -64,6 +64,13 @@ class Segment(turkic.database.Base):
     start = Column(Integer)
     stop = Column(Integer)
 
+    @property
+    def paths(self):
+        paths = []
+        for job in self.jobs:
+            paths.extend(job.paths)
+        return paths
+
 class Job(turkic.models.HIT):
     __tablename__ = "jobs"
     __mapper_args__ = {"polymorphic_identity": "jobs"}
@@ -122,6 +129,9 @@ class Path(turkic.database.Base):
             result = self.interpolatecache
         return result
 
+    def __repr__(self):
+        return "<Path {0}>".format(self.id)
+
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
 
@@ -155,9 +165,12 @@ class PerObjectBonus(turkic.models.BonusSchedule):
     def award(self, hit):
         paths = len(hit.paths)
         amount = paths * self.amount
-        hit.awardbonus(amount, "For {0} objects".format(paths))
-        logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
-                        .format(amount, paths))
+        if amount > 0:
+            hit.awardbonus(amount, "For {0} objects".format(paths))
+            logger.debug("Awarded per-object bonus of ${0:.2f} for {1} paths"
+                            .format(amount, paths))
+        else:
+            logger.debug("No award for per-object bonus because 0 paths")
 
 class CompletionBonus(turkic.models.BonusSchedule):
     __tablename__ = "completion_bonuses"
