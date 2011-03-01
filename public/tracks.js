@@ -922,6 +922,16 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside)
     this.width = xbr - xtl;
     this.height = ybr - ytl;
 
+    if (this.xbr <= this.xtl)
+    {
+        this.xbr = this.xtl + 1;
+    }
+
+    if (this.ybr <= this.ytl)
+    {
+        this.ybr = this.ytl + 1;
+    }
+
     this.serialize = function()
     {
         return "[" + this.xtl + "," +
