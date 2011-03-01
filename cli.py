@@ -363,7 +363,7 @@ class visualize(DumpCommand):
 
         it = vision.visualize.highlight_paths(video, paths)
 
-        if not args.no_augument:
+        if not args.no_augment:
             it = self.augment(args, video, data, it)
 
         try:
