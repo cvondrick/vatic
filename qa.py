@@ -9,6 +9,12 @@ class tolerable(object):
         self.tolerance = tolerance
         self.mistakes = mistakes
 
+    def __call__(self, first, second):
+        """
+        Allows this object to be called as a function to invoke validation.
+        """
+        return self.validate(first, second)
+
     def validate(self, first, second):
         """
         Compares first to second to determine if they sufficiently agree.

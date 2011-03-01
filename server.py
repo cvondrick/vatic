@@ -95,8 +95,7 @@ def validatejob(id, tracks):
     job = session.query(Job).get(id)
     paths = readpaths(tracks)
 
-    validator = job.trainingjob.validator.validate
-    return validator(paths, job.trainingjob.paths)
+    return job.trainingjob.validator(paths, job.trainingjob.paths)
 
 @handler()
 def respawnjob(id):

@@ -353,18 +353,23 @@ class visualize(DumpCommand):
     def setup(self):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("output")
+        parser.add_argument("--no-augment", default = False)
         return parser
 
     def __call__(self, args):
-        print "Fetching data..."
         video, data = self.getdata(args)
-
-        print "Processing {0} tracks...".format(len(data))
         paths = [x.boxes for x in data]
-        
-        print "Highlighting frames..."
+        print "Highlighting {0} tracks...".format(len(data))
+
         it = vision.visualize.highlight_paths(video, paths)
-        it = self.augment(args, video, data, it)
+
+        if not args.no_augument:
+            it = self.augment(args, video, data, it)
+
+        try:
+            os.makedirs(args.output)
+        except:
+            pass
 
         vision.visualize.save(it,
             lambda x: "{0}/{1}.jpg".format(args.output, x))
