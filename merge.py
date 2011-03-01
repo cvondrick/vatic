@@ -58,6 +58,7 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
     In general, if 'method' returns 0 for a perfect match and 1 for a
     horrible match, then 'threshold' = 0.5 is pretty good.
     """
+    logger.debug("Starting to merge!")
     paths = {}
     for path in segments[0].paths:
         paths[path.id] = path.getboxes(), [path]
@@ -88,6 +89,7 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
                 paths[first.id][1].append(second)
                 paths[second.id] = (path, paths[first.id][1])
                 del paths[first.id]
+    logger.debug("Done merging!")
     return paths.values()
 
 def mergepath(left, right):
@@ -101,7 +103,7 @@ def mergepath(left, right):
                 min((x.frame, x) for x in left if x.frame >= rightmin))
 
     leftfill = Linear(boundary[0][1], boundary[1][1])
-    pivot    = [x for x in leftfill if x.frame == rightmin - 1][0]
+    pivot    = [x for x in leftfill if x.frame == rightmin + 1][0]
 
     response = [x for x in left if x.frame <= boundary[0][1].frame]
     response.append(pivot)
