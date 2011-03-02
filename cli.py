@@ -423,6 +423,7 @@ class dump(DumpCommand):
             action="store_true", default=False)
         parser.add_argument("--pickle", "-p",
             action="store_true", default=False)
+        parser.add_argument("--scale", "-s", default = 1.0, type = float)
         return parser
 
     def __call__(self, args):
@@ -432,6 +433,9 @@ class dump(DumpCommand):
             file = cStringIO.StringIO()
 
         video, data = self.getdata(args)
+
+        for track in data:
+            track.boxes = [x.transform(args.scale) for x in track.boxes]
 
         if args.xml:
             self.dumpxml(file, data)
