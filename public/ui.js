@@ -596,7 +596,8 @@ function ui_showinstructions(job)
     h.append("<p>We will hand review your work and we will only accept high quality work. Your annotations are not compared against other workers. Follow these guidelines to ensure your work is accepted:</p>");
 
     h.append("<h3>Label Every Object</h3>")
-    h.append("<img src='secret.png'>");
+    h.append('<iframe title="YouTube video player" width="560" height="349" src="http://www.youtube.com/embed/H8cMZkz8Kbw?rel=0" frameborder="0" allowfullscreen></iframe>');
+    //h.append("<img src='secret.png'>");
     //h.append("<img src='everyobject.jpg'>");
 
     if (job.perobject > 0)
