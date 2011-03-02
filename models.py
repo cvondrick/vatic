@@ -81,6 +81,7 @@ class Job(turkic.models.HIT):
     segment        = relationship(Segment,
                                   backref = backref("jobs",
                                                     cascade = "all,delete"))
+    useful         = Column(Boolean, default = True)
 
     def getpage(self):
         return "?id={0}".format(self.id)
@@ -97,6 +98,14 @@ class Job(turkic.models.HIT):
         logger.debug("Job is now training and replacement built")
 
         return replacement
+
+    def invalidate(self):
+        """
+        Invalidates this path because it is poor work. The new job will be
+        respawned automatically for different workers to complete.
+        """
+        self.useful = False
+        return Job(segment = self.segment, group = self.group)
 
     @property
     def trainingjob(self):
