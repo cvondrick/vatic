@@ -102,10 +102,11 @@ def respawnjob(id):
     job = session.query(Job).get(id)
 
     replacement = job.markastraining()
-    replacement.publish()
-
     job.worker.verified = True
-
     session.add(job)
+    session.add(replacement)
+    session.commit()
+
+    replacement.publish()
     session.add(replacement)
     session.commit()

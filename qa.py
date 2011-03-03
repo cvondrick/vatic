@@ -28,8 +28,8 @@ class tolerable(object):
         Computes the overlap cost between first and second. Both will be
         linearly filled.
         """
-        firstboxes  = match[0].getboxes(interpolate = True)
-        secondboxes = match[1].getboxes(interpolate = True)
+        firstboxes  = first.getboxes(interpolate = True)
+        secondboxes = second.getboxes(interpolate = True)
 
         horrible = max(len(firstboxes), len(secondboxes)) + 1
         if first.label != second.label:
@@ -38,12 +38,12 @@ class tolerable(object):
             return horrible
 
         cost = 0
-        for f, s in zip(first, second):
+        for f, s in zip(firstboxes, secondboxes):
             if f.lost != s.lost:
                 cost += 1
             elif f.percentoverlap(s) < self.overlap:
                 cost += 1
-        return max(0, cost - float(len(first)) * self.tolerance)
+        return max(0, cost - float(len(firstboxes)) * self.tolerance)
 
     def __hash__(self):
         """

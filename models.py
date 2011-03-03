@@ -68,7 +68,8 @@ class Segment(turkic.database.Base):
     def paths(self):
         paths = []
         for job in self.jobs:
-            paths.extend(job.paths)
+            if job.useful:
+                paths.extend(job.paths)
         return paths
 
 class Job(turkic.models.HIT):
@@ -81,7 +82,7 @@ class Job(turkic.models.HIT):
     segment        = relationship(Segment,
                                   backref = backref("jobs",
                                                     cascade = "all,delete"))
-    useful         = Column(Boolean, default = True)
+    istraining     = Column(Boolean, default = False)
 
     def getpage(self):
         return "?id={0}".format(self.id)
@@ -94,6 +95,7 @@ class Job(turkic.models.HIT):
         replacement = Job(segment = self.segment, group = self.group)
         self.segment = self.segment.video.trainwith.segments[0]
         self.group = self.segment.jobs[0].group
+        self.istraining = True
 
         logger.debug("Job is now training and replacement built")
 
@@ -105,7 +107,9 @@ class Job(turkic.models.HIT):
         respawned automatically for different workers to complete.
         """
         self.useful = False
-        return Job(segment = self.segment, group = self.group)
+        # is this a training task? if yes, we don't want to respawn
+        if not self.istraining:
+            return Job(segment = self.segment, group = self.group)
 
     @property
     def trainingjob(self):

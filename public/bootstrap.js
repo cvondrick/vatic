@@ -2,7 +2,13 @@ var development = true;
 
 var container;
 
-$(document).ready(function()
+$(document).ready(function() {
+    mturk_ready(function() {
+        mturk_blockbadworkers(boot);
+    });
+});
+
+function boot()
 {
     console.log("Booting...");
 
@@ -13,7 +19,6 @@ $(document).ready(function()
         container.html("<p style='width:500px;'><strong>Sorry!</strong> This application does not currently support Internet Explorer. Please upgrade to a more modern browser to complete this HIT. We recommend <a href='http://www.google.com/chrome' target='_blank'>Google Chrome</a> or <a href='http://www.getfirefox.com' target='_blank'>Mozilla Firefox</a>.</p>");
         return;
     }
-    
 
     if (!mturk_isassigned())
     {
@@ -46,7 +51,7 @@ $(document).ready(function()
         console.log("Worker is NOT verified");
         dispatch(true);
     });
-});
+}
 
 function loadingscreen(job)
 {

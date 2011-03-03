@@ -306,6 +306,7 @@ class DumpCommand(Command):
     parent.add_argument("--interpolate", "-i",
         action="store_true", default=False)
     parent.add_argument("--merge", "-m", action="store_true", default=False)
+    parent.add_argument("--worker", "-w", nargs = "*", default = None)
 
     class Tracklet(object):
         def __init__(self, label, boxes, workers):
@@ -330,12 +331,18 @@ class DumpCommand(Command):
         else:
             for segment in video.segments:
                 for job in segment.jobs:
+                    if not job.useful:
+                        continue
                     worker = job.workerid
                     for path in job.paths:
                         tracklet = DumpCommand.Tracklet(path.label.text,
                                                         path.getboxes(),
                                                         [worker])
                         response.append(tracklet)
+
+        if args.worker:
+            workers = set(args.worker)
+            response = [x for x in response if set(x.workers) & workers]
 
         if args.interpolate:
             interpolated = []
