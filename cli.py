@@ -574,6 +574,9 @@ class sample(Command):
 
             jobs = session.query(Job)
             jobs = jobs.filter(Job.worker == worker)
+            jobs = jobs.join(Segment)
+            jobs = jobs.join(Video)
+            jobs = jobs.filter(Video.isfortraining == False)
             jobs = jobs.order_by(sqlalchemy.func.rand())
             jobs = jobs.limit(args.number)
 
