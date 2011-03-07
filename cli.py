@@ -6,6 +6,8 @@ import config
 import shutil
 from turkic.cli import handler, importparser, Command, LoadCommand
 from turkic.database import session
+import sqlalchemy
+import random
 from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
@@ -550,6 +552,61 @@ class dump(DumpCommand):
                 file.write(" \"")
                 file.write(track.label)
                 file.write("\"\n")
+
+@handler("Samples the performance by worker")
+class sample(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("directory")
+        parser.add_argument("--number", "-n", type=int, default=3)
+        parser.add_argument("--frames", "-f", type=int, default=4)
+        return parser
+
+    def __call__(self, args):
+        try:
+            os.makedirs(args.directory)
+        except:
+            pass
+
+        workers = session.query(turkic.models.Worker)
+        for worker in workers:
+            print "Sampling worker {0}".format(worker.id)
+
+            jobs = session.query(Job)
+            jobs = jobs.filter(Job.worker == worker)
+            jobs = jobs.order_by(sqlalchemy.func.rand())
+            jobs = jobs.limit(args.number)
+
+            for job in jobs:
+                print "Visualizing HIT {0}".format(job.hitid)
+                paths = [x.getboxes(interpolate = True) for x in job.paths]
+
+                frames = random.sample(xrange(job.segment.start,
+                                              job.segment.stop + 1),
+                                       args.frames)
+
+                size = math.sqrt(len(frames))
+                video = job.segment.video
+                image = Image.new(video[0].mode, (video.width * int(math.floor(size)),
+                                                  video.height * int(math.ceil(size))))
+                size = int(math.floor(size))
+
+                offset = (0, 0)
+                horcount = 0
+
+                for frame, framenum in vision.visualize.highlight_paths(video, paths):
+                    if framenum in frames:
+                        image.paste(frame, offset)
+                        horcount += 1
+                        if horcount >= size:
+                            offset = (0, offset[1] + video.height)
+                            horcount = 0
+                        else:
+                            offset = (offset[0] + video.width, offset[1])
+
+                image.save("{0}/{1}-{2}.jpg".format(args.directory,
+                                                    worker.id,
+                                                    job.hitid))
 
 @handler("List all videos loaded", "list")
 class listvideos(Command):
