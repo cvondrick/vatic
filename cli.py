@@ -611,6 +611,28 @@ class sample(Command):
                                                     worker.id,
                                                     job.hitid))
 
+@handler("Provides a URL to fix annotations during vetting")
+class vet(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("slug")
+        parser.add_argument("frame", type = int)
+        return parser
+
+    def __call__(self, args):
+        jobs = session.query(Job)
+        jobs = jobs.join(Segment).join(Video)
+        jobs = jobs.filter(Video.slug == args.slug)
+        jobs = jobs.filter(Segment.start <= args.frame)
+        jobs = jobs.filter(Segment.stop >= args.frame)
+        jobs = jobs.filter(turkic.models.HIT.useful == True)
+
+        if jobs.count() > 0:
+            for job in jobs:
+                print job.offlineurl(config.localhost)
+        else:
+            print "No jobs matching this criteria."
+
 @handler("List all videos loaded", "list")
 class listvideos(Command):
     def __call__(self, args):
