@@ -432,6 +432,8 @@ class dump(DumpCommand):
             action="store_true", default=False)
         parser.add_argument("--pickle", "-p",
             action="store_true", default=False)
+        parser.add_argument("--labelme", "-vlm",
+            action="store_true", default=False)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         return parser
 
@@ -454,6 +456,8 @@ class dump(DumpCommand):
             self.dumpmatlab(file, data)
         elif args.pickle:
             self.dumppickle(file, data)
+        elif args.labelme:
+            self.dumplabelme(file, data, args.slug)
         else:
             self.dumptext(file, data)
 
@@ -549,9 +553,65 @@ class dump(DumpCommand):
                 file.write(str(box.lost))
                 file.write(" ")
                 file.write(str(box.occluded))
+                file.write(" ")
+                file.write(str(box.generated))
                 file.write(" \"")
                 file.write(track.label)
                 file.write("\"\n")
+
+    def dumplabelme(self, file, data, slug):
+        file.write("<annotation>")
+        file.write("<folder>submitted</folder>")
+        file.write("<filename>{0}</filename>".format(slug))
+        file.write("<source>")
+        file.write("<type>video</type>")
+        file.write("<sourceImage>vatic frames</sourceImage>")
+        file.write("<sourceAnnotation>vatic</sourceAnnotation>")
+        file.write("</source>")
+        file.write("\n")
+
+        for id, track in enumerate(data):
+            file.write("<object>")
+            file.write("<name>{0}</name>".format(track.label))
+            file.write("<moving>true</moving>")
+            file.write("<action/>")
+            file.write("<verified>0</verified>")
+            file.write("<id>{0}</id>".format(id))
+            file.write("<createdFrame>0</createdFrame>")
+            startframe = min(x.frame for x in track.boxes)
+            endframe = max(x.frame for x in track.boxes)
+            file.write("<startFrame>{0}</startFrame>".format(startframe))
+            file.write("<endFrame>{0}</endFrame>".format(endframe))
+            file.write("\n")
+            for box in track.boxes:
+                file.write("<polygon>")
+                file.write("<t>{0}</t>".format(box.frame))
+                file.write("<pt>")
+                file.write("<x>{0}</x>".format(box.xtl))
+                file.write("<y>{0}</y>".format(box.ytl))
+                file.write("<l>{0}</l>".format(0 if box.generated else 1))
+                file.write("</pt>")
+                file.write("<pt>")
+                file.write("<x>{0}</x>".format(box.xtl))
+                file.write("<y>{0}</y>".format(box.ybr))
+                file.write("<l>{0}</l>".format(0 if box.generated else 1))
+                file.write("</pt>")
+                file.write("<pt>")
+                file.write("<x>{0}</x>".format(box.xbr))
+                file.write("<y>{0}</y>".format(box.ytl))
+                file.write("<l>{0}</l>".format(0 if box.generated else 1))
+                file.write("</pt>")
+                file.write("<pt>")
+                file.write("<x>{0}</x>".format(box.xbr))
+                file.write("<y>{0}</y>".format(box.ybr))
+                file.write("<l>{0}</l>".format(0 if box.generated else 1))
+                file.write("</pt>")
+                file.write("</polygon>")
+                file.write("\n")
+            file.write("</object>")
+            file.write("\n")
+        file.write("</annotation>")
+        file.write("\n")
 
 @handler("Samples the performance by worker")
 class sample(Command):
@@ -590,14 +650,16 @@ class sample(Command):
 
                 size = math.sqrt(len(frames))
                 video = job.segment.video
-                image = Image.new(video[0].mode, (video.width * int(math.floor(size)),
-                                                  video.height * int(math.ceil(size))))
+                bannersize = (video.width * int(math.floor(size)),
+                              video.height * int(math.ceil(size)))
+                image = Image.new(video[0].mode, bannersize)
                 size = int(math.floor(size))
 
                 offset = (0, 0)
                 horcount = 0
 
-                for frame, framenum in vision.visualize.highlight_paths(video, paths):
+                paths = vision.visualize.highlight_paths(video, paths)
+                for frame, framenum in paths:
                     if framenum in frames:
                         image.paste(frame, offset)
                         horcount += 1
