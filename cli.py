@@ -570,7 +570,9 @@ class dump(DumpCommand):
         file.write("</source>")
         file.write("\n")
 
-        for id, track in enumerate(data):
+        data = list(enumerate(data))
+
+        for id, track in data:
             file.write("<object>")
             file.write("<name>{0}</name>".format(track.label))
             file.write("<moving>true</moving>")
@@ -584,6 +586,8 @@ class dump(DumpCommand):
             file.write("<endFrame>{0}</endFrame>".format(endframe))
             file.write("\n")
             for box in track.boxes:
+                if box.lost:
+                    continue
                 file.write("<polygon>")
                 file.write("<t>{0}</t>".format(box.frame))
                 file.write("<pt>")
@@ -610,6 +614,47 @@ class dump(DumpCommand):
                 file.write("\n")
             file.write("</object>")
             file.write("\n")
+
+        eventcounter = 0
+        for id, track in data:
+            occlusions = [x for x in track.boxes if x.occluded and not x.lost]
+            lastframe = None
+            startframe = None
+            for box in occlusions:
+                output = box is occlusions[-1]
+                if lastframe is None:
+                    lastframe = box.frame
+                    startframe = box.frame
+                elif box.frame == lastframe + 1:
+                    lastframe = box.frame
+                else:
+                    output = True
+                    
+                if output:
+                    file.write("<event>");
+                    file.write("<username>anonymous</username>")
+                    file.write("<startFrame>{0}</startFrame>".format(startframe))
+                    file.write("<endFrame>{0}</endFrame>".format(lastframe))
+                    file.write("<createdFrame>{0}</createdFrame>".format(startframe))
+                    file.write("<date>null</date>")
+                    file.write("<eid>{0}</eid>".format(eventcounter))
+                    file.write("<x>0</x>")
+                    file.write("<y>0</y>")
+                    file.write("<sentence>")
+                    file.write("<word><text>{0}</text><id>{1}</id></word>"
+                               .format(track.label, id))
+                    file.write("<word><text>is</text></word>")
+                    file.write("<word><text>occluded</text></word>")
+                    file.write("<word><text>by</text></word>")
+                    file.write("<word><text>unknown</text></word>")
+                    file.write("</sentence>")
+                    file.write("</event>")
+                    file.write("\n")
+
+                    eventcounter += 1
+                    lastframe = None
+                    startframe = None
+
         file.write("</annotation>")
         file.write("\n")
 
