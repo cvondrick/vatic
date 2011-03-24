@@ -77,7 +77,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         }
         else
         {
-            this.track.resizable(false);
+            this.tracks.resizable(false);
         }
 
         this.tracks.dim(false);
