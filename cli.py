@@ -8,6 +8,7 @@ from turkic.cli import handler, importparser, Command, LoadCommand
 from turkic.database import session
 import sqlalchemy
 import random
+from vision import Box
 from vision import ffmpeg
 import vision.visualize
 import vision.track.interpolation
@@ -587,6 +588,30 @@ class dump(DumpCommand):
             file.write("\n")
             for box in track.boxes:
                 if box.lost:
+                    file.write("<polygon>")
+                    file.write("<t>{0}</t>".format(box.frame))
+                    file.write("<pt>")
+                    file.write("<x>-1</x>")
+                    file.write("<y>-1</y>")
+                    file.write("<l>0</l>")
+                    file.write("</pt>")
+                    file.write("<pt>")
+                    file.write("<x>-1</x>")
+                    file.write("<y>-1</y>")
+                    file.write("<l>0</l>")
+                    file.write("</pt>")
+                    file.write("<pt>")
+                    file.write("<x>-1</x>")
+                    file.write("<y>-1</y>")
+                    file.write("<l>0</l>")
+                    file.write("</pt>")
+                    file.write("<pt>")
+                    file.write("<x>-1</x>")
+                    file.write("<y>-1</y>")
+                    file.write("<l>0</l>")
+                    file.write("</pt>")
+                    file.write("</polygon>")
+                    file.write("\n")
                     continue
                 file.write("<polygon>")
                 file.write("<t>{0}</t>".format(box.frame))
@@ -602,12 +627,12 @@ class dump(DumpCommand):
                 file.write("</pt>")
                 file.write("<pt>")
                 file.write("<x>{0}</x>".format(box.xbr))
-                file.write("<y>{0}</y>".format(box.ytl))
+                file.write("<y>{0}</y>".format(box.ybr))
                 file.write("<l>{0}</l>".format(0 if box.generated else 1))
                 file.write("</pt>")
                 file.write("<pt>")
                 file.write("<x>{0}</x>".format(box.xbr))
-                file.write("<y>{0}</y>".format(box.ybr))
+                file.write("<y>{0}</y>".format(box.ytl))
                 file.write("<l>{0}</l>".format(0 if box.generated else 1))
                 file.write("</pt>")
                 file.write("</polygon>")
@@ -636,7 +661,6 @@ class dump(DumpCommand):
                     file.write("<startFrame>{0}</startFrame>".format(startframe))
                     file.write("<endFrame>{0}</endFrame>".format(lastframe))
                     file.write("<createdFrame>{0}</createdFrame>".format(startframe))
-                    file.write("<date>null</date>")
                     file.write("<eid>{0}</eid>".format(eventcounter))
                     file.write("<x>0</x>")
                     file.write("<y>0</y>")
