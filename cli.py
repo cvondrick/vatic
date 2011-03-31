@@ -574,14 +574,18 @@ class dump(DumpCommand):
         data = list(enumerate(data))
 
         for id, track in data:
+            eligibleframes = [x.frame for x in track.boxes if not x.lost]
+            if not eligibleframes:
+                continue
+            startframe = min(eligibleframes)
+            endframe = max(eligibleframes)
+
             file.write("<object>")
             file.write("<name>{0}</name>".format(track.label))
             file.write("<moving>true</moving>")
             file.write("<action/>")
             file.write("<verified>0</verified>")
             file.write("<id>{0}</id>".format(id))
-            startframe = min(x.frame for x in track.boxes if not x.lost)
-            endframe = max(x.frame for x in track.boxes if not x.lost)
             file.write("<createdFrame>{0}</createdFrame>".format(startframe))
             file.write("<startFrame>{0}</startFrame>".format(startframe))
             file.write("<endFrame>{0}</endFrame>".format(endframe))
