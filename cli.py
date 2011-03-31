@@ -439,12 +439,13 @@ class dump(DumpCommand):
         return parser
 
     def __call__(self, args):
+        video, data = self.getdata(args)
+
         if args.output:
             file = open(args.output, 'w')
+            print "Dumping video {0}".format(video.slug)
         else:
             file = cStringIO.StringIO()
-
-        video, data = self.getdata(args)
 
         for track in data:
             track.boxes = [x.transform(args.scale) for x in track.boxes]
