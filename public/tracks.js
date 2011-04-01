@@ -596,6 +596,7 @@ function Track(player, color, position)
                 stop: function() {
                     me.fixposition();
                     me.recordposition();
+                    eventlog("resizable", "Resize a box");
                 }
             });
 
@@ -606,6 +607,7 @@ function Track(player, color, position)
                 stop: function() { 
                     me.fixposition();
                     me.recordposition();                
+                    eventlog("draggable", "Drag-n-drop a box");
                 }
             });
 

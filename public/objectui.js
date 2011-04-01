@@ -29,6 +29,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         console.log("Starting new track object");
 
+        eventlog("New object", "Start drawing new object");
+
         this.instructions.fadeOut();
 
         this.currentcolor = this.pickcolor();
@@ -322,11 +324,33 @@ function TrackObject(job, player, container, color)
 
         $("#trackobject" + this.id + "lost").click(function() {
             me.player.pause();
-            me.track.setoutside($(this).attr("checked"));
+
+            var outside = $(this).attr("checked");
+            me.track.setoutside(outside);
+
+            if (outside)
+            {
+                eventlog("markoutside", "Mark object outside");
+            }
+            else
+            {
+                eventlog("markoutside", "Mark object inside");
+            }
         });
         $("#trackobject" + this.id + "occluded").click(function() {
             me.player.pause();
-            me.track.setocclusion($(this).attr("checked"));
+
+            var occlusion = $(this).attr("checked");
+            me.track.setocclusion(occlusion);
+
+            if (occlusion)
+            {
+                eventlog("markocclusion", "Mark object as occluded");
+            }
+            else
+            {
+                eventlog("markocclusion", "Mark object as not occluded");
+            }
         });
 
         this.player.onupdate.push(function() {
@@ -340,6 +364,7 @@ function TrackObject(job, player, container, color)
             if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? If the object just left the view screen, click the \"Outside of view frame\" check box instead."))
             {
                 me.remove();
+                eventlog("removeobject", "Deleted an object");
             }
         });
     }

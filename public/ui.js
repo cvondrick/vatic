@@ -69,6 +69,7 @@ function ui_setup(job)
                 primary: "ui-icon-wrench"
             }
         }).appendTo($("#advancedoptions").parent()).click(function() {
+                eventlog("options", "Show advanced options");
                 $(this).remove();
                 $("#advancedoptions").show();
             });
@@ -119,6 +120,15 @@ function ui_setupbuttons(job, player, tracks)
         if (!$(this).button("option", "disabled"))
         {
             player.toggle();
+
+            if (player.paused)
+            {
+                eventlog("playpause", "Paused video");
+            }
+            else
+            {
+                eventlog("playpause", "Play video");
+            }
         }
     }).button({
         disabled: false,
@@ -131,6 +141,7 @@ function ui_setupbuttons(job, player, tracks)
         if (ui_disabled) return;
         player.pause();
         player.seek(player.job.start);
+        eventlog("rewind", "Rewind to start");
     }).button({
         disabled: true,
         icons: {
@@ -187,14 +198,35 @@ function ui_setupbuttons(job, player, tracks)
             player.pause();
             player.play();
         }
+        eventlog("speedcontrol", "FPS = " + player.fps + " and delta = " + player.playdelta);
     });
 
     $("#annotateoptionsresize").button().click(function() {
-        tracks.resizable(!$(this).attr("checked"));
+        var resizable = !$(this).attr("checked")
+        tracks.resizable(resizable);
+
+        if (resizable)
+        {
+            eventlog("disableresize", "Objects can be resized");
+        }
+        else
+        {
+            eventlog("disableresize", "Objects can not be resized");
+        }
     });
 
     $("#annotateoptionshideboxes").button().click(function() {
-        tracks.visible(!$(this).attr("checked"));
+        var visible = !$(this).attr("checked");
+        tracks.visible(visible);
+
+        if (visible)
+        {
+            eventlog("hideboxes", "Boxes are visible");
+        }
+        else
+        {
+            eventlog("hideboxes", "Boxes are invisible");
+        }
     });
 }
 
@@ -210,6 +242,7 @@ function ui_setupkeyboardshortcuts(job, player)
         }
 
         var keycode = e.keyCode ? e.keyCode : e.which;
+        eventlog("keyboard", "Key press: " + keycode);
         
         if (keycode == 32 || keycode == 112)
         {
@@ -276,6 +309,7 @@ function ui_setupslider(player)
         slide: function(event, ui) {
             player.pause();
             player.seek(ui.value);
+            eventlog("slider", "Seek to " + ui.value);
         }
     });
 
