@@ -235,6 +235,13 @@ function TrackObject(job, player, container, color)
         this.track.onmouseout.push(function() {
             me.mouseout();
         });
+
+        this.track.onupdate.push(function() {
+            eventlog("interact", "Interact with box " + me.id);
+        });
+
+        this.track.notifyupdate();
+        eventlog("newobject", "Finished drawing new object");
     }
 
     this.remove = function()
@@ -327,6 +334,7 @@ function TrackObject(job, player, container, color)
 
             var outside = $(this).attr("checked");
             me.track.setoutside(outside);
+            me.track.notifyupdate();
 
             if (outside)
             {
@@ -342,6 +350,7 @@ function TrackObject(job, player, container, color)
 
             var occlusion = $(this).attr("checked");
             me.track.setocclusion(occlusion);
+            me.track.notifyupdate();
 
             if (occlusion)
             {

@@ -421,6 +421,7 @@ function Track(player, color, position)
 
     this.onmouseover = [];
     this.onmouseout = [];
+    this.onupdate = [];
 
     this.journal.mark(this.player.job.start,
         new Position(position.xtl, position.ytl,
@@ -520,6 +521,17 @@ function Track(player, color, position)
     }
 
     /*
+     * Notifies that there was an update to this box.
+     */
+    this.notifyupdate = function()
+    {
+        for (var i in this.onupdate)
+        {
+            this.onupdate[i]();
+        }
+    }
+
+    /*
      * Sets the current position as occluded.
      */
     this.setocclusion = function(value)
@@ -596,6 +608,7 @@ function Track(player, color, position)
                 stop: function() {
                     me.fixposition();
                     me.recordposition();
+                    me.notifyupdate();
                     eventlog("resizable", "Resize a box");
                 }
             });
@@ -607,6 +620,7 @@ function Track(player, color, position)
                 stop: function() { 
                     me.fixposition();
                     me.recordposition();                
+                    me.notifyupdate();
                     eventlog("draggable", "Drag-n-drop a box");
                 }
             });
