@@ -89,6 +89,8 @@ function loadingscreen(job)
         ui_showinstructions(job);
     });
 
+    eventlog("preload", "Start preloading");
+
     preloadvideo(job.start, job.stop, job.frameurl,
         preloadslider($("#loadingscreenslider"), function(progress) {
             if (progress == 1)
@@ -101,6 +103,8 @@ function loadingscreen(job)
 
                 ls.remove()
                 ui_build(job);
+
+                eventlog("preload", "Done preloading");
             }
         })
     );

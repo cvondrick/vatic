@@ -29,7 +29,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         console.log("Starting new track object");
 
-        eventlog("New object", "Start drawing new object");
+        eventlog("newobject", "Start drawing new object");
 
         this.instructions.fadeOut();
 

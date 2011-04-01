@@ -561,6 +561,8 @@ function ui_showinstructions(job)
         return;
     }
 
+    eventlog("instructions", "Popup instructions");
+
     $('<div id="turkic_overlay"></div>').appendTo("#container");
     var h = $('<div id="instructionsdialog"></div>').appendTo("#container");
 
@@ -692,6 +694,7 @@ function ui_closeinstructions()
     console.log("Popdown instructions");
     $("#turkic_overlay").remove();
     $("#instructionsdialog").remove();
+    eventlog("instructions", "Popdown instructions");
 
     ui_enable();
 }
