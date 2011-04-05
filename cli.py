@@ -18,6 +18,8 @@ import cStringIO
 import Image, ImageDraw, ImageFont
 import qa
 import merge
+import parsedatetime.parsedatetime
+import datetime, time
 
 @handler("Decompresses an entire video into frames")
 class extract(Command):
@@ -670,6 +672,7 @@ class sample(Command):
         parser.add_argument("directory")
         parser.add_argument("--number", "-n", type=int, default=3)
         parser.add_argument("--frames", "-f", type=int, default=4)
+        parser.add_argument("--since", "-s")
         return parser
 
     def __call__(self, args):
@@ -677,6 +680,12 @@ class sample(Command):
             os.makedirs(args.directory)
         except:
             pass
+
+        since = None
+        if args.since:
+            since = parsedatetime.parsedatetime.Calendar().parse(args.since)
+            since = time.mktime(since[0])
+            since = datetime.datetime.fromtimestamp(since)
 
         workers = session.query(turkic.models.Worker)
         for worker in workers:
@@ -687,6 +696,10 @@ class sample(Command):
             jobs = jobs.join(Segment)
             jobs = jobs.join(Video)
             jobs = jobs.filter(Video.isfortraining == False)
+
+            if since:
+                jobs = jobs.filter(turkic.models.HIT.timeonserver >= since)
+
             jobs = jobs.order_by(sqlalchemy.func.rand())
             jobs = jobs.limit(args.number)
 
