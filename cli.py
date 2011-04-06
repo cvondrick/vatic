@@ -707,9 +707,13 @@ class sample(Command):
                 print "Visualizing HIT {0}".format(job.hitid)
                 paths = [x.getboxes(interpolate = True) for x in job.paths]
 
-                frames = random.sample(xrange(job.segment.start,
-                                              job.segment.stop + 1),
-                                       args.frames)
+                if args.frames > job.segment.stop - job.segment.start:
+                    frames = range(job.segment.start, job.segment.stop + 1) 
+                else:
+                    frames = random.sample(xrange(job.segment.start,
+                                                job.segment.stop + 1),
+                                           args.frames)
+
 
                 size = math.sqrt(len(frames))
                 video = job.segment.video
