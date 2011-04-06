@@ -256,6 +256,10 @@ function ui_setupkeyboardshortcuts(job, player)
         {
             $("#newobjectbutton").click();
         }
+        else if (keycode == 104)
+        {
+            $("#annotateoptionshideboxes").click();
+        }
         else 
         {
             var skip = 0;
@@ -680,6 +684,7 @@ function ui_showinstructions(job)
         '<li><code>n</code> creates a new object</li>' +
         '<li><code>p</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
+        '<li><code>h</code> hides/shows the boxes (only after clicking Options button)</li>' +
         '<li><code>.</code> jump the video forward a bit</li>' +
         '<li><code>,</code> jump the video backward a bit</li>' +
         '<li><code>&gt;</code> step the video forward a tiny bit</li>' +
