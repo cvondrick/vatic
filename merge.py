@@ -60,9 +60,9 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
     """
     logger.debug("Starting to merge!")
     paths = {}
+    segments.sort(key = lambda x: x.start)
     for path in segments[0].paths:
         paths[path.id] = path.getboxes(), [path]
-    segments.sort(key = lambda x: x.start)
     for x, y in zip(segments, segments[1:]):
         logger.debug("Merging segments {0} and {1}".format(x.id, y.id))
         for first, second, score in match(x.paths, y.paths, method):
