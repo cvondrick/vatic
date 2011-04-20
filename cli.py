@@ -72,6 +72,7 @@ class load(LoadCommand):
         parser.add_argument("--skip", type=int, default = 0)
         parser.add_argument("--per-object-bonus", type=float)
         parser.add_argument("--completion-bonus", type=float)
+        parser.add_argument("--use-frames", default = None)
         parser.add_argument("--train-with")
         parser.add_argument("--for-training", action="store_true")
         parser.add_argument("--for-training-start", type=int)
@@ -212,10 +213,28 @@ class load(LoadCommand):
                 job = Job(segment = segment, group = group, ready = False)
                 session.add(segment)
                 session.add(job)
+        elif args.use_frames:
+            with open(args.use_frames) as useframes:
+                for line in useframes:
+                    ustart, ustop = line.split()
+                    ustart, ustop = int(ustart), int(ustop)
+                    validlength = float(ustop - ustart)
+                    numsegments = math.ceil(validlength / args.length)
+                    segmentlength = math.ceil(validlength / numsegments)
+
+                    for start in range(ustart, ustop, int(segmentlength)):
+                        stop = min(start + segmentlength + args.overlap + 1,
+                                   ustop)
+                        segment = Segment(start = start,
+                                          stop = stop, 
+                                          video = video)
+                        job = Job(segment = segment, group = group)
+                        session.add(segment)
+                        session.add(job)
         else:
             for start in range(0, video.totalframes, args.length):
                 stop = min(start + args.length + args.overlap + 1,
-                            video.totalframes)
+                           video.totalframes)
                 segment = Segment(start = start,
                                     stop = stop,
                                     video = video)
@@ -311,6 +330,8 @@ class DumpCommand(Command):
     parent.add_argument("--interpolate", "-i",
         action="store_true", default=False)
     parent.add_argument("--merge", "-m", action="store_true", default=False)
+    parent.add_argument("--merge-threshold", "-t",
+                        type=float, default = 0.5)
     parent.add_argument("--worker", "-w", nargs = "*", default = None)
 
     class Tracklet(object):
@@ -328,7 +349,8 @@ class DumpCommand(Command):
         video = video.one()
 
         if args.merge:
-            for boxes, paths in merge.merge(video.segments):
+            for boxes, paths in merge.merge(video.segments, 
+                                            threshold = args.merge_threshold):
                 workers = list(set(x.job.workerid for x in paths))
                 tracklet = DumpCommand.Tracklet(paths[0].label.text,
                                                 boxes, workers)
@@ -365,7 +387,7 @@ class visualize(DumpCommand):
     def setup(self):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("output")
-        parser.add_argument("--no-augment", default = False)
+        parser.add_argument("--no-augment", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
@@ -436,7 +458,7 @@ class dump(DumpCommand):
         parser.add_argument("--pickle", "-p",
             action="store_true", default=False)
         parser.add_argument("--labelme", "-vlm",
-            action="store_true", default=False)
+            action="store", default=False)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         return parser
 
@@ -461,7 +483,7 @@ class dump(DumpCommand):
         elif args.pickle:
             self.dumppickle(file, data)
         elif args.labelme:
-            self.dumplabelme(file, data, args.slug)
+            self.dumplabelme(file, data, args.slug, args.labelme)
         else:
             self.dumptext(file, data)
 
@@ -563,10 +585,10 @@ class dump(DumpCommand):
                 file.write(track.label)
                 file.write("\"\n")
 
-    def dumplabelme(self, file, data, slug):
+    def dumplabelme(self, file, data, slug, folder):
         file.write("<annotation>")
-        file.write("<folder>submitted</folder>")
-        file.write("<filename>{0}</filename>".format(slug))
+        file.write("<folder>{0}</folder>".format(folder))
+        file.write("<filename>{0}.flv</filename>".format(slug))
         file.write("<source>")
         file.write("<type>video</type>")
         file.write("<sourceImage>vatic frames</sourceImage>")

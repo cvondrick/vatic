@@ -65,30 +65,36 @@ def merge(segments, method = percentoverlap, threshold = 0.5):
         paths[path.id] = path.getboxes(), [path]
     for x, y in zip(segments, segments[1:]):
         logger.debug("Merging segments {0} and {1}".format(x.id, y.id))
-        for first, second, score in match(x.paths, y.paths, method):
-            logger.debug("{0} associated to {1} with score {2}"
-                         .format(first, second, score))
-            if second is None:
-                continue
+        if x.stop < y.start:
+            logger.debug("Segments {0} and {1} do not overlap"
+                         .format(x.id, y.id))
+            for path in y.paths:
+                paths[path.id] = path.getboxes(), [path]
+        else:
+            for first, second, score in match(x.paths, y.paths, method):
+                logger.debug("{0} associated to {1} with score {2}"
+                            .format(first, second, score))
+                if second is None:
+                    continue
 
-            isbirth = first is None
-            if not isbirth:
-                scorerequirement = threshold * overlapsize(first, second)
-                if score > scorerequirement:
-                    logger.debug("Score {0} exceeds merge threshold of {1}"
-                                 .format(score, scorerequirement))
-                    isbirth = True
+                isbirth = first is None
+                if not isbirth:
+                    scorerequirement = threshold * overlapsize(first, second)
+                    if score > scorerequirement:
+                        logger.debug("Score {0} exceeds merge threshold of {1}"
+                                    .format(score, scorerequirement))
+                        isbirth = True
+                    else:
+                        logger.debug("Score {0} satisfies merge threshold of "
+                                     "{1}" .format(score, scorerequirement))
+
+                if isbirth:
+                    paths[second.id] = second.getboxes(), [second]
                 else:
-                    logger.debug("Score {0} satisfies merge threshold of {1}"
-                                 .format(score, scorerequirement))
-
-            if isbirth:
-                paths[second.id] = second.getboxes(), [second]
-            else:
-                path = mergepath(paths[first.id][0], second.getboxes())
-                paths[first.id][1].append(second)
-                paths[second.id] = (path, paths[first.id][1])
-                del paths[first.id]
+                    path = mergepath(paths[first.id][0], second.getboxes())
+                    paths[first.id][1].append(second)
+                    paths[second.id] = (path, paths[first.id][1])
+                    del paths[first.id]
     logger.debug("Done merging!")
     return paths.values()
 

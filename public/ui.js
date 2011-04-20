@@ -313,7 +313,8 @@ function ui_setupslider(player)
         slide: function(event, ui) {
             player.pause();
             player.seek(ui.value);
-            eventlog("slider", "Seek to " + ui.value);
+            // probably too much bandwidth
+            //eventlog("slider", "Seek to " + ui.value);
         }
     });
 
@@ -578,6 +579,8 @@ function ui_showinstructions(job)
 
     h.append("<h1>Important Instructions</h1>");
     h.append("<p>In this task, we ask you to annotate a video. You are to draw a box around every object of interest and track each object for the entire video. These instructions will give you tips on how to best use our tool.</p>");
+
+    h.append("<p style='color:red;'>Only annotate players and referees that are <strong>on the court or actively in the game</strong>. Do not annotate the players or referee thats are sitting on the sidelines.</p>");
 
 
     h.append("<h2>Crash Course</h2>");
