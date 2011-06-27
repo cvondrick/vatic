@@ -1,0 +1,345 @@
+vatic - Video Annotation Tool from Irvine, California
+
+vatic is an online video annotation tool for computer vision research that
+crowdsources work to Amazon's Mechanical Turk. Our tool makes it easy to build
+massive, affordable video data sets. 
+
+This document will describe how to use vatic.
+
+==INSTALLATION=================================================================
+
+==ANNOTATION===================================================================
+
+----Frame Extraction-----------------------------------------------------------
+
+Our system requires that videos are extracted into JPEG frames. Our tool can 
+do this automatically for you:
+
+    $ turkic extract /path/to/video.mp4 /path/to/output/directory
+
+By default, our tool will resize the frames to fit within a 720x480 rectangle.
+We believe this resolution is ideal for online video viewing. You can change 
+resolution with options:
+
+    $ turkic extract /path/to/video.mp4 /path/to/output/directory
+      --width 1000 --height 1000
+
+    $ turkic extract /path/to/video.mp4 /path/to/output/directory
+      --no-resize
+
+The tool will maintain aspect ratio in all cases.
+
+----Importing a Video----------------------------------------------------------
+
+After extracting frames, the video can be imported into our tool for 
+annotation. The general syntax for this operation is:
+
+    $ turkic load identifier /path/to/output/directory Label1 Label2 LabelN
+
+where identifier is a unique string that you will use to refer to this video,
+/path/to/output/directory is the directory of frames, and LabelX are class
+labels that you want annotated (e.g., Person, Car, Bicycle). You can have as
+many class labels as you wish, but you must have at least one.
+
+When a video is imported, it is broken into small segments typically of only a
+few seconds. When all the segments are annotated, the annotations are merged
+across segments because each segment overlaps another by a small margin.
+
+The above command specifies all of the required options, but there are many
+options available as well. We recommend using these options.
+
+    MTurk Options
+        --title         The title that MTurk workers see
+        --description   The description that MTurk workers see
+        --duration      Time in seconds that a worker has to complete the task
+        --lifetime      Time in seconds that the task is online
+        --keywords      Keywords that MTurk workers can search on
+        --offline       Disable MTurk and use for self annotation only
+
+    Compensation Options
+        --cost                  The price advertised to MTurk workers
+        --per-object-bonus      A bonus in dollars paid for each object
+        --completion-bonus      A bonus in dollars paid for completing the task
+
+    Qualification Options
+        --min-approved-percent  Minimum percent of tasks the worker must have
+                                approved
+        --min-approved-amount   Minimum number of tasks that the worker must 
+                                have completed
+
+    Video Options
+        --length        The length of each segment for this video in frames
+        --overlap       The overlap between segments in frames
+        --use-frames    When splitting into segments, only the frame intervals
+                        specified in this file. Each line should contain one
+                        interval of a start frame, followed by a space, then
+                        the stop frame. Frames outside the intervals in this
+                        file will be ignored.
+        --skip          If specified, request annotations only on this interval
+
+----Gold Standard Training----------------------------------------------------
+
+It turns out that video annotation is extremely challenging and most MTurk
+workers lack the necessary patience. For this reason, we recommend requiring
+workers to pass a "gold standard" video. When a new worker visits the task,
+they will be redirected to a video for which the annotations are already known.
+In order to move on to the true annotations, the worker must correctly annotate
+the gold standard video first. We have found that this approach significantly
+improves the quality of the annotations.
+
+To use this feature, import a video to be used as the gold standard:
+
+    $ turkic load identifier-train /path/to/frames Label1 Label2 LabelN
+      --for-training --for-training-start 0 --for-training-stop 500
+      --for-training-overlap 0.5 --for-training-tolerance 0.1
+      --for-training-mistakes 1
+
+You can also use any of the options described above. Explanations for the new
+options are as follows:
+
+    --for-training              Specifies that this video is gold standard
+    --for-training-start        Specifies the first frame to use
+    --for-training-stop         Specifies the last frame to use
+    --for-training-overlap      Percent overlap that worker's boxes must match 
+    --for-training-tolerance    Percent that annotations must agree temporally
+    --for-training-mistakes     The number of completely wrong annotations 
+                                allowed. We recommend setting this to a small,
+                                nonzero integer.
+
+After running the above command, it will provide you with an URL for you to
+input the ground truth annotation. You must make this ground truth annotation
+as careful as possible, as it will be used to evaluate future workers.
+
+You can now specify that a video should use a gold standard video:
+
+    $ turkic load identifier /path/to/output/directory Label1 Label2 LabelN
+      --train-with identifier-train
+
+When a not-yet-seen worker visits this video, they will now be redirected to
+to the training video and be required to pass the evaluation test.
+
+----Publishing Tasks----------------------------------------------------------
+
+When you are ready for the MTurk workers to annotate, you must publish the 
+tasks, which will allow workers to see the tasks:
+    
+    $ turkic publish
+
+You can limit the number of tasks that are published:
+
+    $ turkic publish --limit 100
+
+Running above command repeatedly will launch tasks in batches of 100. You can
+also disable all pending tasks:
+    
+    $ turkic publish --disable
+
+which will "unpublish" tasks that have not yet been completed.
+
+If you have videos that are offline only, you can see their access URLs with
+the command:
+
+    $ turkic publish --offline
+
+----Checking the Status-------------------------------------------------------
+
+You can check the status of the video annotation server with the command:
+
+    $ turkic status
+
+This will list various statistics about the server, such as number of jobs
+published and how many are completed. You can get even more statistics by
+requesting additional information from Amazon:
+
+    $ turkic status --turk
+
+which will output how much money is left in your account, among other
+statistics.
+
+When all the videos are annotated, the last line will read:
+
+    Server is offline.
+
+----Retrieving Annotations----------------------------------------------------
+
+You can get all the annotations for a video with the command:
+
+    $ turkic dump identifier -o output.txt
+
+which will write the file "output.txt" where each line contains one
+annotation. Each line contains 10 columns, separated by spaces. The
+definition of these columns are:
+
+    1   Track ID. All rows with the same ID belong to the same path.
+    2   xmin. The top left x-coordinate of the bounding box.
+    3   ymin. The top left y-coordinate of the bounding box.
+    4   xmax. The bottom right x-coordinate of the bounding box.
+    5   ymax. The bottom right y-coordinate of the bounding box.
+    6   frame. The frame that this annotation represents.
+    7   lost. If 1, the annotation is outside of the view screen.
+    8   occluded. If 1, the annotation is occluded.
+    9   generated. If 1, the annotation was automatically interpolated.
+    10  label. The label for this annotation, enclosed in quotation marks.
+
+By default, the above command will just dump the raw annotations. It will not
+interpolate or do any merging. You can request linear interpolation with:
+
+    $ turkic dump identifier -o output.txt --interpolate
+
+You can also request merging with the command:
+
+    $ turkic dump identifier -o output.txt --merge --merge-threshold 0.5
+
+The --merge-threshold option is optional, but it is a number between 0 and 1
+that represents much the paths must agree in order to merge. 1 specifies a
+perfect match and 0 specifies no match. In practice, 0.5 is sufficient. Merging
+is done using the Hungarian algorithm.
+
+Of course, the above options are often combined:
+
+    $ turkic dump identifier -o output.txt -mi
+
+You can also scale annotations by a factor, which is useful for when the
+videos have been downsampled:
+
+    $ turkic dump identifier -o output.txt -s 2.8
+
+The command can also output to many different formats. Available formats are:
+
+    --xml       Use XML
+    --json      Use JSON
+    --matlab    Use MATLAB
+    --pickle    Use Python's Pickle
+    --labelme   Use LabelMe video's XML format
+
+The specifications for these formats should be self explanatory.
+
+----Visualizing Videos--------------------------------------------------------
+
+You can preview the annotations by visualizing the results:
+
+    $ turkic visualize identifier /tmp --interpolate --merge
+
+which will output frames to /tmp with the bounding boxes with the file name
+as the frame number. The visualization will contain some meta information
+that can help you identify bad workers. You can remove this meta information
+with the option:
+
+    $ turkic visualize identifer /tmp --interpolate --merge --no-augment
+
+If you want to make a video of the visualization (e.g., with ffmpeg), it is
+useful to renumber the frames so that they start counting at 0 and do not
+have any gaps:
+
+    $ turkic visualize identifier /tmp --interpolate --merge --renumber
+
+----Compensating Workers------------------------------------------------------
+
+When you are ready, you can pay workers:
+
+    $ turkic compensate --default accept
+
+which will pay all workers for all outstanding tasks. We strongly recommend
+paying all workers regardless of their quality.
+
+----Quality Control-----------------------------------------------------------
+
+The gold standard does a "pretty good" job of weeding out bad workers.
+Nonetheless, there will always be bad workers that we must weed out. Our tool
+provides a method to sample the annotations provided by workers, which you can
+then manually verify for correctness:
+
+    $ turkic sample /tmp
+
+which by default will pick 3 random videos that the worker has completed, and
+pick 4 random frames from each of those videos, and write visualiations to a
+file in /tmp. You can tweak the number of videos and the number of frames with
+the options:
+
+    $ turkic sample /tmp --number 3 --frames 4
+
+Moreover, you can only look at work from a certain date:
+
+    $ turkic sample /tmp --since "yesterday"
+
+The filename will follow the format of WORKERID-JOBID.jpg. Once you have
+identified a mallicious worker, you can block them, invalidate ALL of their
+work, and respawn their jobs with the command:
+
+    $ turkic invalidate workerid
+
+The options are also available:
+
+    --no-block      invalidate and respawn, but don't block
+    --no-publish    block and invalidate, but don't respawn
+
+You can also invalidate and respawn individual jobs with the command:
+
+    $ turkic invalidate --hit hitid
+
+Furthermore, if you have found a small mistake in a video and want to make
+the correction yourself, you can start an annotation session initialized with
+the MTurk workers annotations:
+
+    $ turkic vet identifier frame
+
+where identifier is the identifier for the video and frame is the frame number
+that the error occurs. In most cases, this command will return one URL for you
+to make the corrections. If it outputs two URLs, it means the frame number
+occurs in two segments, and so you may have to make changes to both of the
+segments.
+
+----Listing all Videos--------------------------------------------------------
+
+You can retrieve a list of all videos in the system with:
+
+    $ turkic list
+
+Videos prefixed with an uppercase T are training videos. Videos with with a
+lowercase t require training before completion.
+
+----Managing Workers----------------------------------------------------------
+
+You can list all known workers with the command:
+
+    $ turkic workers
+
+which will dump every worker with the number of jobs they have completed. You
+can also use this command to block and unblock workers:
+
+    $ turkic workers --block workerid
+    $ turkic workers --unblock workerid
+
+You can also search for workers by the first few letters of their ID:
+
+    $ turkic workers --search A3M
+
+----Deleting a Video----------------------------------------------------------
+
+You can delete a video at any time with:
+
+    $ turkic delete identifier
+
+If the video has already been annotated (even partially), this command will 
+warn you and abort. You can force deletion with:
+
+    $ turkic delete identifier --force
+
+which will REMOVE ALL DATA AND CANNOT BE UNDONE.
+
+==REFERENCES===================================================================
+
+When using our system, please cite:
+
+    Carl Vondrick, Deva Ramanan, Donald Patterson. "Efficiently Scaling Up
+    Video Annotation with Crowdsourced Marketplaces" European Conference on
+    Computer Vision (ECCV) Crete, Greece, September, 2010. 
+
+==FEEDBACK AND BUGS============================================================
+
+Please direct all comments and report all bugs to:
+
+    Carl Vondrick
+    vondrick@mit.edu
+
+Thanks for using our system!

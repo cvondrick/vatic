@@ -388,6 +388,7 @@ class visualize(DumpCommand):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("output")
         parser.add_argument("--no-augment", action="store_true", default = False)
+        parser.add_argument("--renumber", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
@@ -400,6 +401,9 @@ class visualize(DumpCommand):
         if not args.no_augment:
             it = self.augment(args, video, data, it)
 
+        if args.renumber:
+            it = self.renumber(it)
+
         try:
             os.makedirs(args.output)
         except:
@@ -407,6 +411,10 @@ class visualize(DumpCommand):
 
         vision.visualize.save(it,
             lambda x: "{0}/{1}.jpg".format(args.output, x))
+
+    def renumber(self, it):
+        for count, (im, _) in enumerate(it):
+            yield im, count
 
     def augment(self, args, video, data, frames):
         offset = 100
