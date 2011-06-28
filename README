@@ -4,11 +4,103 @@ vatic is an online video annotation tool for computer vision research that
 crowdsources work to Amazon's Mechanical Turk. Our tool makes it easy to build
 massive, affordable video data sets. 
 
-This document will describe how to use vatic.
+This document will describe how to install and use vatic.
 
 ==INSTALLATION=================================================================
 
+Note: vatic has only been tested on Ubuntu with Apache 2.2 HTTP server and a
+MySQL server. This document will describe installation on this platform,
+however it should work any operating system and with any server.
+
+----Dependencies---------------------------------------------------------------
+
+We developed two tools concurrently with vatic that provide a simple MTurk
+framework ("turkic") and a basic computer vision toolkit for Python
+("pyvision"). You must install these tools as vatic depends on them.
+
+You can install turkic with:
+
+    $ sudo apt-get install python-setuptools
+    $ sudo easy_install turkic
+
+You also must install a webserver. We recommend Apache:
+
+    $ sudo apt-get install apache2
+
+You must install a database server. We recommend MySQL:
+    
+    $ sudo apt-get install mysql-server-5.1 mysql-client-5.1
+
+----HTTP Server Configuration--------------------------------------------------
+
+Open the Apache configuration file. On Ubuntu, this file is located in:
+
+    /etc/apache2/sites-enabled/000-default
+
+Add the following to the bottom of the file:
+
+    WSGIDaemonProcess www-data
+    WSGIProcessGroup www-data
+
+    <VirtualHost *:80>
+        ServerName vatic.domain.edu
+        DocumentRoot /path/to/vatic/public
+
+        WSGIScriptAlias /server /path/to/vatic/server.py
+        CustomLog /var/log/apache2/access.log combined
+    </VirtualHost>
+
+updating ServerName with your domain name, DocumentRoot with the path to
+the public directory in vatic, and WSGIScriptAlias to the server.py file.
+
+After making these changes, restart Apache:
+
+    $ sudo apache2ctl graceful
+
+----SQL Server Configuration---------------------------------------------------
+
+We recommend creating a separate database specially for vatic:
+
+    $ mysql -u root
+    mysql> create database vatic;
+
+The next section will automatically create the necessary tables.
+
+----Setup----------------------------------------------------------------------
+
+Inside the vatic directory, copy config.py-example to config.py:
+
+    $ cp config.py-example config.py
+
+Then open config.py and make changes to the following variables in order to
+configure vatic:
+
+    signature       Amazon Mechanical Turk AWS signature
+    accesskey       Amazon Mechanical Turk AWS access key
+    sandbox         If true, put into Mturk sandbox mode. For debugging.
+    localhost       The local HTTP address: http://vatic.domain.edu/
+    database        Database connection string: mysql://root@localhost/vatic
+    geolocation     API key from ipinfodb.com for geolocation services
+
+After saving results, you can then initialize the database:
+
+    $ turkic setup --database
+
+Note: if you want to reset the database, you can do this with:
+
+    $ turkic setup --database --reset
+
+which will require confirmation to reset in order to prevent data loss.
+
 ==ANNOTATION===================================================================
+
+Before you continue, you should verify that the installation was correct. You
+can verify this with:
+
+    $ turkic status --verify
+
+If you receive any error messages, it means the installation was not complete
+and you should review the previous section.
 
 ----Frame Extraction-----------------------------------------------------------
 
@@ -23,6 +115,8 @@ resolution with options:
 
     $ turkic extract /path/to/video.mp4 /path/to/output/directory
       --width 1000 --height 1000
+
+or
 
     $ turkic extract /path/to/video.mp4 /path/to/output/directory
       --no-resize
@@ -116,12 +210,12 @@ You can now specify that a video should use a gold standard video:
       --train-with identifier-train
 
 When a not-yet-seen worker visits this video, they will now be redirected to
-to the training video and be required to pass the evaluation test.
+to the training video and be required to pass the evaluation test first.
 
 ----Publishing Tasks----------------------------------------------------------
 
 When you are ready for the MTurk workers to annotate, you must publish the 
-tasks, which will allow workers to see the tasks:
+tasks, which will allow workers to start annotating:
     
     $ turkic publish
 
@@ -235,19 +329,20 @@ have any gaps:
 
 ----Compensating Workers------------------------------------------------------
 
-When you are ready, you can pay workers:
+When you are ready, you can compensate workers:
 
     $ turkic compensate --default accept
 
 which will pay all workers for all outstanding tasks. We strongly recommend
-paying all workers regardless of their quality.
+paying all workers regardless of their quality. You should attempt to pay
+workers at least once per day.
 
 ----Quality Control-----------------------------------------------------------
 
 The gold standard does a "pretty good" job of weeding out bad workers.
-Nonetheless, there will always be bad workers that we must weed out. Our tool
-provides a method to sample the annotations provided by workers, which you can
-then manually verify for correctness:
+Nonetheless, there will always be bad workers that we must identify and
+invalidate. Our tool provides a method to sample the annotations provided by
+workers, which you can then manually verify for correctness:
 
     $ turkic sample /tmp
 
@@ -286,8 +381,8 @@ the MTurk workers annotations:
 where identifier is the identifier for the video and frame is the frame number
 that the error occurs. In most cases, this command will return one URL for you
 to make the corrections. If it outputs two URLs, it means the frame number
-occurs in two segments, and so you may have to make changes to both of the
-segments.
+occurs in two overlapping segments, and so you may have to make changes to both
+of the segments.
 
 ----Listing all Videos--------------------------------------------------------
 
