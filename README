@@ -12,6 +12,15 @@ Note: vatic has only been tested on Ubuntu with Apache 2.2 HTTP server and a
 MySQL server. This document will describe installation on this platform,
 however it should work any operating system and with any server.
 
+----Download-------------------------------------------------------------------
+
+You can download and extract vatic from our website:
+
+    $ mkdir vatic
+    $ cd vatic
+    $ wget http://mit.edu/vatic/vatic.tar.gz
+    $ tar xzvf vatic.tar.gz
+
 ----Dependencies---------------------------------------------------------------
 
 You can install all of vatic's dependencies with the command:

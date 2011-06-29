@@ -1,8 +1,9 @@
-signature = ""
-accesskey = ""
-sandbox   = False
-localhost = "http://example.edu/"
-database  = "mysql://root@localhost/turkic"
+signature   = ""
+accesskey   = ""
+sandbox     = True
+localhost   = "http://localhost/"
+database    = "mysql://root@localhost/vatic"
+geolocation = ""
 
 # probably no need to mess below this line
 

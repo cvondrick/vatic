@@ -1,6 +1,13 @@
 apt-get install -y python-setuptools
 
-easy_install -U turkic
+wget http://mit.edu/vondrick/code/turkic.tar.gz
+tar xzvf turkic.tar.gz
+cd turkic-*
+easy_install -U SQLAlchemy
+easy_install -U wsgilog
+python setup.py install
+cd ..
+
 
 wget http://mit.edu/vondrick/code/pyvision.tar.gz
 tar xzvf pyvision.tar.gz
@@ -13,6 +20,7 @@ python setup.py install
 cd ..
 
 apt-get install -y apache2
+apt-get install -y libapache2-mod-wsgi
 
 apt-get install -y mysql-server-5.1 mysql-client-5.1
 apt-get install -y libmysqlclient-dev
