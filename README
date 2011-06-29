@@ -14,14 +14,36 @@ however it should work any operating system and with any server.
 
 ----Dependencies---------------------------------------------------------------
 
-We developed two tools concurrently with vatic that provide a simple MTurk
+Note: You can complete all the commands in this section by executing:
+    
+    $ sudo make install
+
+inside the vatic directory. If you do this, you may skip to the next section,
+"HTTP Server Configuration." Otherwise, if you want fine grained control, keep
+reading...
+
+We developed two libraries concurrently with vatic that provide a simple MTurk
 framework ("turkic") and a basic computer vision toolkit for Python
-("pyvision"). You must install these tools as vatic depends on them.
+("pyvision"). You must install these tools because vatic depends on them.
 
 You can install turkic with:
 
     $ sudo apt-get install python-setuptools
-    $ sudo easy_install turkic
+    $ sudo easy_install -U turkic
+
+pyvision requires a specialized installation procedure:
+
+    $ wget http://mit.edu/vondrick/code/pyvision.tar.gz 
+    $ tar xzvf pyvision.tar.gz
+    $ cd pyvision-*
+    $ sudo apt-get install python-dev
+    $ sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev
+    $ sudo easy_install -U cython
+    $ sudo easy_install -U numpy
+    $ sudo python setup.py install
+
+(If you receive an error during the numpy installation, ignore it and forge
+forwards. It is likely meaningless.)
 
 You also must install a webserver. We recommend Apache:
 
@@ -30,10 +52,12 @@ You also must install a webserver. We recommend Apache:
 You must install a database server. We recommend MySQL:
     
     $ sudo apt-get install mysql-server-5.1 mysql-client-5.1
+    $ sudo apt-get install libmysqlclient-dev
+    $ sudo easy_install -U mysql-python
 
 ----HTTP Server Configuration--------------------------------------------------
 
-Open the Apache configuration file. On Ubuntu, this file is located in:
+Open the Apache configuration file. On Ubuntu, this file is located at:
 
     /etc/apache2/sites-enabled/000-default
 
@@ -51,7 +75,7 @@ Add the following to the bottom of the file:
     </VirtualHost>
 
 updating ServerName with your domain name, DocumentRoot with the path to
-the public directory in vatic, and WSGIScriptAlias to the server.py file.
+the public directory in vatic, and WSGIScriptAlias to vatic's server.py file.
 
 After making these changes, restart Apache:
 
@@ -157,19 +181,19 @@ options available as well. We recommend using these options.
 
     Qualification Options
         --min-approved-percent  Minimum percent of tasks the worker must have
-                                approved
+                                approved before they can work for you
         --min-approved-amount   Minimum number of tasks that the worker must 
-                                have completed
+                                have completed before they can work for you
 
     Video Options
         --length        The length of each segment for this video in frames
         --overlap       The overlap between segments in frames
         --use-frames    When splitting into segments, only the frame intervals
-                        specified in this file. Each line should contain one
-                        interval of a start frame, followed by a space, then
-                        the stop frame. Frames outside the intervals in this
-                        file will be ignored.
-        --skip          If specified, request annotations only on this interval
+                        specified in this file. Each line should contain a
+                        start frame, followed by a space, then the stop frame.
+                        Frames outside the intervals in this file will be
+                        ignored.
+        --skip          If specified, request annotations only every N frames.
 
 ----Gold Standard Training----------------------------------------------------
 
