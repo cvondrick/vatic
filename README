@@ -81,6 +81,10 @@ Note: if you want to reset the database, you can do this with:
 
 which will require confirmation to reset in order to prevent data loss.
 
+Finally, you must also allow vatic to access turkic, a major dependency:
+
+    $ turkic setup --public-symlink
+
 ==ANNOTATION===================================================================
 
 Before you continue, you should verify that the installation was correct. You

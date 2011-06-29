@@ -18,8 +18,6 @@ apt-get install -y mysql-server-5.1 mysql-client-5.1
 apt-get install -y libmysqlclient-dev
 easy_install -U mysql-python
 
-turkic setup --public-symlink
-
 echo "*****************************************************"
 echo "*** Please consult README to finish installation. ***"
 echo "*****************************************************"
