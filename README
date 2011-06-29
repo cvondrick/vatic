@@ -65,8 +65,10 @@ configure vatic:
     signature       Amazon Mechanical Turk AWS signature
     accesskey       Amazon Mechanical Turk AWS access key
     sandbox         If true, put into Mturk sandbox mode. For debugging.
-    localhost       The local HTTP address: http://vatic.domain.edu/
-    database        Database connection string: mysql://root@localhost/vatic
+    localhost       The local HTTP address: http://vatic.domain.edu/ so it
+                    matches the ServerName in Apache.
+    database        Database connection string: for example,
+                    mysql://user:pass@localhost/vatic
     geolocation     API key from ipinfodb.com for geolocation services
 
 After saving results, you can then initialize the database:
