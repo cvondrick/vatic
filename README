@@ -14,46 +14,9 @@ however it should work any operating system and with any server.
 
 ----Dependencies---------------------------------------------------------------
 
-Note: You can complete all the commands in this section by executing:
-    
-    $ sudo make install
+You can install all of vatic's dependencies with the command:
 
-inside the vatic directory. If you do this, you may skip to the next section,
-"HTTP Server Configuration." Otherwise, if you want fine grained control, keep
-reading...
-
-We developed two libraries concurrently with vatic that provide a simple MTurk
-framework ("turkic") and a basic computer vision toolkit for Python
-("pyvision"). You must install these tools because vatic depends on them.
-
-You can install turkic with:
-
-    $ sudo apt-get install python-setuptools
-    $ sudo easy_install -U turkic
-
-pyvision requires a specialized installation procedure:
-
-    $ wget http://mit.edu/vondrick/code/pyvision.tar.gz 
-    $ tar xzvf pyvision.tar.gz
-    $ cd pyvision-*
-    $ sudo apt-get install python-dev
-    $ sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev
-    $ sudo easy_install -U cython
-    $ sudo easy_install -U numpy
-    $ sudo python setup.py install
-
-(If you receive an error during the numpy installation, ignore it and forge
-forwards. It is likely meaningless.)
-
-You also must install a webserver. We recommend Apache:
-
-    $ sudo apt-get install apache2
-
-You must install a database server. We recommend MySQL:
-    
-    $ sudo apt-get install mysql-server-5.1 mysql-client-5.1
-    $ sudo apt-get install libmysqlclient-dev
-    $ sudo easy_install -U mysql-python
+    $ sudo ./install.sh
 
 ----HTTP Server Configuration--------------------------------------------------
 
