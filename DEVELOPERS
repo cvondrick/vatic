@@ -1,0 +1,23 @@
+This document will describe how to modify vatic for your own purposes. If you
+only want to use vatic, please see README instead.
+
+vatic is actually broken up into three different packages:
+
+    1. vatic - video annotation tool
+    2. turkic - a platform for easy MTurk management
+    3. pyvision - a simple Python computer vision toolkit
+
+In general, you likely want to only modify vatic, which houses the essential
+tools for video annotation, such as: the JavaScript video player, instructions,
+entire user interface, merging paths, quality assurance, etc.
+
+pyvision contains a couple of routines useful for vision research (e.g.,
+convolution, tracking, svm, bounding boxes). You probably should only modify
+pyvision if you want to tweak our tracking algorithms, linear interpolation
+schemes, or support new type of annotations besides bounding boxes.
+
+turkic is a framework that makes it easy to send jobs to MTurk. It manages
+workers, payment, and training. You probably should only modify turkic if you
+want to change protocols to how workers are paid and quality control is done.
+
+More to come later...
