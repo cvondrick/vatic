@@ -15,6 +15,15 @@ video_labels = Table("videos2labels", turkic.database.Base.metadata,
     Column("video_id", Integer, ForeignKey("videos.id")),
     Column("label_id", Integer, ForeignKey("labels.id")))
 
+labels_attributes = Table("labels2attributes", turkic.database.Base.metadata,
+    Column("label_id", Integer, ForeignKey("labels.id")),
+    Column("attribute_id", Integer, ForeignKey("attributes.id")))
+
+boxes_attributes = Table("boxes2attributes", turkic.database.Base.metadata,
+    Column("box_id", Integer, ForeignKey("boxes.id")),
+    Column("attribute_id", Integer, ForeignKey("attributes.id")))
+
+
 class Video(turkic.database.Base):
     __tablename__   = "videos"
 
@@ -50,6 +59,15 @@ class Video(turkic.database.Base):
 
 class Label(turkic.database.Base):
     __tablename__ = "labels"
+
+    id = Column(Integer, primary_key = True)
+    text = Column(String(250))
+    attributes = relationship("Attribute",
+                              secondary = labels_attributes,
+                              backref = "labels")
+
+class Attribute(turkic.database.Base):
+    __tablename__ = "attributes"
 
     id = Column(Integer, primary_key = True)
     text = Column(String(250))
@@ -159,6 +177,9 @@ class Box(turkic.database.Base):
     frame = Column(Integer)
     occluded = Column(Boolean, default = False)
     outside = Column(Boolean, default = False)
+
+    attributes = relationship("Attribute",
+                              secondary = boxes_attributes)
 
     def getbox(self):
         return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,

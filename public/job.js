@@ -35,6 +35,7 @@ function job_import(data)
     job.completion = parseFloat(data["completion"]);
     job.jobid = parseInt(data["jobid"]);
     job.labels = data["labels"];
+    job.attributes = data["attributes"];
     job.training = parseInt(data["training"]);
 
     console.log("Job configured!");
@@ -51,6 +52,14 @@ function job_import(data)
     for (var i in job.labels)
     {
         console.log("    " + i + " = " + job.labels[i]);
+    }
+    console.log("  Attributes:");
+    for (var i in job.attributes)
+    {
+        for (var j in job.attributes[i])
+        {
+            console.log("    " + job.labels[i] + " = " + job.attributes[i][j])
+        }
     }
 
     return job;

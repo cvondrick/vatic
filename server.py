@@ -28,6 +28,10 @@ def getjob(id, verified):
     video = segment.video
     labels = dict((l.id, l.text) for l in video.labels)
 
+    attributes = {}
+    for label in video.labels:
+        attributes[label.id] = dict((a.id, a.text) for a in label.attributes)
+
     logger.debug("Giving user frames {0} to {1} of {2}".format(video.slug,
                                                                segment.start,
                                                                segment.stop))
@@ -42,7 +46,8 @@ def getjob(id, verified):
             "completion":   video.completionbonus,
             "jobid":        job.id,
             "training":     int(training),
-            "labels":       labels}
+            "labels":       labels,
+            "attributes":   attributes}
 
 @handler()
 def getboxesforjob(id):
@@ -71,6 +76,10 @@ def readpaths(tracks):
             box.occluded = int(userbox[4])
             box.outside = int(userbox[5])
             box.frame = int(frame)
+
+            for attribute in userbox[6]:
+                attribute = session.query(Attribute).get(attribute)
+                box.attributes.append(attribute)
 
             logger.debug("Received box {0}".format(str(box.getbox())))
 

@@ -328,6 +328,33 @@ function TrackObject(job, player, container, color)
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "lost'> <label for='trackobject" + this.id + "lost'>Outside of view frame</label><br>");
         this.details.append("<input type='checkbox' id='trackobject" + this.id + "occluded'> <label for='trackobject" + this.id + "occluded'>Occluded or obstructed</label><br>");
 
+        for (var i in this.job.attributes[this.track.label])
+        {
+            this.details.append("<input type='checkbox' id='trackobject" + this.id + "attribute" + i + "'> <label for='trackobject" + this.id + "attribute" + i +"'>" + this.job.attributes[this.track.label][i] + "</label><br>");
+
+            // create a closure on attributeid
+            (function(attributeid) {
+
+                $("#trackobject" + me.id + "attribute" + i).click(function() {
+                    me.player.pause();
+
+                    var checked = $(this).attr("checked");
+                    me.track.setattribute(attributeid, checked);
+                    me.track.notifyupdate();
+
+                    if (checked) 
+                    {
+                        eventlog("markattribute", "Mark object as " + me.job.attributes[me.track.label][attributeid]);
+                    }
+                    else
+                    {
+                        eventlog("markattribute", "Mark object as not " + me.job.attributes[me.track.label][attributeid]);
+                    }
+                });
+
+            })(i);
+        }
+
 
         $("#trackobject" + this.id + "lost").click(function() {
             me.player.pause();
@@ -383,6 +410,18 @@ function TrackObject(job, player, container, color)
         var e = this.track.journal.estimate(this.player.frame);
         $("#trackobject" + this.id + "lost").attr("checked", e.outside);
         $("#trackobject" + this.id + "occluded").attr("checked", e.occluded);
+
+        for (var i in this.job.attributes[this.track.label])
+        {
+            if (e.attributes.indexOf(i) == -1)
+            {
+                $("#trackobject" + this.id + "attribute" + i).attr("checked", false);
+            }
+            else
+            {
+                $("#trackobject" + this.id + "attribute" + i).attr("checked", true);
+            }
+        }
     }
 
     this.disable = function()

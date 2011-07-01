@@ -157,7 +157,7 @@ class load(LoadCommand):
 
         # create video
         video = Video(slug = args.slug,
-                      location = args.location, 
+                      location = os.path.realpath(args.location), 
                       width = width,
                       height = height,
                       totalframes = maxframes,
@@ -175,19 +175,37 @@ class load(LoadCommand):
 
         session.add(video)
 
-        print "Binding labels..."
+        print "Binding labels and attributes..."
 
-        # create labels
+        # create labels and attributes
         labelcache = {}
+        attributecache = {}
+        lastlabel = None
         for labeltext in args.labels:
-            query = session.query(Label).filter(Label.text == labeltext)
-            if query.count() > 0:
-                label = query.one()
+            if labeltext[0] == "~":
+                if lastlabel is None:
+                    print "Cannot assign an attribute without a label!"
+                    return
+                labeltext = labeltext[1:]
+                query = session.query(Attribute)
+                query = query.filter(Attribute.text == labeltext)
+                if query.count() > 0:
+                    attribute = query.one()
+                else:
+                    attribute = Attribute(text = labeltext)
+                    session.add(attribute)
+                lastlabel.attributes.append(attribute)
+                attributecache[labeltext] = attribute
             else:
-                label = Label(text = labeltext)
-                session.add(label)
-            video.labels.append(label)
-            labelcache[labeltext] = label
+                query = session.query(Label).filter(Label.text == labeltext)
+                if query.count() > 0:
+                    label = query.one()
+                else:
+                    label = Label(text = labeltext)
+                    session.add(label)
+                video.labels.append(label)
+                labelcache[labeltext] = label
+                lastlabel = label
 
         print "Creating symbolic link..."
         symlink = "public/frames/{0}".format(video.slug)
