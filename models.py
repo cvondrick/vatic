@@ -23,7 +23,6 @@ boxes_attributes = Table("boxes2attributes", turkic.database.Base.metadata,
     Column("box_id", Integer, ForeignKey("boxes.id")),
     Column("attribute_id", Integer, ForeignKey("attributes.id")))
 
-
 class Video(turkic.database.Base):
     __tablename__   = "videos"
 

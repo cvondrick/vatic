@@ -1,9 +1,9 @@
-signature   = ""
-accesskey   = ""
-sandbox     = True
-localhost   = "http://localhost/"
-database    = "mysql://root@localhost/vatic"
-geolocation = ""
+signature   = "" # AWS secret access key
+accesskey   = "" # AWS access key ID
+sandbox     = True # if true, put on workersandbox.mturk.com
+localhost   = "http://localhost/" # your local host
+database    = "mysql://root@localhost/vatic" # server://user:pass@localhost/dbname
+geolocation = "" # api key for ipinfodb.com
 
 # probably no need to mess below this line
 
