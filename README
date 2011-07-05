@@ -34,7 +34,8 @@ Open the Apache configuration file. On Ubuntu, this file is located at:
 
     /etc/apache2/sites-enabled/000-default
 
-Add the following to the bottom of the file:
+If you do not use Apache on this computer for any other purpose, replace the
+contents of the file with:
 
     WSGIDaemonProcess www-data
     WSGIProcessGroup www-data
@@ -49,6 +50,9 @@ Add the following to the bottom of the file:
 
 updating ServerName with your domain name, DocumentRoot with the path to
 the public directory in vatic, and WSGIScriptAlias to vatic's server.py file.
+
+If you do use Apache for other purposes, you will have to setup a new virtual
+host with the correct document root and script alias, as shown above.
 
 After making these changes, restart Apache:
 
@@ -72,8 +76,8 @@ Inside the vatic directory, copy config.py-example to config.py:
 Then open config.py and make changes to the following variables in order to
 configure vatic:
 
-    signature       Amazon Mechanical Turk AWS signature
-    accesskey       Amazon Mechanical Turk AWS access key
+    signature       Amazon Mechanical Turk AWS signature (secret access key)
+    accesskey       Amazon Mechanical Turk AWS access key (access key ID)
     sandbox         If true, put into Mturk sandbox mode. For debugging.
     localhost       The local HTTP address: http://vatic.domain.edu/ so it
                     matches the ServerName in Apache.

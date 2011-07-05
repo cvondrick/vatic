@@ -102,8 +102,13 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         function convert(box)
         {
+            var attrs = [];
+            for (var i in box[8])
+            {
+                attrs.push("" + box[8][i][0]);
+            }
             return new Position(box[0], box[1], box[2], box[3],
-                                box[6], box[5]);
+                                box[6], box[5], attrs);
         }
 
         var track = tracks.add(path[0][4], convert(path[0]),
