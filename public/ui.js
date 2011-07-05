@@ -85,6 +85,9 @@ function ui_setup(job)
     $("#advancedoptions").append(
     "<div id='speedcontrol'>" +
     "<input type='radio' name='speedcontrol' " +
+        "value='10,1' id='speedcontrolslower'>" +
+    "<label for='speedcontrolslower'>Crawl</label>" +
+    "<input type='radio' name='speedcontrol' " +
         "value='15,1' id='speedcontrolslow'>" +
     "<label for='speedcontrolslow'>Slow</label>" +
     "<input type='radio' name='speedcontrol' " +

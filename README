@@ -179,13 +179,13 @@ options available as well. We recommend using these options.
                         ignored.
         --skip          If specified, request annotations only every N frames.
 
-You can also specify attributes that each object label can take on. For
-example, you may have a person object with attributes "walking", "running", or
-"sitting". You can specify attributes the same way as labels, except you 
+You can also specify temporal attributes that each object label can take on.
+For example, you may have a person object with attributes "walking", "running",
+or "sitting". You can specify attributes the same way as labels, except you
 prepend an ~ before the text, which bind the attribute to the previous label:
 
     $ turkic load identifier /path/to/output/directory Label1 ~Attr1A ~Attr1B
-      Label2 (Attr2A) (Attr2B) (Attr2C) Label3 
+      Label2 ~Attr2A ~Attr2B ~Attr2C Label3 
 
 In the above example, Label1 will have attributes Attr1A and Attr1B, Label2
 will have attributes Attr2B, Attr2B, and Attr2C and Label3 will have no 
