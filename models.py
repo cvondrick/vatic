@@ -182,8 +182,10 @@ class Box(turkic.database.Base):
                               secondary = boxes_attributes)
 
     def getbox(self):
+        attributes = [(x.id, x.text) for x in self.attributes]
         return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,
-                          self.frame, self.outside, self.occluded)
+                          self.frame, self.outside, self.occluded,
+                          0, attributes)
 
 class PerObjectBonus(turkic.models.BonusSchedule):
     __tablename__ = "per_object_bonuses"

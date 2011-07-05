@@ -985,11 +985,20 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside, attributes)
     this.serialize = function()
     {
         var attrs = "[";
-        for (var i in this.attributes)
+
+        if (this.attributes.length > 0)
         {
-            attrs += this.attributes[i] + ",";
+            for (var i in this.attributes)
+            {
+                attrs += this.attributes[i] + ",";
+            }
+            attrs = attrs.substr(0, attrs.length - 1) + "]";
         }
-        attrs = attrs.substr(0, attrs.length - 1) + "]";
+        else
+        {
+            attrs += "]";
+        }
+
         return "[" + this.xtl + "," +
                      this.ytl + "," +
                      this.xbr + "," +

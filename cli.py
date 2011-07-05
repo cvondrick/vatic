@@ -532,6 +532,7 @@ class dump(DumpCommand):
                 data['lost'] = box.lost
                 data['occluded'] = box.occluded
                 data['label'] = track.label
+                data['attributes'] = box.attributes
                 results.append(data)
 
         from scipy.io import savemat as savematlab
@@ -550,7 +551,11 @@ class dump(DumpCommand):
                 file.write(" xbr=\"{0}\"".format(box.xbr))
                 file.write(" ybr=\"{0}\"".format(box.ybr))
                 file.write(" outside=\"{0}\"".format(box.lost))
-                file.write(" occluded=\"{0}\" />\n".format(box.occluded))
+                file.write(" occluded=\"{0}\">".format(box.occluded))
+                for attrid, attrtext in box.attributes:
+                    file.write("<attribute id=\"{0}\">{1}</attribute>".format(
+                               attrid, attrtext))
+                file.write("</box>\n")
             file.write("\t</track>\n")
         file.write("</annotations>\n")
 
@@ -568,6 +573,7 @@ class dump(DumpCommand):
                 boxdata['ybr'] = box.ybr
                 boxdata['outside'] = box.lost
                 boxdata['occluded'] = box.occluded
+                boxdata['attributes'] = box.attributes
                 boxes[int(box.frame)] = boxdata
             result['boxes'] = boxes
             annotations[int(id)] = result
@@ -609,7 +615,12 @@ class dump(DumpCommand):
                 file.write(str(box.generated))
                 file.write(" \"")
                 file.write(track.label)
-                file.write("\"\n")
+                file.write("\"")
+                for _, attribute in box.attributes:
+                    file.write(" \"")
+                    file.write(attribute)
+                    file.write("\"")
+                file.write("\n")
 
     def dumplabelme(self, file, data, slug, folder):
         file.write("<annotation>")

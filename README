@@ -56,7 +56,7 @@ After making these changes, restart Apache:
 
 --- SQL Server Configuration --------------------------------------------------
 
-We recommend creating a separate database specially for vatic:
+We recommend creating a separate database specifically for vatic:
 
     $ mysql -u root
     mysql> create database vatic;
@@ -277,7 +277,7 @@ You can get all the annotations for a video with the command:
     $ turkic dump identifier -o output.txt
 
 which will write the file "output.txt" where each line contains one
-annotation. Each line contains 10 columns, separated by spaces. The
+annotation. Each line contains 10+ columns, separated by spaces. The
 definition of these columns are:
 
     1   Track ID. All rows with the same ID belong to the same path.
@@ -290,6 +290,7 @@ definition of these columns are:
     8   occluded. If 1, the annotation is occluded.
     9   generated. If 1, the annotation was automatically interpolated.
     10  label. The label for this annotation, enclosed in quotation marks.
+    11+ attributes. Each column after this is an attribute.
 
 By default, the above command will just dump the raw annotations. It will not
 interpolate or do any merging. You can request linear interpolation with:
