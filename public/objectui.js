@@ -120,7 +120,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         obj.initialize(this.counter, track, this.tracks);
         obj.finalize(label);
-        obj.statefoldup();
+        obj.statefolddown();
         obj.updatecheckboxes();
         this.counter++;
 
