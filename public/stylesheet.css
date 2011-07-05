@@ -172,8 +172,10 @@ code
 #music
 {
     position : absolute;
-    top : -1000px;
-    left : -1000px;
+    top : -100000px;
+    left : -100000px;
+    width : 1px;
+    height : 1px;
 }
 
 

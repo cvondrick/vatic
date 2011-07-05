@@ -99,6 +99,10 @@ function loadingscreen(job)
                 {
                     $("body").append('<div id="music"><embed src="magic.mp3">' +
                         '<noembed><bgsound src="magic.mp3"></noembed></div>');
+
+                    window.setTimeout(function() {
+                        $("#music").remove();
+                    }, 2000);
                 }
 
                 ls.remove()
