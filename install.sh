@@ -13,6 +13,9 @@ tar xzvf pyvision.tar.gz
 cd pyvision-*
 apt-get install -y python-dev
 apt-get install -y libavcodec-dev libavformat-dev libswscale-dev
+apt-get install -y libjpeg libjpeg-dev
+apt-get install -y libfreetype6 libfreetype6-dev
+easy_install -U pil
 easy_install -U cython
 easy_install -U numpy
 python setup.py install
