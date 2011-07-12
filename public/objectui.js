@@ -55,13 +55,13 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         var track = tracks.add(player.frame, position, this.currentcolor[0]);
 
         this.drawer.disable();
-        
-        this.currentobject.initialize(this.counter, track, this.tracks);
-        this.currentobject.stateclassify();
 
         this.currentobject.onready.push(function() {
             me.stopnewobject();
         });
+        
+        this.currentobject.initialize(this.counter, track, this.tracks);
+        this.currentobject.stateclassify();
     }
 
     this.stopnewobject = function()
@@ -279,33 +279,49 @@ function TrackObject(job, player, container, color)
             me.drawinst.remove(); 
         });
 
-        var html = "<p>What type of object did you just annotate?</p>";
-        for (var i in job.labels)
+        var length = 0;
+        var firsti = 0;
+        for (var i in this.job.labels)
         {
-            var id = "classification" + this.id + "_" + i;
-            html += "<div class='label'><input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label></div>";
+            length++;
+            firsti = i;
         }
 
-        this.classifyinst = $("<div>" + html + "</div>").appendTo(this.handle);
-        this.classifyinst.hide().slideDown();
-
-        $("input[name='classification" + this.id + "']").click(function() {
-            me.classifyinst.slideUp(null, function() {
-                me.classifyinst.remove(); 
-            });
-
-            for (var i in me.job.labels)
+        if (length == 1)
+        {
+            this.finalize(firsti);
+            this.statefolddown();
+        }
+        else
+        {
+            var html = "<p>What type of object did you just annotate?</p>";
+            for (var i in job.labels)
             {
-                var id = "classification" + me.id + "_" + i;
-                if ($("#" + id + ":checked").size() > 0)
-                {
-                    me.finalize(i);
-                    me.statefolddown();
-                    break;
-                }
+                var id = "classification" + this.id + "_" + i;
+                html += "<div class='label'><input type='radio' name='classification" + this.id + "' id='" + id + "'> <label for='" + id + "'>" + job.labels[i] + "</label></div>";
             }
 
-        });
+            this.classifyinst = $("<div>" + html + "</div>").appendTo(this.handle);
+            this.classifyinst.hide().slideDown();
+
+            $("input[name='classification" + this.id + "']").click(function() {
+                me.classifyinst.slideUp(null, function() {
+                    me.classifyinst.remove(); 
+                });
+
+                for (var i in me.job.labels)
+                {
+                    var id = "classification" + me.id + "_" + i;
+                    if ($("#" + id + ":checked").size() > 0)
+                    {
+                        me.finalize(i);
+                        me.statefolddown();
+                        break;
+                    }
+                }
+
+            });
+        }
     }
     
     this.finalize = function(labelid)
