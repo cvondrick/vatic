@@ -1,5 +1,6 @@
 apt-get install -y python-setuptools
 
+rm -f turkic.tar.gz
 wget http://mit.edu/vondrick/code/turkic.tar.gz
 tar xzvf turkic.tar.gz
 cd turkic-*
@@ -8,6 +9,7 @@ easy_install -U wsgilog
 python setup.py install
 cd ..
 
+rm -f pyvision.tar.gz
 wget http://mit.edu/vondrick/code/pyvision.tar.gz
 tar xzvf pyvision.tar.gz
 cd pyvision-*
