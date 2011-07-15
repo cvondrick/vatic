@@ -187,22 +187,13 @@ class load(LoadCommand):
                     print "Cannot assign an attribute without a label!"
                     return
                 labeltext = labeltext[1:]
-                query = session.query(Attribute)
-                query = query.filter(Attribute.text == labeltext)
-                if query.count() > 0:
-                    attribute = query.one()
-                else:
-                    attribute = Attribute(text = labeltext)
-                    session.add(attribute)
+                attribute = Attribute(text = labeltext)
+                session.add(attribute)
                 lastlabel.attributes.append(attribute)
                 attributecache[labeltext] = attribute
             else:
-                query = session.query(Label).filter(Label.text == labeltext)
-                if query.count() > 0:
-                    label = query.one()
-                else:
-                    label = Label(text = labeltext)
-                    session.add(label)
+                label = Label(text = labeltext)
+                session.add(label)
                 video.labels.append(label)
                 labelcache[labeltext] = label
                 lastlabel = label

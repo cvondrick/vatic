@@ -11,13 +11,13 @@ import logging
 
 logger = logging.getLogger("vatic.models")
 
-video_labels = Table("videos2labels", turkic.database.Base.metadata,
-    Column("video_id", Integer, ForeignKey("videos.id")),
-    Column("label_id", Integer, ForeignKey("labels.id")))
-
-labels_attributes = Table("labels2attributes", turkic.database.Base.metadata,
-    Column("label_id", Integer, ForeignKey("labels.id")),
-    Column("attribute_id", Integer, ForeignKey("attributes.id")))
+#video_labels = Table("videos2labels", turkic.database.Base.metadata,
+#    Column("video_id", Integer, ForeignKey("videos.id")),
+#    Column("label_id", Integer, ForeignKey("labels.id")))
+#
+#labels_attributes = Table("labels2attributes", turkic.database.Base.metadata,
+#    Column("label_id", Integer, ForeignKey("labels.id")),
+#    Column("attribute_id", Integer, ForeignKey("attributes.id")))
 
 boxes_attributes = Table("boxes2attributes", turkic.database.Base.metadata,
     Column("box_id", Integer, ForeignKey("boxes.id")),
@@ -28,9 +28,6 @@ class Video(turkic.database.Base):
 
     id              = Column(Integer, primary_key = True)
     slug            = Column(String(250), index = True)
-    labels          = relationship("Label",
-                                   secondary = video_labels,
-                                   backref = "videos")
     width           = Column(Integer)
     height          = Column(Integer)
     totalframes     = Column(Integer)
@@ -61,15 +58,18 @@ class Label(turkic.database.Base):
 
     id = Column(Integer, primary_key = True)
     text = Column(String(250))
-    attributes = relationship("Attribute",
-                              secondary = labels_attributes,
-                              backref = "labels")
+    videoid = Column(Integer, ForeignKey(Video.id))
+    video = relationship(Video, backref = backref("labels",
+                                                  cascade = "all,delete"))
 
 class Attribute(turkic.database.Base):
     __tablename__ = "attributes"
 
     id = Column(Integer, primary_key = True)
     text = Column(String(250))
+    labelid = Column(Integer, ForeignKey(Label.id))
+    label = relationship(Label, backref = backref("attributes",
+                                                  cascade = "all,delete"))
 
 class Segment(turkic.database.Base):
     __tablename__ = "segments"
@@ -146,7 +146,7 @@ class Path(turkic.database.Base):
     jobid = Column(Integer, ForeignKey(Job.id))
     job = relationship(Job, backref = backref("paths", cascade="all,delete"))
     labelid = Column(Integer, ForeignKey(Label.id))
-    label = relationship(Label, cascade = "none", backref = "paths")
+    label = relationship(Label, cascade = "all,delete", backref = "paths")
 
     interpolatecache = None
 
