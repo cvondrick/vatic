@@ -146,7 +146,7 @@ class Path(turkic.database.Base):
     jobid = Column(Integer, ForeignKey(Job.id))
     job = relationship(Job, backref = backref("paths", cascade="all,delete"))
     labelid = Column(Integer, ForeignKey(Label.id))
-    label = relationship(Label, cascade = "all,delete", backref = "paths")
+    label = relationship(Label, cascade = "none", backref = "paths")
 
     interpolatecache = None
 

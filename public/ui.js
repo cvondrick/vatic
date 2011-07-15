@@ -80,13 +80,15 @@ function ui_setup(job)
     "<input type='checkbox' id='annotateoptionsresize'>" +
     "<label for='annotateoptionsresize'>Disable Resize?</label> " +
     "<input type='checkbox' id='annotateoptionshideboxes'>" +
-    "<label for='annotateoptionshideboxes'>Hide Boxes?</label> ");
+    "<label for='annotateoptionshideboxes'>Hide Boxes?</label> " +
+    "<input type='checkbox' id='annotateoptionshideboxtext'>" +
+    "<label for='annotateoptionshideboxtext'>Hide Box Labels?</label> ");
 
     $("#advancedoptions").append(
     "<div id='speedcontrol'>" +
     "<input type='radio' name='speedcontrol' " +
-        "value='10,1' id='speedcontrolslower'>" +
-    "<label for='speedcontrolslower'>Crawl</label>" +
+        "value='5,1' id='speedcontrolslower'>" +
+    "<label for='speedcontrolslower'>Slower</label>" +
     "<input type='radio' name='speedcontrol' " +
         "value='15,1' id='speedcontrolslow'>" +
     "<label for='speedcontrolslow'>Slow</label>" +
@@ -229,6 +231,19 @@ function ui_setupbuttons(job, player, tracks)
         else
         {
             eventlog("hideboxes", "Boxes are invisible");
+        }
+    });
+
+    $("#annotateoptionshideboxtext").button().click(function() {
+        var visible = !$(this).attr("checked");
+
+        if (visible)
+        {
+            $(".boundingboxtext").show();
+        }
+        else
+        {
+            $(".boundingboxtext").hide();
         }
     });
 }

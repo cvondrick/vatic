@@ -611,13 +611,25 @@ function Track(player, color, position)
     }
 
     /*
+     * Changes the text on the bounding box.
+     */
+    this.settext = function(value)
+    {
+        if (this.handle != null)
+        {
+            this.handle.children(".boundingboxtext").html(value);
+        }
+
+    }
+
+    /*
      * Draws the current box on the screen. 
      */
     this.draw = function(frame, position)
     {
         if (this.handle == null)
         {
-            this.handle = $('<div class="boundingbox"></div>');
+            this.handle = $('<div class="boundingbox"><div class="boundingboxtext"></div></div>');
             this.handle.css("border-color", this.color);
             var fill = $('<div class="fill"></div>').appendTo(this.handle);
             fill.css("background-color", this.color);

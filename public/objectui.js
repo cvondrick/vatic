@@ -336,12 +336,50 @@ function TrackObject(job, player, container, color)
 
         this.setupdetails();
 
+        this.updateboxtext();
+
         this.header.mouseup(function() {
             me.click();
         });
 
         this.ready = true;
         this._callback(this.onready);
+
+        this.player.onupdate.push(function() {
+            me.updateboxtext();
+        });
+    }
+
+    this.updateboxtext = function()
+    {
+        var str = "<strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong>";
+
+        var e = this.track.journal.estimate(this.player.frame);
+        var count = 0;
+        for (var i in this.job.attributes[this.track.label])
+        {
+            if (e.attributes.indexOf(i) > -1)
+            {
+                if (count == 0)
+                {
+                    str += "<br>";
+                }
+                else
+                {
+                    str += "<br>";
+                }
+
+                str += this.job.attributes[this.track.label][i];
+                count++;
+            }
+        }
+
+        this.track.settext(str);
+
+        if ($("#annotateoptionshideboxtext").attr("checked"))
+        {
+            $(".boundingboxtext").hide();
+        }
     }
 
     this.setupdetails = function()
@@ -362,6 +400,8 @@ function TrackObject(job, player, container, color)
                     var checked = $(this).attr("checked");
                     me.track.setattribute(attributeid, checked);
                     me.track.notifyupdate();
+
+                    me.updateboxtext();
 
                     if (checked) 
                     {

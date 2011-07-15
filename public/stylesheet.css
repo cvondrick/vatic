@@ -315,6 +315,20 @@ code
     border-width : 2px;
 }
 
+.boundingbox .boundingboxtext
+{
+    font-size : 14px;
+    /*margin-top : -18px;*/
+
+    position : absolute;
+    margin-left : -103px;
+    margin-top : -2px;
+    width : 100px;
+    text-align : right;
+
+    color : #000;
+}
+
 .boundingbox .fill
 {
     width : 100%;
