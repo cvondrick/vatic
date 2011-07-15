@@ -321,12 +321,28 @@ code
     /*margin-top : -18px;*/
 
     position : absolute;
-    margin-left : -103px;
+    margin-left : -105px;
     margin-top : -2px;
     width : 100px;
     text-align : right;
 
     color : #000;
+    padding : 1px;
+    padding-right : 3px;
+    cursor : default;
+    z-index : 99;
+}
+
+.boundingboxhighlight .boundingboxtext
+{
+    background-color:#fff;
+    border-width : 1px;
+    border-style : solid;
+    border-right : 0;
+    border-color : inherit;
+    padding : 0;
+    padding-right : 2px;
+    z-index : 100;
 }
 
 .boundingbox .fill

@@ -635,6 +635,9 @@ function Track(player, color, position)
             fill.css("background-color", this.color);
             this.player.handle.append(this.handle);
 
+            this.handle.children(".boundingboxtext").css({
+                "border-color": this.color});
+
             this.handle.resizable({
                 handles: "n,w,s,e",
                 start: function() {
