@@ -11,14 +11,6 @@ import logging
 
 logger = logging.getLogger("vatic.models")
 
-#video_labels = Table("videos2labels", turkic.database.Base.metadata,
-#    Column("video_id", Integer, ForeignKey("videos.id")),
-#    Column("label_id", Integer, ForeignKey("labels.id")))
-#
-#labels_attributes = Table("labels2attributes", turkic.database.Base.metadata,
-#    Column("label_id", Integer, ForeignKey("labels.id")),
-#    Column("attribute_id", Integer, ForeignKey("attributes.id")))
-
 boxes_attributes = Table("boxes2attributes", turkic.database.Base.metadata,
     Column("box_id", Integer, ForeignKey("boxes.id")),
     Column("attribute_id", Integer, ForeignKey("attributes.id")))
