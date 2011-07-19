@@ -213,10 +213,14 @@ class load(LoadCommand):
                 segment = Segment(video = video)
                 if args.for_training_start:
                     segment.start = args.for_training_start
+                    if segment.start < 0:
+                        segment.start = 0
                 else:
                     segment.start = 0
                 if args.for_training_stop:
                     segment.stop = args.for_training_stop
+                    if segment.stop > video.totalframes:
+                        segment.stop = video.totalframes
                 else:
                     segment.stop = video.totalframes
                 job = Job(segment = segment, group = group, ready = False)
@@ -324,7 +328,7 @@ class delete(Command):
 
         for segment in video.segments:
             for job in segment.jobs:
-                if job.published:
+                if job.published and not job.completed:
                     hitid = job.disable()
                     print "Disabled {0}".format(hitid)
 
