@@ -61,7 +61,7 @@ def getboxesforjob(id):
 def readpaths(tracks):
     paths = []
     logger.debug("Reading {0} total tracks".format(len(tracks)))
-    for label, track in tracks:
+    for label, (track, attributes) in tracks:
         path = Path()
         path.label = session.query(Label).get(label)
         
@@ -77,9 +77,18 @@ def readpaths(tracks):
             box.outside = int(userbox[5])
             box.frame = int(frame)
 
-            for attribute in userbox[6]:
-                attribute = session.query(Attribute).get(attribute)
-                box.attributes.append(attribute)
+        attributecache = {}
+        for frame, attribute, value in attributes:
+            if attribute not in attributecache:
+                query = session.query(Attribute)
+                attributecache[attribute] = query.get(attribute)
+            attribute = attributecache[attribute]
+
+            aa = AttributeAnnotation()
+            aa.attribute = attribute
+            aa.value = value
+
+            path.attributes.append(aa)
 
             logger.debug("Received box {0}".format(str(box.getbox())))
 

@@ -412,6 +412,7 @@ function Track(player, color, position)
     var me = this;
 
     this.journal = new Journal();
+    this.attributejournals = {};
     this.label = null;
     this.player = player;
     this.handle = null;
@@ -466,11 +467,10 @@ function Track(player, color, position)
         var xbr = xtl + width + this.htmloffset;
         var ybr = ytl + height + this.htmloffset;
 
-        var estimate = this.journal.estimate(this.player.frame);
+        var estimate = this.estimate(this.player.frame);
         var position = new Position(xtl, ytl, xbr, ybr)
         position.occluded = estimate.occluded;
         position.outside = estimate.outside;
-        position.attributes = estimate.attributes;
         return position;
     }
 
@@ -546,7 +546,7 @@ function Track(player, color, position)
             console.log("Marking object as not occluded here.");
         }
 
-        var pos = this.journal.estimate(this.player.frame);
+        var pos = this.estimate(this.player.frame);
         if (pos == null)
         {
             pos = this.pollposition();
@@ -572,7 +572,7 @@ function Track(player, color, position)
             console.log("Marking object as not outside here.");
         }
 
-        var pos = this.journal.estimate(this.player.frame);
+        var pos = this.estimate(this.player.frame);
         if (pos == null)
         {
             pos = this.pollposition();
@@ -586,28 +586,30 @@ function Track(player, color, position)
 
     this.setattribute = function(id, value)
     {
-        var pos = this.journal.estimate(this.player.frame);
-        if (pos == null)
+        if (this.attributejournals[id] == null)
         {
-            pos = this.pollposition();
-        }
-        pos = pos.clone()
-
-        if (value)
-        {
-            pos.attributes.push(id)
-        }
-        else
-        {
-            var index = pos.attributes.indexOf(id);
-            if (index >= 0)
-            {
-                pos.attributes.splice(index, 1);
-            }
+            this.attributejournals[id] = new Journal();
         }
 
-        this.journal.mark(this.player.frame, pos);
-        this.journal.artificialright = this.journal.rightmost();
+        var journal = this.attributejournals[id];
+        journal.mark(this.player.frame, value);
+        journal.artificialright = journal.rightmost();
+    }
+
+    this.estimateattribute = function(id, frame)
+    {
+        if (this.attributejournals[id] == null)
+        {
+            return false;
+        }
+
+        var bounds = this.attributejournals[id].bounds(frame);
+        if (bounds['left'] == null)
+        {
+            return bounds['right'];
+        }
+
+        return bounds['left'];
     }
 
     /*
@@ -617,7 +619,7 @@ function Track(player, color, position)
     {
         if (this.handle != null)
         {
-            this.handle.children(".boundingboxtext").html(value);
+            this.handle.children(".boundingboxtext").html(value).show();
         }
 
     }
@@ -636,7 +638,7 @@ function Track(player, color, position)
             this.player.handle.append(this.handle);
 
             this.handle.children(".boundingboxtext").css({
-                "border-color": this.color});
+                "border-color": this.color}).hide();
 
             this.handle.resizable({
                 handles: "n,w,s,e",
@@ -684,7 +686,7 @@ function Track(player, color, position)
 
         if (position == null)
         {
-            position = this.journal.estimate(frame);
+            position = this.estimate(frame);
         }
 
         if (position.outside)
@@ -803,27 +805,6 @@ function Track(player, color, position)
         this.deleted = true;
     }
 
-    this.draw(this.player.frame);
-}
-
-/*
- * A journal to store a set of positions.
- */
-function Journal()
-{
-    this.annotations = {};
-    this.artificialright = null;
-    this.artificialrightframe = null;
-
-    /*
-     * Marks the boxes position.
-     */
-    this.mark = function(frame, position) 
-    {
-        console.log("Marking " + frame);
-        this.annotations[frame] = position;
-    }
-
     /*
      * Estimates the position of the box for visualization purposes.
      * If the frame was annotated, returns that position, otherwise
@@ -831,7 +812,7 @@ function Journal()
      */
     this.estimate = function(frame)
     {
-        var bounds = this.bounds(frame);
+        var bounds = this.journal.bounds(frame);
         if (bounds['leftframe'] == bounds['rightframe'])
         {
             return bounds['left'];
@@ -871,11 +852,32 @@ function Journal()
 //        {
             occluded = bounds['left'].occluded;
             outside = bounds['left'].outside;
-            attrs = bounds['left'].attributes;
 //        }
 
-        return new Position(xtl, ytl, xbr, ybr, occluded, outside, attrs);
+        return new Position(xtl, ytl, xbr, ybr, occluded, outside);
     }
+
+    this.draw(this.player.frame);
+}
+
+/*
+ * A journal to store a set of positions.
+ */
+function Journal()
+{
+    this.annotations = {};
+    this.artificialright = null;
+    this.artificialrightframe = null;
+
+    /*
+     * Marks the boxes position.
+     */
+    this.mark = function(frame, position) 
+    {
+        console.log("Marking " + frame);
+        this.annotations[frame] = position;
+    }
+
     
     this.bounds = function(frame)
     {
@@ -970,7 +972,7 @@ function Journal()
  * A structure to store a position.
  * Occlusion and outside is optional.
  */
-function Position(xtl, ytl, xbr, ybr, occluded, outside, attributes)
+function Position(xtl, ytl, xbr, ybr, occluded, outside)
 {
     this.xtl = xtl;
     this.ytl = ytl;
@@ -978,14 +980,8 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside, attributes)
     this.ybr = ybr;
     this.occluded = occluded ? occluded : false;
     this.outside = outside ? outside : false;
-    this.attributes = attributes;
     this.width = xbr - xtl;
     this.height = ybr - ytl;
-
-    if (this.attributes == null)
-    {
-        this.attributes = [];
-    }
 
     if (this.xbr <= this.xtl)
     {
@@ -999,28 +995,12 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside, attributes)
 
     this.serialize = function()
     {
-        var attrs = "[";
-
-        if (this.attributes.length > 0)
-        {
-            for (var i in this.attributes)
-            {
-                attrs += this.attributes[i] + ",";
-            }
-            attrs = attrs.substr(0, attrs.length - 1) + "]";
-        }
-        else
-        {
-            attrs += "]";
-        }
-
         return "[" + this.xtl + "," +
                      this.ytl + "," +
                      this.xbr + "," +
                      this.ybr + "," +
                      this.occluded + "," +
-                     this.outside + "," +
-                     attrs + "]";
+                     this.outside + "]";
     }
 
     this.clone = function()
@@ -1030,7 +1010,6 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside, attributes)
                             this.xbr,
                             this.ybr,
                             this.occluded,
-                            this.outside,
-                            this.attributes.slice(0));
+                            this.outside)
     }
 }
