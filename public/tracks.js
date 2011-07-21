@@ -868,6 +868,7 @@ function Journal()
     this.annotations = {};
     this.artificialright = null;
     this.artificialrightframe = null;
+    this.blowradius = 5;
 
     /*
      * Marks the boxes position.
@@ -875,6 +876,22 @@ function Journal()
     this.mark = function(frame, position) 
     {
         console.log("Marking " + frame);
+
+        var newannotations = {};
+
+        for (var i in this.annotations)
+        {
+            if (Math.abs(i - frame) > this.blowradius)
+            {
+                newannotations[i] = this.annotations[i];
+            }
+            else
+            {
+                console.log("Blowing out annotation at " + i);
+            }
+        }
+
+        this.annotations = newannotations;
         this.annotations[frame] = position;
     }
 
