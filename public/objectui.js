@@ -333,10 +333,7 @@ function TrackObject(job, player, container, color)
 
         this.updateboxtext();
 
-        for (var i in this.job.attributes[this.track.label])
-        {
-            this.track.setattribute(i, false);
-        }
+        this.track.initattributes(this.job.start, this.job.attributes[this.track.label]);
 
         this.header.mouseup(function() {
             me.click();

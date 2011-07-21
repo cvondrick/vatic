@@ -596,6 +596,18 @@ function Track(player, color, position)
         journal.artificialright = journal.rightmost();
     }
 
+    this.initattributes = function(start, attributes)
+    {
+        for (var i in attributes)
+        {
+            var journal = new Journal();
+            journal.mark(start, false);
+            journal.artificialright = journal.rightmost();
+
+            this.attributejournals[i] = journal;
+        }
+    }
+
     this.estimateattribute = function(id, frame)
     {
         if (this.attributejournals[id] == null)
@@ -881,7 +893,7 @@ function Journal()
 
         for (var i in this.annotations)
         {
-            if (Math.abs(i - frame) > this.blowradius)
+            if (Math.abs(i - frame) >= this.blowradius)
             {
                 newannotations[i] = this.annotations[i];
             }
