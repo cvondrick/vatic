@@ -631,7 +631,8 @@ function Track(player, color, position)
     {
         if (this.handle != null)
         {
-            this.handle.children(".boundingboxtext").html(value).show();
+            var t = this.handle.children(".boundingboxtext");
+            t.html(value).show();
         }
 
     }
@@ -651,6 +652,7 @@ function Track(player, color, position)
 
             this.handle.children(".boundingboxtext").css({
                 "border-color": this.color}).hide();
+                //"color": this.color}).hide();
 
             this.handle.resizable({
                 handles: "n,w,s,e",

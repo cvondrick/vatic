@@ -319,29 +319,29 @@ code
 {
     font-size : 14px;
     /*margin-top : -18px;*/
+    color : #fff;
 
     position : absolute;
-    margin-left : -105px;
+    margin-left : -80px;
     margin-top : -2px;
-    width : 100px;
+    width : 75px;
     text-align : right;
 
-    color : #000;
     padding : 1px;
     padding-right : 3px;
     cursor : default;
     z-index : 99;
+
+    text-shadow: -1px 0 2px #000, 0px 1px 2px #000, 1px 0 2px #000, 0 -1px 2px #000; 
+    -moz-text-shadow: -1px 0 2px #000, 0px 1px 2px #000, 1px 0 2px #000, 0 -1px 2px #000; 
+    -webkit-text-shadow: -1px 0 2px #000, 0px 1px 2px #000, 1px 0 2px #000, 0 -1px 2px #000; 
 }
 
 .boundingboxhighlight .boundingboxtext
 {
-    background-color:#fff;
-    border-width : 1px;
-    border-style : solid;
-    border-right : 0;
-    border-color : inherit;
-    padding : 0;
-    padding-right : 2px;
+    text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
+    -moz-text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
+    -webkit-text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
     z-index : 100;
 }
 
