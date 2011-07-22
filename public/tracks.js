@@ -411,7 +411,7 @@ function Track(player, color, position)
 {
     var me = this;
 
-    this.journal = new Journal();
+    this.journal = new Journal(player.job.start);
     this.attributejournals = {};
     this.label = null;
     this.player = player;
@@ -586,22 +586,17 @@ function Track(player, color, position)
 
     this.setattribute = function(id, value)
     {
-        if (this.attributejournals[id] == null)
-        {
-            this.attributejournals[id] = new Journal();
-        }
-
         var journal = this.attributejournals[id];
         journal.mark(this.player.frame, value);
         journal.artificialright = journal.rightmost();
     }
 
-    this.initattributes = function(start, attributes)
+    this.initattributes = function(attributes)
     {
         for (var i in attributes)
         {
-            var journal = new Journal();
-            journal.mark(start, false);
+            var journal = new Journal(this.player.job.start);
+            journal.mark(this.player.job.start, false);
             journal.artificialright = journal.rightmost();
 
             this.attributejournals[i] = journal;
@@ -877,12 +872,13 @@ function Track(player, color, position)
 /*
  * A journal to store a set of positions.
  */
-function Journal()
+function Journal(start)
 {
     this.annotations = {};
     this.artificialright = null;
     this.artificialrightframe = null;
     this.blowradius = 5;
+    this.start = start;
 
     /*
      * Marks the boxes position.
@@ -898,6 +894,11 @@ function Journal()
             if (Math.abs(i - frame) >= this.blowradius)
             {
                 newannotations[i] = this.annotations[i];
+            }
+            else if (i == this.start)
+            {
+                console.log("Start would blow, so propagating");
+                newannotations[i] = position;
             }
             else
             {
