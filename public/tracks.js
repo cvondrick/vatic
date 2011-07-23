@@ -665,6 +665,10 @@ function Track(player, color, position)
                     me.recordposition();
                     me.notifyupdate();
                     eventlog("resizable", "Resize a box");
+                    me.highlight(false);
+                },
+                resize: function() {
+                    me.highlight(true);
                 }
             });
 
