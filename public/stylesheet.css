@@ -330,7 +330,7 @@ code
     padding : 1px;
     padding-right : 3px;
     cursor : default;
-    z-index : 99;
+    z-index : 0;
 
     text-shadow: -1px 0 2px #000, 0px 1px 2px #000, 1px 0 2px #000, 0 -1px 2px #000; 
     -moz-text-shadow: -1px 0 2px #000, 0px 1px 2px #000, 1px 0 2px #000, 0 -1px 2px #000; 
@@ -342,7 +342,7 @@ code
     text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
     -moz-text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
     -webkit-text-shadow: -1px 0 5px #000, 0px 1px 5px #000, 1px 0 5px #000, 0 -1px 5px #000; 
-    z-index : 100;
+    z-index : 1;
 }
 
 .boundingbox .fill

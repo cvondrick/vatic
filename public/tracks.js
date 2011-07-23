@@ -588,7 +588,7 @@ function Track(player, color, position)
     {
         var journal = this.attributejournals[id];
         journal.mark(this.player.frame, value);
-        journal.artificialright = journal.rightmost();
+        //journal.artificialright = journal.rightmost();
     }
 
     this.initattributes = function(attributes)
@@ -597,8 +597,8 @@ function Track(player, color, position)
         {
             var journal = new Journal(this.player.job.start);
             journal.mark(this.player.job.start, false);
-            journal.artificialright = journal.rightmost();
-            journal.artificialrightframe = this.player.job.stop;
+            //journal.artificialright = journal.rightmost();
+            //journal.artificialrightframe = this.player.job.stop;
 
             this.attributejournals[i] = journal;
         }
