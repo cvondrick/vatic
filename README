@@ -340,6 +340,11 @@ have any gaps:
 
     $ turkic visualize identifier /tmp --merge --renumber
 
+If you wish to display the class label and their attributes next to the box,
+specify the --labels option:
+
+    $ turkic visualize identifier /tmp --labels
+
 --- Compensating Workers -----------------------------------------------------
 
 When you are ready, you can compensate workers:

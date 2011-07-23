@@ -428,15 +428,26 @@ class visualize(DumpCommand):
         parser = argparse.ArgumentParser(parents = [self.parent])
         parser.add_argument("output")
         parser.add_argument("--no-augment", action="store_true", default = False)
+        parser.add_argument("--labels", action="store_true", default = False)
         parser.add_argument("--renumber", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
         video, data = self.getdata(args)
+        
+        # prepend class label
+        for track in data:
+            for box in track.boxes:
+                box.attributes.insert(0, track.label)
+
         paths = [x.boxes for x in data]
         print "Highlighting {0} tracks...".format(len(data))
 
-        it = vision.visualize.highlight_paths(video, paths)
+        if args.labels:
+            font = ImageFont.truetype("arial.ttf", 14)
+        else:
+            font = None
+        it = vision.visualize.highlight_paths(video, paths, font = font)
 
         if not args.no_augment:
             it = self.augment(args, video, data, it)
