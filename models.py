@@ -11,14 +11,6 @@ import logging
 
 logger = logging.getLogger("vatic.models")
 
-#video_labels = Table("videos2labels", turkic.database.Base.metadata,
-#    Column("video_id", Integer, ForeignKey("videos.id")),
-#    Column("label_id", Integer, ForeignKey("labels.id")))
-#
-#labels_attributes = Table("labels2attributes", turkic.database.Base.metadata,
-#    Column("label_id", Integer, ForeignKey("labels.id")),
-#    Column("attribute_id", Integer, ForeignKey("attributes.id")))
-
 boxes_attributes = Table("boxes2attributes", turkic.database.Base.metadata,
     Column("box_id", Integer, ForeignKey("boxes.id")),
     Column("attribute_id", Integer, ForeignKey("attributes.id")))
@@ -162,6 +154,19 @@ class Path(turkic.database.Base):
     def __repr__(self):
         return "<Path {0}>".format(self.id)
 
+class AttributeAnnotation(turkic.database.Base):
+    __tablename__ = "attribute_annotations"
+
+    id = Column(Integer, primary_key = True)
+    pathid = Column(Integer, ForeignKey(Path.id))
+    path = relationship(Path,
+                        backref = backref("attributes",
+                                          cascade = "all,delete"))
+    attributeid = Column(Integer, ForeignKey(Attribute.id))
+    attribute = relationship(Attribute)
+    frame = Column(Integer)
+    value = Column(Boolean, default = False)
+
 class Box(turkic.database.Base):
     __tablename__ = "boxes"
 
@@ -177,14 +182,9 @@ class Box(turkic.database.Base):
     occluded = Column(Boolean, default = False)
     outside = Column(Boolean, default = False)
 
-    attributes = relationship("Attribute",
-                              secondary = boxes_attributes)
-
     def getbox(self):
-        attributes = [(x.id, x.text) for x in self.attributes]
         return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,
-                          self.frame, self.outside, self.occluded,
-                          0, attributes)
+                          self.frame, self.outside, self.occluded, 0)
 
 class PerObjectBonus(turkic.models.BonusSchedule):
     __tablename__ = "per_object_bonuses"

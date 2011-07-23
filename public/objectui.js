@@ -90,7 +90,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.counter++;
     }
 
-    this.injectnewobject = function(label, path)
+    this.injectnewobject = function(label, path, attributes)
     {
         console.log("Injecting existing object");
 
@@ -102,13 +102,8 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         function convert(box)
         {
-            var attrs = [];
-            for (var i in box[8])
-            {
-                attrs.push("" + box[8][i][0]);
-            }
             return new Position(box[0], box[1], box[2], box[3],
-                                box[6], box[5], attrs);
+                                box[6], box[5]);
         }
 
         var track = tracks.add(path[0][4], convert(path[0]),
@@ -120,8 +115,16 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         obj.initialize(this.counter, track, this.tracks);
         obj.finalize(label);
+
+        for (var i = 0; i < attributes.length; i++)
+        {
+            track.attributejournals[attributes[i][0]].mark(attributes[i][1], attributes[i][2]);
+            console.log("Injecting attribute " + attributes[i][0] + " at frame " + attributes[i][1] + " to " + attributes[i][2]);
+        }
+
         obj.statefolddown();
         obj.updatecheckboxes();
+        obj.updateboxtext();
         this.counter++;
 
         return obj;
@@ -338,6 +341,8 @@ function TrackObject(job, player, container, color)
 
         this.updateboxtext();
 
+        this.track.initattributes(this.job.attributes[this.track.label]);
+
         this.header.mouseup(function() {
             me.click();
         });
@@ -354,21 +359,12 @@ function TrackObject(job, player, container, color)
     {
         var str = "<strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong>";
 
-        var e = this.track.journal.estimate(this.player.frame);
         var count = 0;
         for (var i in this.job.attributes[this.track.label])
         {
-            if (e.attributes.indexOf(i) > -1)
+            if (this.track.estimateattribute(i, this.player.frame))
             {
-                if (count == 0)
-                {
-                    str += "<br>";
-                }
-                else
-                {
-                    str += "<br>";
-                }
-
+                str += "<br>";
                 str += this.job.attributes[this.track.label][i];
                 count++;
             }
@@ -398,7 +394,7 @@ function TrackObject(job, player, container, color)
                     me.player.pause();
 
                     var checked = $(this).attr("checked");
-                    me.track.setattribute(attributeid, checked);
+                    me.track.setattribute(attributeid, checked ? true : false);
                     me.track.notifyupdate();
 
                     me.updateboxtext();
@@ -468,13 +464,13 @@ function TrackObject(job, player, container, color)
 
     this.updatecheckboxes = function()
     {
-        var e = this.track.journal.estimate(this.player.frame);
+        var e = this.track.estimate(this.player.frame);
         $("#trackobject" + this.id + "lost").attr("checked", e.outside);
         $("#trackobject" + this.id + "occluded").attr("checked", e.occluded);
 
         for (var i in this.job.attributes[this.track.label])
         {
-            if (e.attributes.indexOf(i) == -1)
+            if (!this.track.estimateattribute(i, this.player.frame))
             {
                 $("#trackobject" + this.id + "attribute" + i).attr("checked", false);
             }
