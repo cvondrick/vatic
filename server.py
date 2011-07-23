@@ -54,7 +54,8 @@ def getboxesforjob(id):
     job = session.query(Job).get(id)
     result = []
     for path in job.paths:
-        attrs = [(x.attributeid, x.frame, x.value) for x in path.attributes]
+        attrs = [(x.timeline.attributeid, x.frame, x.value)
+                 for x in path.flattenattributes()]
         result.append({"label": path.labelid,
                        "boxes": [tuple(x) for x in path.getboxes()],
                        "attributes": attrs})
@@ -82,14 +83,17 @@ def readpaths(tracks):
 
             logger.debug("Received box {0}".format(str(box.getbox())))
 
-        for attributeid, timeline in attributes.items():
+        for attributeid, keypoints in attributes.items():
             attribute = session.query(Attribute).get(attributeid)
-            for frame, value in timeline.items():
+            timeline = AttributeTimeline()
+            timeline.attribute = attribute
+            path.attributes.append(timeline)
+
+            for frame, value in keypoints.items():
                 aa = AttributeAnnotation()
-                aa.attribute = attribute
                 aa.frame = frame
                 aa.value = value
-                path.attributes.append(aa)
+                timeline.annotations.append(aa)
 
         paths.append(path)
     return paths

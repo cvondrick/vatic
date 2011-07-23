@@ -348,10 +348,28 @@ class DumpCommand(Command):
     parent.add_argument("--worker", "-w", nargs = "*", default = None)
 
     class Tracklet(object):
-        def __init__(self, label, boxes, workers):
+        def __init__(self, label, paths, boxes, workers):
             self.label = label
+            self.paths = paths
             self.boxes = sorted(boxes, key = lambda x: x.frame)
             self.workers = workers
+
+        def bind(self):
+            for box in self.boxes:
+                for path in self.paths:
+                    for timeline in path.attributes:
+                        attributes = timeline.annotations
+                        attributes.sort(key = lambda x: x.frame)
+                        for prev, cur in zip(attributes, attributes[1:]):
+                            if prev.frame <= box.frame < cur.frame:
+                                data = (prev.attributeid, prev.attribute.text)
+                                if prev.value and data not in box.attributes:
+                                    box.attributes.append(data)
+                        if attributes[-1].value:
+                            data = (attributes[-1].timeline.attributeid,
+                                    attributes[-1].timeline.attribute.text)
+                            if data not in box.attributes:
+                                box.attributes.append(data)
 
     def getdata(self, args):
         response = []
@@ -366,7 +384,7 @@ class DumpCommand(Command):
                                             threshold = args.merge_threshold):
                 workers = list(set(x.job.workerid for x in paths))
                 tracklet = DumpCommand.Tracklet(paths[0].label.text,
-                                                boxes, workers)
+                                                paths, boxes, workers)
                 response.append(tracklet)
         else:
             for segment in video.segments:
@@ -376,6 +394,7 @@ class DumpCommand(Command):
                     worker = job.workerid
                     for path in job.paths:
                         tracklet = DumpCommand.Tracklet(path.label.text,
+                                                        [path],
                                                         path.getboxes(),
                                                         [worker])
                         response.append(tracklet)
@@ -388,10 +407,13 @@ class DumpCommand(Command):
             interpolated = []
             for track in response:
                 path = vision.track.interpolation.LinearFill(track.boxes)
-                tracklet = DumpCommand.Tracklet(track.label,
+                tracklet = DumpCommand.Tracklet(track.label, track.paths,
                                                 path, track.workers)
                 interpolated.append(tracklet)
             response = interpolated
+
+        for tracklet in response:
+            tracklet.bind()
 
         return video, response
 

@@ -151,19 +151,34 @@ class Path(turkic.database.Base):
             result = self.interpolatecache
         return result
 
+    def flattenattributes(self):
+        attrs = []
+        for timeline in self.attributes:
+            for attribute in timeline.annotations:
+                attrs.append(attribute)
+        return attrs
+
     def __repr__(self):
         return "<Path {0}>".format(self.id)
+
+class AttributeTimeline(turkic.database.Base):
+    __tablename__ = "attribute_timelines"
+
+    id = Column(Integer, primary_key = True)
+    pathid = Column(Integer, ForeignKey(Path.id))
+    path = relationship(Path, backref = backref("attributes"),
+                        cascade = "all,delete")
+    attributeid = Column(Integer, ForeignKey(Attribute.id))
+    attribute = relationship(Attribute)
 
 class AttributeAnnotation(turkic.database.Base):
     __tablename__ = "attribute_annotations"
 
     id = Column(Integer, primary_key = True)
-    pathid = Column(Integer, ForeignKey(Path.id))
-    path = relationship(Path,
-                        backref = backref("attributes",
-                                          cascade = "all,delete"))
-    attributeid = Column(Integer, ForeignKey(Attribute.id))
-    attribute = relationship(Attribute)
+    timelineid = Column(Integer, ForeignKey(AttributeTimeline.id))
+    timeline = relationship(AttributeTimeline,
+                           backref = backref("annotations",
+                           cascade = "all,delete"))
     frame = Column(Integer)
     value = Column(Boolean, default = False)
 
