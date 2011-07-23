@@ -54,14 +54,17 @@ def getboxesforjob(id):
     job = session.query(Job).get(id)
     result = []
     for path in job.paths:
+        attrs = [(x.attributeid, x.frame, x.value) for x in path.attributes]
         result.append({"label": path.labelid,
-                       "boxes": [tuple(x) for x in path.getboxes()]})
+                       "boxes": [tuple(x) for x in path.getboxes()],
+                       "attributes": attrs})
     return result
 
 def readpaths(tracks):
     paths = []
     logger.debug("Reading {0} total tracks".format(len(tracks)))
-    for label, (track, attributes) in tracks:
+
+    for label, track, attributes in tracks:
         path = Path()
         path.label = session.query(Label).get(label)
         
@@ -77,20 +80,16 @@ def readpaths(tracks):
             box.outside = int(userbox[5])
             box.frame = int(frame)
 
-        attributecache = {}
-        for frame, attribute, value in attributes:
-            if attribute not in attributecache:
-                query = session.query(Attribute)
-                attributecache[attribute] = query.get(attribute)
-            attribute = attributecache[attribute]
-
-            aa = AttributeAnnotation()
-            aa.attribute = attribute
-            aa.value = value
-
-            path.attributes.append(aa)
-
             logger.debug("Received box {0}".format(str(box.getbox())))
+
+        for attributeid, timeline in attributes.items():
+            attribute = session.query(Attribute).get(attributeid)
+            for frame, value in timeline.items():
+                aa = AttributeAnnotation()
+                aa.attribute = attribute
+                aa.frame = frame
+                aa.value = value
+                path.attributes.append(aa)
 
         paths.append(path)
     return paths

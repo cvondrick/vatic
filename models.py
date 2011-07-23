@@ -183,7 +183,6 @@ class Box(turkic.database.Base):
     outside = Column(Boolean, default = False)
 
     def getbox(self):
-        attributes = [(x.id, x.text) for x in self.attributes]
         return vision.Box(self.xtl, self.ytl, self.xbr, self.ybr,
                           self.frame, self.outside, self.occluded, 0)
 

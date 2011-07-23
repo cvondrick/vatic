@@ -598,6 +598,7 @@ function Track(player, color, position)
             var journal = new Journal(this.player.job.start);
             journal.mark(this.player.job.start, false);
             journal.artificialright = journal.rightmost();
+            journal.artificialrightframe = this.player.job.stop;
 
             this.attributejournals[i] = journal;
         }
@@ -645,9 +646,10 @@ function Track(player, color, position)
             fill.css("background-color", this.color);
             this.player.handle.append(this.handle);
 
-            this.handle.children(".boundingboxtext").css({
-                "border-color": this.color}).hide();
-                //"color": this.color}).hide();
+            this.handle.children(".boundingboxtext").hide().css({
+                "border-color": this.color,
+                //"color": this.color
+                });
 
             this.handle.resizable({
                 handles: "n,w,s,e",
@@ -675,8 +677,10 @@ function Track(player, color, position)
                     me.recordposition();                
                     me.notifyupdate();
                     eventlog("draggable", "Drag-n-drop a box");
-                }
+                },
+                cancel: ".boundingboxtext"
             });
+
 
             this.handle.mouseover(function() {
                 for (var i in me.onmouseover)
@@ -800,7 +804,16 @@ function Track(player, color, position)
         {
             return "";
         }
-        return "[" + this.label + "," + this.journal.serialize() + "]";
+        var str = "[" + this.label + "," + this.journal.serialize() + ",{";
+
+        for (var i in this.attributejournals)
+        {
+            str += '"' + i + '":' + this.attributejournals[i].serialize() + ",";
+        }
+
+        str = str.substr(0, str.length - 1);
+
+        return str += "}]";
     }
 
     /*
@@ -988,13 +1001,22 @@ function Journal(start)
         for (var frame in this.annotations)
         {
             var dat = this.annotations[frame];
-            str += "\"" + frame + "\":" + dat.serialize() + ",";
+            if (dat instanceof Object)
+            {
+                dat = dat.serialize();
+            }
+            str += "\"" + frame + "\":" + dat + ",";
         }
 
         if (this.artificialrightframe != null && this.annotations[this.artificialrightframe] == null)
         {
             console.log("Using artificial in serialization");
-            str += "\"" + this.artificialrightframe + "\":" + this.artificialright.serialize() + ",";
+            var dat = this.artificialright;
+            if (dat instanceof Object)
+            {
+                dat = dat.serialize();
+            }
+            str += "\"" + this.artificialrightframe + "\":" + dat + ",";
         }
         return str.substr(0, str.length - 1) + "}";
     }

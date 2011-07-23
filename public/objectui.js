@@ -90,7 +90,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         this.counter++;
     }
 
-    this.injectnewobject = function(label, path)
+    this.injectnewobject = function(label, path, attributes)
     {
         console.log("Injecting existing object");
 
@@ -115,8 +115,16 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         obj.initialize(this.counter, track, this.tracks);
         obj.finalize(label);
+
+        for (var i = 0; i < attributes.length; i++)
+        {
+            track.attributejournals[attributes[i][0]].mark(attributes[i][1], attributes[i][2]);
+            console.log("Injecting attribute " + attributes[i][0] + " at frame " + attributes[i][1] + " to " + attributes[i][2]);
+        }
+
         obj.statefolddown();
         obj.updatecheckboxes();
+        obj.updateboxtext();
         this.counter++;
 
         return obj;
