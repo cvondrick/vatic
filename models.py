@@ -63,6 +63,9 @@ class Attribute(turkic.database.Base):
     label = relationship(Label, backref = backref("attributes",
                                                   cascade = "all,delete"))
 
+    def __str__(self):
+        return self.text
+
 class Segment(turkic.database.Base):
     __tablename__ = "segments"
 
@@ -151,36 +154,30 @@ class Path(turkic.database.Base):
             result = self.interpolatecache
         return result
 
-    def flattenattributes(self):
-        attrs = []
-        for timeline in self.attributes:
-            for attribute in timeline.annotations:
-                attrs.append(attribute)
-        return attrs
-
     def __repr__(self):
         return "<Path {0}>".format(self.id)
-
-class AttributeTimeline(turkic.database.Base):
-    __tablename__ = "attribute_timelines"
-
-    id = Column(Integer, primary_key = True)
-    pathid = Column(Integer, ForeignKey(Path.id))
-    path = relationship(Path, backref = backref("attributes"),
-                        cascade = "all,delete")
-    attributeid = Column(Integer, ForeignKey(Attribute.id))
-    attribute = relationship(Attribute)
 
 class AttributeAnnotation(turkic.database.Base):
     __tablename__ = "attribute_annotations"
 
     id = Column(Integer, primary_key = True)
-    timelineid = Column(Integer, ForeignKey(AttributeTimeline.id))
-    timeline = relationship(AttributeTimeline,
-                           backref = backref("annotations",
-                           cascade = "all,delete"))
+    pathid = Column(Integer, ForeignKey(Path.id))
+    path = relationship(Path,
+                        backref = backref("attributes",
+                                          cascade = "all,delete"))
+    attributeid = Column(Integer, ForeignKey(Attribute.id))
+    attribute = relationship(Attribute)
     frame = Column(Integer)
     value = Column(Boolean, default = False)
+
+    def __repr__(self):
+        return ("AttributeAnnotation(pathid = {0}, "
+                                    "attributeid = {1}, "
+                                    "frame = {2}, "
+                                    "value = {3})").format(self.pathid,
+                                                           self.attributeid,
+                                                           self.frame,
+                                                           self.value)
 
 class Box(turkic.database.Base):
     __tablename__ = "boxes"

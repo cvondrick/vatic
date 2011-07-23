@@ -296,12 +296,8 @@ definition of these columns are:
     10  label. The label for this annotation, enclosed in quotation marks.
     11+ attributes. Each column after this is an attribute.
 
-By default, the above command will just dump the raw annotations. It will not
-interpolate or do any merging. You can request linear interpolation with:
-
-    $ turkic dump identifier -o output.txt --interpolate
-
-You can also request merging with the command:
+By default, the above command will not attempt to merge annotations across
+shot segments. You can request merging with the command:
 
     $ turkic dump identifier -o output.txt --merge --merge-threshold 0.5
 
@@ -309,10 +305,6 @@ The --merge-threshold option is optional, but it is a number between 0 and 1
 that represents much the paths must agree in order to merge. 1 specifies a
 perfect match and 0 specifies no match. In practice, 0.5 is sufficient. Merging
 is done using the Hungarian algorithm.
-
-Of course, the above options are often combined:
-
-    $ turkic dump identifier -o output.txt -mi
 
 You can also scale annotations by a factor, which is useful for when the
 videos have been downsampled:
@@ -333,20 +325,20 @@ The specifications for these formats should be self explanatory.
 
 You can preview the annotations by visualizing the results:
 
-    $ turkic visualize identifier /tmp --interpolate --merge
+    $ turkic visualize identifier /tmp --merge
 
 which will output frames to /tmp with the bounding boxes with the file name
 as the frame number. The visualization will contain some meta information
 that can help you identify bad workers. You can remove this meta information
 with the option:
 
-    $ turkic visualize identifer /tmp --interpolate --merge --no-augment
+    $ turkic visualize identifer /tmp --merge --no-augment
 
 If you want to make a video of the visualization (e.g., with ffmpeg), it is
 useful to renumber the frames so that they start counting at 0 and do not
 have any gaps:
 
-    $ turkic visualize identifier /tmp --interpolate --merge --renumber
+    $ turkic visualize identifier /tmp --merge --renumber
 
 --- Compensating Workers -----------------------------------------------------
 

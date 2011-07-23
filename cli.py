@@ -340,8 +340,6 @@ class delete(Command):
 class DumpCommand(Command):
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("slug")
-    parent.add_argument("--interpolate", "-i",
-        action="store_true", default=False)
     parent.add_argument("--merge", "-m", action="store_true", default=False)
     parent.add_argument("--merge-threshold", "-t",
                         type=float, default = 0.5)
@@ -355,21 +353,29 @@ class DumpCommand(Command):
             self.workers = workers
 
         def bind(self):
-            for box in self.boxes:
-                for path in self.paths:
-                    for timeline in path.attributes:
-                        attributes = timeline.annotations
-                        attributes.sort(key = lambda x: x.frame)
-                        for prev, cur in zip(attributes, attributes[1:]):
-                            if prev.frame <= box.frame < cur.frame:
-                                data = (prev.attributeid, prev.attribute.text)
-                                if prev.value and data not in box.attributes:
-                                    box.attributes.append(data)
-                        if attributes[-1].value:
-                            data = (attributes[-1].timeline.attributeid,
-                                    attributes[-1].timeline.attribute.text)
-                            if data not in box.attributes:
-                                box.attributes.append(data)
+            for path in self.paths:
+                attributes = path.attributes
+                attributes.sort(key = lambda x: x.frame)
+
+                byid = {}
+                for attribute in attributes:
+                    if attribute.attributeid not in byid:
+                        byid[attribute.attributeid] = []
+                    byid[attribute.attributeid].append(attribute)
+
+                for attributes in byid.values():
+                    for prev, cur in zip(attributes, attributes[1:]):
+                        if prev.value:
+                            for box in self.boxes:
+                                if prev.frame <= box.frame < cur.frame:
+                                    if prev.attribute not in box.attributes:
+                                        box.attributes.append(prev.attribute)
+                    last = attributes[-1]
+                    if last.value:
+                        for box in self.boxes:
+                            if last.frame <= box.frame:
+                                if last.attribute not in box.attributes:
+                                    box.attributes.append(last.attribute)
 
     def getdata(self, args):
         response = []
@@ -403,14 +409,13 @@ class DumpCommand(Command):
             workers = set(args.worker)
             response = [x for x in response if set(x.workers) & workers]
 
-        if args.interpolate:
-            interpolated = []
-            for track in response:
-                path = vision.track.interpolation.LinearFill(track.boxes)
-                tracklet = DumpCommand.Tracklet(track.label, track.paths,
-                                                path, track.workers)
-                interpolated.append(tracklet)
-            response = interpolated
+        interpolated = []
+        for track in response:
+            path = vision.track.interpolation.LinearFill(track.boxes)
+            tracklet = DumpCommand.Tracklet(track.label, track.paths,
+                                            path, track.workers)
+            interpolated.append(tracklet)
+        response = interpolated
 
         for tracklet in response:
             tracklet.bind()
@@ -569,9 +574,9 @@ class dump(DumpCommand):
                 file.write(" ybr=\"{0}\"".format(box.ybr))
                 file.write(" outside=\"{0}\"".format(box.lost))
                 file.write(" occluded=\"{0}\">".format(box.occluded))
-                for attrid, attrtext in box.attributes:
+                for attr in box.attributes:
                     file.write("<attribute id=\"{0}\">{1}</attribute>".format(
-                               attrid, attrtext))
+                               attr.id, attr.text))
                 file.write("</box>\n")
             file.write("\t</track>\n")
         file.write("</annotations>\n")
@@ -633,9 +638,9 @@ class dump(DumpCommand):
                 file.write(" \"")
                 file.write(track.label)
                 file.write("\"")
-                for _, attribute in box.attributes:
+                for attr in box.attributes:
                     file.write(" \"")
-                    file.write(attribute)
+                    file.write(attr.text)
                     file.write("\"")
                 file.write("\n")
 
