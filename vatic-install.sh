@@ -1,18 +1,15 @@
+apt-get install -y git
 apt-get install -y python-setuptools
 
-rm -f turkic.tar.gz
-wget http://mit.edu/vondrick/code/turkic.tar.gz
-tar xzvf turkic.tar.gz
-cd turkic-*
+git clone https://github.com/cvondrick/turkic.git
+cd turkic
 easy_install -U SQLAlchemy
 easy_install -U wsgilog
 python setup.py install
 cd ..
 
-rm -f pyvision.tar.gz
-wget http://mit.edu/vondrick/code/pyvision.tar.gz
-tar xzvf pyvision.tar.gz
-cd pyvision-*
+git clone https://github.com/cvondrick/pyvision.git
+cd pyvision
 apt-get install -y python-dev
 apt-get install -y libavcodec-dev libavformat-dev libswscale-dev
 apt-get install -y libjpeg libjpeg-dev
@@ -32,6 +29,8 @@ easy_install -U mysql-python
 
 easy_install -U munkres
 easy_install -U parsedatetime
+
+git clone https://github.com/cvondrick/vatic.git
 
 echo "*****************************************************"
 echo "*** Please consult README to finish installation. ***"
