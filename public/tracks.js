@@ -342,6 +342,14 @@ function TrackCollection(player, job)
         }
     }
 
+    this.drawingnew = function(value)
+    {
+        for (var i in this.tracks)
+        {
+            this.tracks[i].drawingnew = value;
+        }
+    }
+
     /*
      * Updates boxes with the given frame
      */
@@ -429,6 +437,7 @@ function Track(player, color, position)
     this.canresize = true;
 
     this.locked = false;
+    this.drawingnew = false;
 
     this.journal.mark(this.player.job.start,
         new Position(position.xtl, position.ytl,
@@ -719,7 +728,7 @@ function Track(player, color, position)
 
 
             this.handle.mouseover(function() {
-                if (!me.locked)
+                if (!me.locked && !me.drawingnew)
                 {
                     for (var i in me.onmouseover)
                     {
@@ -729,7 +738,7 @@ function Track(player, color, position)
             });
 
             this.handle.mouseout(function() {
-                if (!me.locked)
+                if (!me.locked && !me.drawingnew)
                 {
                     for (var i in me.onmouseout)
                     {
@@ -777,7 +786,7 @@ function Track(player, color, position)
 
     this.triggerinteract = function() 
     {
-        if (!this.locked)
+        if (!this.locked && !this.drawingnew)
         {
             for (var i in this.oninteract)
             {
@@ -790,7 +799,7 @@ function Track(player, color, position)
     {
         this.candrag = value;
 
-        if (value && !this.locked)
+        if (value && !this.locked && !this.drawingnew)
         {
             this.handle.draggable("option", "disabled", false);
         }
@@ -804,7 +813,7 @@ function Track(player, color, position)
     {
         this.canresize = value;
 
-        if (value && !this.locked)
+        if (value && !this.locked &&!this.drawingnew)
         {
             this.handle.resizable("option", "disabled", false);
         }
