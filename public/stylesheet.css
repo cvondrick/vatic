@@ -313,6 +313,7 @@ code
     position : absolute !important;
     border-style : solid;
     border-width : 2px;
+    z-index : 5;
 }
 
 .boundingbox .boundingboxtext
@@ -363,6 +364,12 @@ code
     opacity : 0.25;
     display : block;
 }
+
+.boundingboxlocked
+{
+    z-index : 0;
+}
+
 
 .boundingboxoccluded
 {

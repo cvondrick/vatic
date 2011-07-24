@@ -424,6 +424,11 @@ function Track(player, color, position)
     this.onmouseout = [];
     this.onupdate = [];
 
+    this.candrag = true;
+    this.canresize = true;
+
+    this.locked = false;
+
     this.journal.mark(this.player.job.start,
         new Position(position.xtl, position.ytl,
                      position.xbr, position.ybr, 
@@ -634,6 +639,30 @@ function Track(player, color, position)
     }
 
     /*
+     * Changes the lock state
+     */
+    this.setlock = function(value)
+    {
+        this.locked = value;
+
+        if (value)
+        {
+            this.handle.draggable("option", "disabled", true);
+            this.handle.resizable("option", "disabled", true);
+        }
+        else
+        {
+            this.handle.draggable("option", "disabled", !this.candrag);
+            this.handle.resizable("option", "disabled", !this.canresize);
+        }
+
+        if (value)
+        {
+            this.handle.addClass("boundingboxlocked");
+        }
+    }
+
+    /*
      * Draws the current box on the screen. 
      */
     this.draw = function(frame, position)
@@ -687,16 +716,22 @@ function Track(player, color, position)
 
 
             this.handle.mouseover(function() {
-                for (var i in me.onmouseover)
+                if (!me.locked)
                 {
-                    me.onmouseover[i]();
+                    for (var i in me.onmouseover)
+                    {
+                        me.onmouseover[i]();
+                    }
                 }
             });
 
             this.handle.mouseout(function() {
-                for (var i in me.onmouseout)
+                if (!me.locked)
                 {
-                    me.onmouseout[i]();
+                    for (var i in me.onmouseout)
+                    {
+                        me.onmouseout[i]();
+                    }
                 }
             });
         }
@@ -735,7 +770,9 @@ function Track(player, color, position)
 
     this.draggable = function(value)
     {
-        if (value)
+        this.candrag = value;
+
+        if (value && !this.locked)
         {
             this.handle.draggable("option", "disabled", false);
         }
@@ -747,7 +784,9 @@ function Track(player, color, position)
 
     this.resizable = function(value)
     {
-        if (value)
+        this.canresize = value;
+
+        if (value && !this.locked)
         {
             this.handle.resizable("option", "disabled", false);
         }

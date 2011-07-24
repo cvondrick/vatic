@@ -452,12 +452,26 @@ function TrackObject(job, player, container, color)
 
         //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
         this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-trash' id='trackobject" + this.id + "delete'></div></div>");
+        this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-unlocked' id='trackobject" + this.id + "lock'></div></div>");
 
         $("#trackobject" + this.id + "delete").click(function() {
             if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? If the object just left the view screen, click the \"Outside of view frame\" check box instead."))
             {
                 me.remove();
                 eventlog("removeobject", "Deleted an object");
+            }
+        });
+
+        $("#trackobject" + this.id + "lock").click(function() {
+            if (me.track.locked)
+            {
+                me.track.setlock(false);
+                $(this).addClass("ui-icon-unlocked").removeClass("ui-icon-locked");
+            }
+            else
+            {
+                me.track.setlock(true);
+                $(this).removeClass("ui-icon-unlocked").addClass("ui-icon-locked");
             }
         });
     }
