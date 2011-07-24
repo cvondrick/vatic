@@ -365,11 +365,6 @@ code
     display : block;
 }
 
-.boundingboxlocked
-{
-    z-index : 0;
-}
-
 .boundingboxoccluded
 {
     border-style : dashed;
@@ -383,6 +378,17 @@ code
 .boundingboxdim
 {
     opacity : 0.3 !important;
+}
+
+.boundingboxlocked
+{
+    z-index : 0;
+    opacity : 0.3 !important;
+}
+
+.boundingboxhighlight
+{
+    opacity : 1 !important;
 }
 
 #submitbar

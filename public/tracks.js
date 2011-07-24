@@ -698,7 +698,7 @@ function Track(player, color, position)
                 handles: "n,w,s,e",
                 start: function() {
                     player.pause();
-                    me.triggerinteract();
+                    //me.triggerinteract();
                     for (var i in me.onmouseover)
                     {
                         me.onmouseover[i]();
@@ -719,7 +719,7 @@ function Track(player, color, position)
             this.handle.draggable({
                 start: function() {
                     player.pause();
-                    me.triggerinteract();
+                    //me.triggerinteract();
                 },
                 stop: function() { 
                     me.fixposition();
