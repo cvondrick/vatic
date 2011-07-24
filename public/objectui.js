@@ -343,7 +343,7 @@ function TrackObject(job, player, container, color)
 
         this.headerdetails = $("<div style='float:right;'></div>").appendTo(this.handle);
         this.header = $("<p class='trackobjectheader'><strong>" + this.job.labels[this.label] + " " + (this.id + 1) + "</strong></p>").appendTo(this.handle).hide().slideDown();
-        this.opencloseicon = $('<div class="ui-icon ui-icon-triangle-1-e"></div>').prependTo(this.header);
+        //this.opencloseicon = $('<div class="ui-icon ui-icon-triangle-1-e"></div>').prependTo(this.header);
         this.details = $("<div class='trackobjectdetails'></div>").appendTo(this.handle).hide();
 
         this.setupdetails();
@@ -531,8 +531,8 @@ function TrackObject(job, player, container, color)
         this.foldedup = true;
         this._callback(this.onfoldup);
 
-        this.opencloseicon.removeClass("ui-icon-triangle-1-s");
-        this.opencloseicon.addClass("ui-icon-triangle-1-e");
+        //this.opencloseicon.removeClass("ui-icon-triangle-1-s");
+        //this.opencloseicon.addClass("ui-icon-triangle-1-e");
     }
 
     this.statefolddown = function()
@@ -544,8 +544,8 @@ function TrackObject(job, player, container, color)
         this.foldedup = false;
         this._callback(this.onfolddown);
 
-        this.opencloseicon.removeClass("ui-icon-triangle-1-e");
-        this.opencloseicon.addClass("ui-icon-triangle-1-s");
+        //this.opencloseicon.removeClass("ui-icon-triangle-1-e");
+        //this.opencloseicon.addClass("ui-icon-triangle-1-s");
     }
 
     this.mouseover = function()
@@ -599,6 +599,7 @@ function TrackObject(job, player, container, color)
 
     this.click = function()
     {
+        return; // disable fold down
         if (this.ready)
         {
             if (this.foldedup)

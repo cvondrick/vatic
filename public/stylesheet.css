@@ -295,12 +295,12 @@ code
 {
     margin : 0;
     padding : 3px !important;
-    cursor : pointer;
+    /*cursor : pointer;*/
 }
 
 .trackobjectheader:hover
 {
-    text-decoration : underline;
+    /*text-decoration : underline;*/
 }
 
 .trackobjectheader .ui-icon
