@@ -353,6 +353,11 @@ code
     display : none;
 }
 
+.boundingboxhighlight
+{
+    z-index : 10;
+}
+
 .boundingboxhighlight .fill
 {
     opacity : 0.25;
