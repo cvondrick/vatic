@@ -402,4 +402,5 @@ code
     font-size : 100px;
     font-weight : bold;
     font-family : Arial;
+    z-index : 100000;
 }
