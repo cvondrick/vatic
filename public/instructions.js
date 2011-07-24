@@ -5,7 +5,8 @@ function instructions(job, h)
 
     h.append("<h2>Crash Course</h2>");
     var str = "<ul>";
-    str += "<li>Annotate <strong>every object</strong> of interest. This includes stationary objects, obstructed objects, and moving objects.</li>";
+    str += "<li>Annotate <strong>every object</strong> of interest.</li>";
+    str += "<li>Annotate stationary objects, obstructed objects, and moving objects.</li>";
     str += "<li>Make your boxes as tight as possible.</li>";
     if (job.perobject > 0)
     {
