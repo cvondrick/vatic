@@ -1,36 +1,19 @@
-apt-get install -y git
-apt-get install -y python-setuptools
+sudo apt-get install -y git python-setuptools python-dev libavcodec-dev libavformat-dev libswscale-dev libjpeg62 libjpeg62-dev libfreetype6 libfreetype6-dev apache2 libapache2-mod-wsgi mysql-server-5.1 mysql-client-5.1 libmysqlclient-dev
+
+sudo easy_install -U SQLAlchemy wsgilog pil cython mysql-python munkres parsedatetime
+sudo easy_install -U numpy
 
 git clone https://github.com/cvondrick/turkic.git
-cd turkic
-easy_install -U SQLAlchemy
-easy_install -U wsgilog
-python setup.py install
-cd ..
-
 git clone https://github.com/cvondrick/pyvision.git
-cd pyvision
-apt-get install -y python-dev
-apt-get install -y libavcodec-dev libavformat-dev libswscale-dev
-apt-get install -y libjpeg libjpeg-dev
-apt-get install -y libfreetype6 libfreetype6-dev
-easy_install -U pil
-easy_install -U cython
-easy_install -U numpy
-python setup.py install
+git clone https://github.com/cvondrick/vatic.git
+
+cd turkic
+sudo python setup.py install
 cd ..
 
-apt-get install -y apache2
-apt-get install -y libapache2-mod-wsgi
-
-apt-get install -y mysql-server-5.1 mysql-client-5.1
-apt-get install -y libmysqlclient-dev
-easy_install -U mysql-python
-
-easy_install -U munkres
-easy_install -U parsedatetime
-
-git clone https://github.com/cvondrick/vatic.git
+cd pyvision
+sudo python setup.py install
+cd ..
 
 echo "*****************************************************"
 echo "*** Please consult README to finish installation. ***"
