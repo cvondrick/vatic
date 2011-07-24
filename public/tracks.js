@@ -670,6 +670,10 @@ function Track(player, color, position)
         {
             this.handle.addClass("boundingboxlocked");
         }
+        else
+        {
+            this.handle.removeClass("boundingboxlocked");
+        }
     }
 
     /*
