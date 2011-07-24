@@ -283,6 +283,9 @@ function TrackObject(job, player, container, color)
 
         this.drawinst = $("<div>" + html + "</div>").appendTo(this.handle);
         this.drawinst.hide().slideDown();
+
+        this.container.stop().animate({scrollTop: 0}, 750);
+
     }
 
     this.stateclassify = function()
