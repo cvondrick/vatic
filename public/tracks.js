@@ -886,7 +886,10 @@ function Track(player, color, position)
             str += '"' + i + '":' + this.attributejournals[i].serialize() + ",";
         }
 
-        str = str.substr(0, str.length - 1);
+        if (this.attributejournals.length > 0)
+        {
+            str = str.substr(0, str.length - 1);
+        }
 
         return str += "}]";
     }
