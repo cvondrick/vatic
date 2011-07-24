@@ -422,6 +422,7 @@ function Track(player, color, position)
 
     this.onmouseover = [];
     this.onmouseout = [];
+    this.oninteract = [];
     this.onupdate = [];
 
     this.candrag = true;
@@ -684,6 +685,7 @@ function Track(player, color, position)
                 handles: "n,w,s,e",
                 start: function() {
                     player.pause();
+                    me.triggerinteract();
                     for (var i in me.onmouseover)
                     {
                         me.onmouseover[i]();
@@ -704,6 +706,7 @@ function Track(player, color, position)
             this.handle.draggable({
                 start: function() {
                     player.pause();
+                    me.triggerinteract();
                 },
                 stop: function() { 
                     me.fixposition();
@@ -733,6 +736,10 @@ function Track(player, color, position)
                         me.onmouseout[i]();
                     }
                 }
+            });
+
+            this.handle.click(function() {
+                me.triggerinteract();
             });
         }
 
@@ -766,6 +773,17 @@ function Track(player, color, position)
             width: (position.width - this.htmloffset) + "px",
             height: (position.height - this.htmloffset) + "px"
         });
+    }
+
+    this.triggerinteract = function() 
+    {
+        if (!this.locked)
+        {
+            for (var i in this.oninteract)
+            {
+                this.oninteract[i]();
+            }
+        }
     }
 
     this.draggable = function(value)

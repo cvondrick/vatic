@@ -238,10 +238,16 @@ function TrackObject(job, player, container, color)
 
         this.track.onmouseover.push(function() {
             me.mouseover();
+
         });
 
         this.track.onmouseout.push(function() {
             me.mouseout();
+        });
+
+        this.track.oninteract.push(function() {
+            var pos = me.handle.position().top - me.container.position().top;
+            me.container.stop().animate({scrollTop: pos}, 1000);
         });
 
         this.track.onupdate.push(function() {
