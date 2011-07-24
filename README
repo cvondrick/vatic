@@ -178,6 +178,11 @@ options available as well. We recommend using these options.
                         Frames outside the intervals in this file will be
                         ignored.
         --skip          If specified, request annotations only every N frames.
+        --blow-radius   When a user marks an annotation, blow away all other
+                        annotations within this many frames. If you want to
+                        allow the user to make fine-grained annotations, set
+                        this number to a small integer, or 0 to disable. By
+                        default, this is 5, which we recommend.
 
 You can also specify temporal attributes that each object label can take on.
 For example, you may have a person object with attributes "walking", "running",

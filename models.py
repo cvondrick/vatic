@@ -31,6 +31,7 @@ class Video(turkic.database.Base):
     trainwith       = relationship("Video", remote_side = id)
     isfortraining   = Column(Boolean, default = False)
     trainvalidator  = Column(PickleType, nullable = True, default = None)
+    blowradius      = Column(Integer, default = 5)
 
     def __getitem__(self, frame):
         path = Video.getframepath(frame, self.location)

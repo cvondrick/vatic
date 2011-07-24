@@ -81,6 +81,7 @@ class load(LoadCommand):
         parser.add_argument("--for-training-tolerance", type=float, default=0.1)
         parser.add_argument("--for-training-mistakes", type=int, default=0)
         parser.add_argument("--for-training-data", default = None)
+        parser.add_argument("--blow-radius", default = 5)
         return parser
 
     def title(self, args):
@@ -165,7 +166,8 @@ class load(LoadCommand):
                       perobjectbonus = args.per_object_bonus,
                       completionbonus = args.completion_bonus,
                       trainwith = trainer,
-                      isfortraining = args.for_training)
+                      isfortraining = args.for_training,
+                      blowradius = args.blow_radius)
 
         if args.for_training:
             video.trainvalidator = qa.tolerable(args.for_training_overlap,

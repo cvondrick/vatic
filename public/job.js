@@ -10,6 +10,7 @@ function Job(data)
     this.skip = null; 
     this.perobject = null;
     this.completion = null;
+    this.blowradius = null;
     this.thisid = null;
     this.labels = null;
 
@@ -33,6 +34,7 @@ function job_import(data)
     job.skip = parseInt(data["skip"]);
     job.perobject = parseFloat(data["perobject"]);
     job.completion = parseFloat(data["completion"]);
+    job.blowradius = parseInt(data["blowradius"]);
     job.jobid = parseInt(data["jobid"]);
     job.labels = data["labels"];
     job.attributes = data["attributes"];
@@ -45,7 +47,8 @@ function job_import(data)
     console.log("  Width: " + job.width);
     console.log("  Height: " + job.height);
     console.log("  Skip: " + job.skip);
-    console.log("  Per Object:" + job.perobject);
+    console.log("  Per Object: " + job.perobject);
+    console.log("  Blow Radius: " + job.blowradius);
     console.log("  Training: " + job.training);
     console.log("  Job ID: " + job.jobid);
     console.log("  Labels: ");

@@ -44,6 +44,7 @@ def getjob(id, verified):
             "skip":         video.skip,
             "perobject":    video.perobjectbonus,
             "completion":   video.completionbonus,
+            "blowradius":   video.blowradius,
             "jobid":        job.id,
             "training":     int(training),
             "labels":       labels,

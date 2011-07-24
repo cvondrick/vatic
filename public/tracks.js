@@ -419,7 +419,7 @@ function Track(player, color, position)
 {
     var me = this;
 
-    this.journal = new Journal(player.job.start);
+    this.journal = new Journal(player.job.start, player.job.blowradius);
     this.attributejournals = {};
     this.label = null;
     this.player = player;
@@ -610,7 +610,8 @@ function Track(player, color, position)
     {
         for (var i in attributes)
         {
-            var journal = new Journal(this.player.job.start);
+            var journal = new Journal(this.player.job.start, 
+                                      this.player.job.blowradius);
             journal.mark(this.player.job.start, false);
             //journal.artificialright = journal.rightmost();
             //journal.artificialrightframe = this.player.job.stop;
@@ -959,12 +960,12 @@ function Track(player, color, position)
 /*
  * A journal to store a set of positions.
  */
-function Journal(start)
+function Journal(start, blowradius)
 {
     this.annotations = {};
     this.artificialright = null;
     this.artificialrightframe = null;
-    this.blowradius = 3;
+    this.blowradius = blowradius;
     this.start = start;
 
     /*
