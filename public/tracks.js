@@ -915,14 +915,14 @@ function Track(player, color, position)
             return bounds['left'];
         }
 
-        if (bounds['left'] == null || bounds['left'].outside)
+        if (bounds['right'] == null || bounds['left'].outside)
         {
             return bounds['left'];
         }
 
-        if (bounds['right'] == null || bounds['right'].outside)
+        if (bounds['right'].outside)
         {
-            return bounds['left'];
+            return bounds['right'];
         }
 
         var fdiff = bounds['rightframe'] - bounds['leftframe'];

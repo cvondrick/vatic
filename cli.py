@@ -81,7 +81,7 @@ class load(LoadCommand):
         parser.add_argument("--for-training-tolerance", type=float, default=0.1)
         parser.add_argument("--for-training-mistakes", type=int, default=0)
         parser.add_argument("--for-training-data", default = None)
-        parser.add_argument("--blow-radius", default = 5)
+        parser.add_argument("--blow-radius", default = 3)
         return parser
 
     def title(self, args):
