@@ -933,7 +933,7 @@ function Journal(start)
     this.annotations = {};
     this.artificialright = null;
     this.artificialrightframe = null;
-    this.blowradius = 5;
+    this.blowradius = 3;
     this.start = start;
 
     /*
