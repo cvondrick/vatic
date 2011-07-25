@@ -409,3 +409,17 @@ code
     font-family : Arial;
     z-index : 100000;
 }
+
+.boxtooltip
+{
+    position : absolute;
+    width : 200px;
+    height : 200px;
+    background-color : #000;
+    z-index : 100;
+    border : 2px solid #000;
+    background-repeat : no-repeat;
+    box-shadow: 5px 5px 10px #000;
+    -moz-box-shadow: 5px 5px 10px #000;
+    -webkit-box-shadow: 5px 5px 10px #000;
+}

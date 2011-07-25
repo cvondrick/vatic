@@ -232,6 +232,9 @@ function TrackObject(job, player, container, color)
     this.ready = false;
     this.foldedup = false;
 
+    this.tooltip = null;
+    this.tooltiptimer = null;
+
     this.initialize = function(id, track, tracks)
     {
         this.id = id;
@@ -240,20 +243,23 @@ function TrackObject(job, player, container, color)
 
         this.track.onmouseover.push(function() {
             me.mouseover();
-
         });
 
         this.track.onmouseout.push(function() {
             me.mouseout();
+            me.hidetooltip();
         });
 
         this.track.oninteract.push(function() {
             var pos = me.handle.position().top + me.container.scrollTop() - 30;
             pos = pos - me.handle.height();
             me.container.stop().animate({scrollTop: pos}, 750);
+
+            me.showtooltip();
         });
 
         this.track.onupdate.push(function() {
+            me.hidetooltip();
             eventlog("interact", "Interact with box " + me.id);
         });
 
@@ -504,6 +510,99 @@ function TrackObject(job, player, container, color)
             {
                 $("#trackobject" + this.id + "attribute" + i).attr("checked", true);
             }
+        }
+    }
+
+    this.showtooltip = function()
+    {
+        if (this.tooltip != null)
+        {
+            return;
+        }
+
+        var pos = this.track.handle.position();
+        var width = this.track.handle.width();
+        var height = this.track.handle.height();
+
+        var cpos = this.player.handle.position();
+        var cwidth = this.player.handle.width();
+        var cheight = this.player.handle.height();
+
+        var x = pos.left + width + 10;
+        if (x + 200 > cpos.left + cwidth)
+        {
+            x = pos.left - 210;
+        }
+
+        var y = pos.top;
+        if (y + 200 > cpos.top + cheight)
+        {
+            y = cpos.top + cheight - 210;
+        }
+        
+
+        var annotation = 0;
+
+        var numannotations = 0;
+        var frames = [];
+        for (var i in this.track.journal.annotations)
+        {
+            if (!me.track.journal.annotations[i].outside)
+            {
+                numannotations++;
+                frames.push(i);
+            }
+        }
+
+        if (numannotations == 0)
+        {
+            return;
+        }
+
+        frames.sort();
+
+        this.tooltip = $("<div class='boxtooltip'></div>").appendTo("body");
+        this.tooltip.css({
+            top: y + "px",
+            left: x + "px"
+        });
+        this.tooltip.hide();
+
+        var update = function() {
+            if (annotation >= numannotations)
+            {
+                annotation = 0;
+            }
+
+            var frame = frames[annotation];
+            var anno = me.track.journal.annotations[frame];
+
+            var x = -anno.xtl;
+            var y = -anno.ytl;
+
+            console.log("Show tooltip for " + frame + " at " + x + ", " + y);
+            me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
+            me.tooltip.css("background-position", x + "px " + y + "px");
+            annotation++;
+        }
+
+
+        this.tooltiptimer = window.setInterval(function() {
+            update();
+        }, 500);
+
+        update();
+        this.tooltip.fadeIn();
+    }
+
+    this.hidetooltip = function()
+    {
+        if (this.tooltip != null)
+        {
+            this.tooltip.hide();
+            this.tooltip = null;
+            window.clearInterval(this.tooltiptimer);
+            this.tooltiptimer = null;
         }
     }
 
