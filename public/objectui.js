@@ -247,7 +247,6 @@ function TrackObject(job, player, container, color)
 
         this.track.onmouseout.push(function() {
             me.mouseout();
-            me.hidetooltip();
         });
 
         this.track.oninteract.push(function() {
@@ -496,6 +495,8 @@ function TrackObject(job, player, container, color)
 
         $("#trackobject" + this.id + "tooltip").click(function() {
             me.toggletooltip(false);
+        }).mouseout(function() {
+            me.hidetooltip(); 
         });
     }
 
@@ -773,7 +774,6 @@ function TrackObject(job, player, container, color)
     this.mouseout = function()
     {
         this.unhighlight();
-        this.hidetooltip();
 
         if (this.track)
         {
