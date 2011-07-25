@@ -423,3 +423,9 @@ code
     -moz-box-shadow: 5px 5px 10px #000;
     -webkit-box-shadow: 5px 5px 10px #000;
 }
+
+.boxtooltip .boundingbox
+{
+    position : relative;
+    z-index : 101;
+}

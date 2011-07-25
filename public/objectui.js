@@ -567,6 +567,7 @@ function TrackObject(job, player, container, color)
             left: x + "px"
         });
         this.tooltip.hide();
+        var boundingbox = $("<div class='boxtooltipboundingbox boundingbox'></div>").appendTo(this.tooltip);
 
         var update = function() {
             if (annotation >= numannotations)
@@ -577,13 +578,50 @@ function TrackObject(job, player, container, color)
             var frame = frames[annotation];
             var anno = me.track.journal.annotations[frame];
 
-            var x = -anno.xtl;
-            var y = -anno.ytl;
+            var x = anno.xtl + (anno.xbr - anno.xtl) / 2 - 100;
+            var y = anno.ytl + (anno.ybr - anno.ytl) / 2 - 100;
 
-            console.log("Show tooltip for " + frame + " at " + x + ", " + y);
+            var bx = 100 - (anno.xbr - anno.xtl) / 2;
+            var by = 100 - (anno.ybr - anno.ytl) / 2;
+            var bw = anno.xbr - anno.xtl;
+            var bh = anno.ybr - anno.ytl;
+
+            if (x < 0)
+            {
+                bx += x;
+                x = 0;
+            }
+            if (x > me.job.width - 200)
+            {
+                bx = 200 - me.job.width + anno.xtl;
+                x = me.job.width - 200;
+            }
+            if (y < 0)
+            {
+                by += y;
+                y = 0;
+            }
+            if (y > me.job.height - 200)
+            {
+                by = 200 - me.job.height + anno.ytl;
+                y = me.job.height - 200;
+            }
+
+            x = -x;
+            y = -y;
+
+            console.log("Show tooltip for " + frame);
             me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
             me.tooltip.css("background-position", x + "px " + y + "px");
             annotation++;
+
+            boundingbox.css({
+                top: by + "px",
+                left: bx + "px",
+                width: bw + "px",
+                height: bh + "px",
+                borderColor: me.color[0]
+            });
         }
 
 
@@ -591,8 +629,8 @@ function TrackObject(job, player, container, color)
             update();
         }, 500);
 
+        this.tooltip.show();
         update();
-        this.tooltip.fadeIn();
     }
 
     this.hidetooltip = function()
