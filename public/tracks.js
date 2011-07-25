@@ -894,12 +894,14 @@ function Track(player, color, position)
         }
         var str = "[" + this.label + "," + this.journal.serialize() + ",{";
 
+        var length = 0;
         for (var i in this.attributejournals)
         {
             str += '"' + i + '":' + this.attributejournals[i].serialize() + ",";
+            length++;
         }
 
-        if (this.attributejournals.length > 0)
+        if (length > 0)
         {
             str = str.substr(0, str.length - 1);
         }
