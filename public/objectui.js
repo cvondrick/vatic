@@ -654,7 +654,7 @@ function TrackObject(job, player, container, color)
             update();
         }, 500);
 
-        this.tooltip.show();
+        this.tooltip.hide().slideDown(250);
         update();
     }
 
@@ -662,7 +662,9 @@ function TrackObject(job, player, container, color)
     {
         if (this.tooltip != null)
         {
-            this.tooltip.remove();
+            this.tooltip.slideUp(250, function() {
+                $(this).remove(); 
+            });
             this.tooltip = null;
             window.clearInterval(this.tooltiptimer);
             this.tooltiptimer = null;
