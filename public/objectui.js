@@ -248,7 +248,7 @@ function TrackObject(job, player, container, color)
         });
 
         this.track.oninteract.push(function() {
-            var pos = me.handle.position().top + me.container.scrollTop();
+            var pos = me.handle.position().top + me.container.scrollTop() - 30;
             pos = pos - me.handle.height();
             me.container.stop().animate({scrollTop: pos}, 750);
         });
