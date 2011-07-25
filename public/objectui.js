@@ -247,6 +247,15 @@ function TrackObject(job, player, container, color)
 
         this.track.onmouseout.push(function() {
             me.mouseout();
+            me.hidetooltip();
+        });
+
+        this.track.onstartupdate.push(function() {
+            me.hidetooltip();
+        });
+
+        this.player.onupdate.push(function() {
+            me.hidetooltip();
         });
 
         this.track.oninteract.push(function() {

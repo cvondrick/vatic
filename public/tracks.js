@@ -432,6 +432,7 @@ function Track(player, color, position)
     this.onmouseout = [];
     this.oninteract = [];
     this.onupdate = [];
+    this.onstartupdate = [];
 
     this.candrag = true;
     this.canresize = true;
@@ -544,6 +545,14 @@ function Track(player, color, position)
         for (var i in this.onupdate)
         {
             this.onupdate[i]();
+        }
+    }
+
+    this.notifystartupdate = function()
+    {
+        for (var i in this.onstartupdate)
+        {
+            this.onstartupdate[i]();
         }
     }
 
@@ -699,6 +708,7 @@ function Track(player, color, position)
                 handles: "n,w,s,e",
                 start: function() {
                     player.pause();
+                    me.notifystartupdate();
                     //me.triggerinteract();
                     for (var i in me.onmouseover)
                     {
@@ -720,6 +730,7 @@ function Track(player, color, position)
             this.handle.draggable({
                 start: function() {
                     player.pause();
+                    me.notifystartupdate();
                     //me.triggerinteract();
                 },
                 stop: function() { 
