@@ -901,9 +901,7 @@ function Track(player, color, position)
      */
     this.remove = function()
     {
-        this.handle.fadeOut(null, function() {
-            me.handle.remove();
-        });
+        this.handle.remove();
         this.deleted = true;
     }
 
