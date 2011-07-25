@@ -587,35 +587,8 @@ function TrackObject(job, player, container, color)
 
             var frame = frames[annotation];
             var anno = me.track.journal.annotations[frame];
-
-            var x = anno.xtl + (anno.xbr - anno.xtl) / 2 - 100;
-            var y = anno.ytl + (anno.ybr - anno.ytl) / 2 - 100;
-
-            var bx = 100 - (anno.xbr - anno.xtl) / 2;
-            var by = 100 - (anno.ybr - anno.ytl) / 2;
             var bw = anno.xbr - anno.xtl;
             var bh = anno.ybr - anno.ytl;
-
-            if (x < 0)
-            {
-                bx += x;
-                x = 0;
-            }
-            if (x > me.job.width - 200)
-            {
-                bx = 200 - me.job.width + anno.xtl;
-                x = me.job.width - 200;
-            }
-            if (y < 0)
-            {
-                by += y;
-                y = 0;
-            }
-            if (y > me.job.height - 200)
-            {
-                by = 200 - me.job.height + anno.ytl;
-                y = me.job.height - 200;
-            }
 
             var scale = 1;
             if (bw > 200)
@@ -627,22 +600,49 @@ function TrackObject(job, player, container, color)
                 scale = Math.min(scale, 200 / bh);
             }
 
+            var x = (anno.xtl + (anno.xbr - anno.xtl) / 2) * scale - 100;
+            var y = (anno.ytl + (anno.ybr - anno.ytl) / 2) * scale - 100;
+
+            var bx = 100 - (anno.xbr - anno.xtl) / 2 * scale;
+            var by = 100 - (anno.ybr - anno.ytl) / 2 * scale;
+            bw = bw * scale;
+            bh = bh * scale;
+
+            if (x < 0)
+            {
+                bx += x;
+                x = 0;
+            }
+            if (x > me.job.width * scale - 200)
+            {
+                bx = 200 - (me.job.width - anno.xtl) * scale;
+                x = me.job.width * scale - 200;
+            }
+            if (y < 0)
+            {
+                by += y;
+                y = 0;
+            }
+            if (y > me.job.height * scale - 200)
+            {
+                by = 200 - (me.job.height - anno.ytl) * scale;
+                y = (me.job.height) * scale - 200;
+            }
+
             x = -x;
             y = -y;
 
             console.log("Show tooltip for " + frame);
             me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
-            me.tooltip.css("background-position", x * scale + "px " + y * scale + "px");
+            me.tooltip.css("background-position", x + "px " + y + "px");
             me.tooltip.css("background-size", (me.job.width * scale) + "px " + (me.job.height * scale) + "px");
             annotation++;
 
-            console.log(by);
-
             boundingbox.css({
-                top: by * scale + "px",
-                left: bx * scale + "px",
-                width: bw * scale + "px",
-                height: bh * scale + "px",
+                top: by + "px",
+                left: bx + "px",
+                width: bw + "px",
+                height: bh + "px",
                 borderColor: me.color[0]
             });
         }
@@ -652,7 +652,7 @@ function TrackObject(job, player, container, color)
             update();
         }, 500);
 
-        this.tooltip.hide().slideDown(100);
+        this.tooltip.show();
         update();
     }
 

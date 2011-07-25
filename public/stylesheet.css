@@ -413,8 +413,8 @@ code
 .boxtooltip
 {
     position : absolute;
-    width : 200px;
-    height : 200px;
+    width : 204px;
+    height : 204px;
     background-color : #000;
     z-index : 100;
     border : 2px solid #000;
