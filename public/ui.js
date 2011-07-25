@@ -262,7 +262,7 @@ function ui_setupkeyboardshortcuts(job, player)
         var keycode = e.keyCode ? e.keyCode : e.which;
         eventlog("keyboard", "Key press: " + keycode);
         
-        if (keycode == 32 || keycode == 112)
+        if (keycode == 32 || keycode == 112 || keycode == 116 || keycode == 98)
         {
             $("#playbutton").click();
         }
@@ -281,11 +281,11 @@ function ui_setupkeyboardshortcuts(job, player)
         else 
         {
             var skip = 0;
-            if (keycode == 44)
+            if (keycode == 44 || keycode == 100)
             {
                 skip = job.skip > 0 ? -job.skip : -10;
             }
-            else if (keycode == 46)
+            else if (keycode == 46 || keycode == 102)
             {
                 skip = job.skip > 0 ? job.skip : 10;
             }

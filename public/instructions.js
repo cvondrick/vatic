@@ -108,11 +108,11 @@ function instructions(job, h)
     h.append("<p>These keyboard shortcuts are available for your convenience:</p>");
     h.append('<ul class="keyboardshortcuts">' +
         '<li><code>n</code> creates a new object</li>' +
-        '<li><code>p</code> toggles play/pause on the video</li>' +
+        '<li><code>t</code> toggles play/pause on the video</li>' +
         '<li><code>r</code> rewinds the video to the start</li>' +
         '<li><code>h</code> hides/shows the boxes (only after clicking Options button)</li>' +
-        '<li><code>.</code> jump the video forward a bit</li>' +
-        '<li><code>,</code> jump the video backward a bit</li>' +
+        '<li><code>d</code> jump the video forward a bit</li>' +
+        '<li><code>f</code> jump the video backward a bit</li>' +
         '<li><code>&gt;</code> step the video forward a tiny bit</li>' +
         '<li><code>&lt;</code> step the video backward a tiny bit</li>' +
         '</ul>');
