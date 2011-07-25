@@ -637,7 +637,12 @@ function TrackObject(job, player, container, color)
             console.log("Show tooltip for " + frame);
             me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
             me.tooltip.css("background-position", x + "px " + y + "px");
-            me.tooltip.css("background-size", (me.job.width * scale) + "px " + (me.job.height * scale) + "px");
+            var bgsize = (me.job.width * scale) + "px " + (me.job.height * scale) + "px";
+            me.tooltip.css("background-size", bgsize);
+            me.tooltip.css("-o-background-size", bgsize);
+            me.tooltip.css("-webkit-background-size", bgsize);
+            me.tooltip.css("-khtml-background-size", bgsize);
+            me.tooltip.css("-moz-background-size", bgsize);
             annotation++;
 
             boundingbox.css({
