@@ -255,7 +255,7 @@ function TrackObject(job, player, container, color)
             pos = pos - me.handle.height();
             me.container.stop().animate({scrollTop: pos}, 750);
 
-            me.showtooltip();
+            me.toggletooltip();
         });
 
         this.track.onupdate.push(function() {
@@ -513,6 +513,18 @@ function TrackObject(job, player, container, color)
         }
     }
 
+    this.toggletooltip = function()
+    {
+        if (this.tooltip == null)
+        {
+            this.showtooltip();
+        }
+        else
+        {
+            this.hidetooltip();
+        }
+    }
+
     this.showtooltip = function()
     {
         if (this.tooltip != null)
@@ -540,9 +552,6 @@ function TrackObject(job, player, container, color)
             y = cpos.top + cheight - 210;
         }
         
-
-        var annotation = 0;
-
         var numannotations = 0;
         var frames = [];
         for (var i in this.track.journal.annotations)
@@ -569,6 +578,7 @@ function TrackObject(job, player, container, color)
         this.tooltip.hide();
         var boundingbox = $("<div class='boxtooltipboundingbox boundingbox'></div>").appendTo(this.tooltip);
 
+        var annotation = 0;
         var update = function() {
             if (annotation >= numannotations)
             {
@@ -623,8 +633,10 @@ function TrackObject(job, player, container, color)
             console.log("Show tooltip for " + frame);
             me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
             me.tooltip.css("background-position", x * scale + "px " + y * scale + "px");
-            me.tooltip.css("background-size", (me.job.width * scale) + "px auto");
+            me.tooltip.css("background-size", (me.job.width * scale) + "px " + (me.job.height * scale) + "px");
             annotation++;
+
+            console.log(by);
 
             boundingbox.css({
                 top: by * scale + "px",
@@ -640,7 +652,7 @@ function TrackObject(job, player, container, color)
             update();
         }, 500);
 
-        this.tooltip.show();
+        this.tooltip.hide().slideDown(100);
         update();
     }
 
@@ -648,7 +660,7 @@ function TrackObject(job, player, container, color)
     {
         if (this.tooltip != null)
         {
-            this.tooltip.hide();
+            this.tooltip.remove();
             this.tooltip = null;
             window.clearInterval(this.tooltiptimer);
             this.tooltiptimer = null;

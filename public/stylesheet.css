@@ -377,7 +377,7 @@ code
 
 .boundingboxdim
 {
-    opacity : 0.3 !important;
+    /*opacity : 0.3 !important; set this in js */
 }
 
 .boundingboxlocked

@@ -848,10 +848,12 @@ function Track(player, color, position)
         if (value)
         {
             this.handle.addClass("boundingboxdim");
+            this.handle.stop().animate({opacity: 0.3}, 50);
         }
         else
         {
             this.handle.removeClass("boundingboxdim");
+            this.handle.stop().animate({opacity: 1}, 50);
         }
     }
 
