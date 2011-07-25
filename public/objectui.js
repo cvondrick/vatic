@@ -471,6 +471,7 @@ function TrackObject(job, player, container, color)
         //this.details.append("<br><input type='button' id='trackobject" + this.id + "label' value='Change Type'>");
         this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-trash' id='trackobject" + this.id + "delete'></div></div>");
         this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-unlocked' id='trackobject" + this.id + "lock'></div></div>");
+        this.headerdetails.append("<div style='float:right;'><div class='ui-icon ui-icon-image' id='trackobject" + this.id + "tooltip'></div></div>");
 
         $("#trackobject" + this.id + "delete").click(function() {
             if (window.confirm("Delete the " + me.job.labels[me.label] + " " + (me.id + 1) + " track? If the object just left the view screen, click the \"Outside of view frame\" check box instead."))
@@ -491,6 +492,10 @@ function TrackObject(job, player, container, color)
                 me.track.setlock(true);
                 $(this).removeClass("ui-icon-unlocked").addClass("ui-icon-locked");
             }
+        });
+
+        $("#trackobject" + this.id + "tooltip").click(function() {
+            me.toggletooltip(false);
         });
     }
 
@@ -513,11 +518,11 @@ function TrackObject(job, player, container, color)
         }
     }
 
-    this.toggletooltip = function()
+    this.toggletooltip = function(onscreen)
     {
         if (this.tooltip == null)
         {
-            this.showtooltip();
+            this.showtooltip(onscreen);
         }
         else
         {
@@ -525,33 +530,53 @@ function TrackObject(job, player, container, color)
         }
     }
 
-    this.showtooltip = function()
+    this.showtooltip = function(onscreen)
     {
         if (this.tooltip != null)
         {
             return;
         }
 
-        var pos = this.track.handle.position();
-        var width = this.track.handle.width();
-        var height = this.track.handle.height();
+        var x;
+        var y;
 
-        var cpos = this.player.handle.position();
-        var cwidth = this.player.handle.width();
-        var cheight = this.player.handle.height();
-
-        var displacement = 15;
-
-        var x = pos.left + width + displacement;
-        if (x + 200 > cpos.left + cwidth)
+        if (onscreen || onscreen == null)
         {
-            x = pos.left - 200 - displacement;
+            var pos = this.track.handle.position();
+            var width = this.track.handle.width();
+            var height = this.track.handle.height();
+
+            var cpos = this.player.handle.position();
+            var cwidth = this.player.handle.width();
+            var cheight = this.player.handle.height();
+
+            var displacement = 15;
+
+            x = pos.left + width + displacement;
+            if (x + 200 > cpos.left + cwidth)
+            {
+                x = pos.left - 200 - displacement;
+            }
+
+            y = pos.top;
+            if (y + 200 > cpos.top + cheight)
+            {
+                y = cpos.top + cheight - 200 - displacement;
+            }
         }
-
-        var y = pos.top;
-        if (y + 200 > cpos.top + cheight)
+        else
         {
-            y = cpos.top + cheight - 200 - displacement;
+            var pos = this.handle.position();
+            x = pos.left - 210;
+
+            var cpos = this.player.handle.position();
+            var cheight = this.player.handle.height();
+
+            y = pos.top;
+            if (y + 200 > cpos.top + cheight)
+            {
+                y = cpos.top + cheight - 215;
+            }
         }
         
         var numannotations = 0;
@@ -748,6 +773,7 @@ function TrackObject(job, player, container, color)
     this.mouseout = function()
     {
         this.unhighlight();
+        this.hidetooltip();
 
         if (this.track)
         {

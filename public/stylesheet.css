@@ -419,6 +419,9 @@ code
     border : 5px solid #000;
     background-color : #000;
     background-repeat : no-repeat;
+    -moz-box-shadow: 0 0 5px #000;
+    -webkit-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
 }
 
 .boxtooltip .boundingbox
