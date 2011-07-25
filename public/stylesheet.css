@@ -413,15 +413,12 @@ code
 .boxtooltip
 {
     position : absolute;
-    width : 204px;
-    height : 204px;
-    background-color : #000;
+    width : 200px;
+    height : 200px;
     z-index : 100;
-    border : 2px solid #000;
+    border : 5px solid #000;
+    background-color : #000;
     background-repeat : no-repeat;
-    box-shadow: 5px 5px 10px #000;
-    -moz-box-shadow: 5px 5px 10px #000;
-    -webkit-box-shadow: 5px 5px 10px #000;
 }
 
 .boxtooltip .boundingbox

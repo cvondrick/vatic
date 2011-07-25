@@ -540,16 +540,18 @@ function TrackObject(job, player, container, color)
         var cwidth = this.player.handle.width();
         var cheight = this.player.handle.height();
 
-        var x = pos.left + width + 10;
+        var displacement = 15;
+
+        var x = pos.left + width + displacement;
         if (x + 200 > cpos.left + cwidth)
         {
-            x = pos.left - 210;
+            x = pos.left - 200 - displacement;
         }
 
         var y = pos.top;
         if (y + 200 > cpos.top + cheight)
         {
-            y = cpos.top + cheight - 210;
+            y = cpos.top + cheight - 200 - displacement;
         }
         
         var numannotations = 0;
@@ -641,8 +643,8 @@ function TrackObject(job, player, container, color)
             boundingbox.css({
                 top: by + "px",
                 left: bx + "px",
-                width: bw + "px",
-                height: bh + "px",
+                width: (bw-4) + "px",
+                height: (bh-4) + "px",
                 borderColor: me.color[0]
             });
         }
