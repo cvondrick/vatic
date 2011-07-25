@@ -607,19 +607,30 @@ function TrackObject(job, player, container, color)
                 y = me.job.height - 200;
             }
 
+            var scale = 1;
+            if (bw > 200)
+            {
+                scale = 200 / bw;
+            }
+            if (bh > 200)
+            {
+                scale = Math.min(scale, 200 / bh);
+            }
+
             x = -x;
             y = -y;
 
             console.log("Show tooltip for " + frame);
             me.tooltip.css("background-image", "url('" + me.job.frameurl(frame) + "')");
-            me.tooltip.css("background-position", x + "px " + y + "px");
+            me.tooltip.css("background-position", x * scale + "px " + y * scale + "px");
+            me.tooltip.css("background-size", (me.job.width * scale) + "px auto");
             annotation++;
 
             boundingbox.css({
-                top: by + "px",
-                left: bx + "px",
-                width: bw + "px",
-                height: bh + "px",
+                top: by * scale + "px",
+                left: bx * scale + "px",
+                width: bw * scale + "px",
+                height: bh * scale + "px",
                 borderColor: me.color[0]
             });
         }
