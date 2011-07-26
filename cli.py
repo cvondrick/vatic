@@ -858,12 +858,28 @@ class vet(Command):
 
 @handler("List all videos loaded", "list")
 class listvideos(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--completed", action="store_true", default=False)
+        parser.add_argument("--published", action="store_true", default=False)
+        parser.add_argument("--training", action="store_true", default=False)
+        return parser
+
     def __call__(self, args):
         videos = session.query(Video)
-        for video in videos:
-            flags = " "
-            if video.isfortraining:
-                flags = "T"
-            elif video.trainwithid:
-                flags = "t"
-            print "{0} {1}".format(flags, video.slug)
+
+        if args.training:
+            videos = videos.filter(Video.isfortraining == True)
+        else:
+            videos = videos.filter(Video.isfortraining == False)
+            if args.published:
+                videos = videos.join(Segment)
+                videos = videos.join(Job)
+                videos = videos.filter(Job.published == True)
+            elif args.completed:
+                videos = videos.join(Segment)
+                videos = videos.join(Job)
+                videos = videos.filter(Job.completed == True)
+        
+        for video in videos.distinct():
+            print video.slug

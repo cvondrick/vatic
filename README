@@ -413,8 +413,17 @@ You can retrieve a list of all videos in the system with:
 
     $ turkic list
 
-Videos prefixed with an uppercase T are training videos. Videos with with a
-lowercase t require training before completion.
+If you want just the videos that have been published:
+
+    $ turkic list --published
+
+If you want just the videos that have been worked on:
+
+    $ turkic list --completed
+
+If you instead want the videos that are used for gold standard:
+
+    $ turkic list --training
 
 --- Managing Workers ---------------------------------------------------------
 
