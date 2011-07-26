@@ -289,11 +289,11 @@ function ui_setupkeyboardshortcuts(job, player)
             {
                 skip = job.skip > 0 ? job.skip : 10;
             }
-            else if (keycode == 62)
+            else if (keycode == 62 || keycode == 118)
             {
                 skip = job.skip > 0 ? job.skip : 1;
             }
-            else if (keycode == 60)
+            else if (keycode == 60 || keycode == 99)
             {
                 skip = job.skip > 0 ? -job.skip : -1;
             }

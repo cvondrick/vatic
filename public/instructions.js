@@ -115,7 +115,7 @@ function instructions(job, h)
         '<li><code>h</code> hides/shows the boxes (only after clicking Options button)</li>' +
         '<li><code>d</code> jump the video forward a bit</li>' +
         '<li><code>f</code> jump the video backward a bit</li>' +
-        '<li><code>&gt;</code> step the video forward a tiny bit</li>' +
-        '<li><code>&lt;</code> step the video backward a tiny bit</li>' +
+        '<li><code>v</code> step the video forward a tiny bit</li>' +
+        '<li><code>c</code> step the video backward a tiny bit</li>' +
         '</ul>');
 }
