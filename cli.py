@@ -863,6 +863,7 @@ class listvideos(Command):
         parser.add_argument("--completed", action="store_true", default=False)
         parser.add_argument("--published", action="store_true", default=False)
         parser.add_argument("--training", action="store_true", default=False)
+        parser.add_argument("--count", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -881,5 +882,8 @@ class listvideos(Command):
                 videos = videos.join(Job)
                 videos = videos.filter(Job.completed == True)
         
-        for video in videos.distinct():
-            print video.slug
+        if args.count:
+            print videos.count()
+        else:
+            for video in videos.distinct():
+                print video.slug

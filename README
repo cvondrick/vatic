@@ -425,6 +425,12 @@ If you instead want the videos that are used for gold standard:
 
     $ turkic list --training
 
+Finally, if you just want to count how many videos are in the system, use the
+--count option, in combination with any of the above:
+
+    $ turkic list --count
+    $ turkic list --published --count
+
 --- Managing Workers ---------------------------------------------------------
 
 You can list all known workers with the command:
