@@ -146,14 +146,48 @@ class Path(turkic.database.Base):
 
     interpolatecache = None
 
-    def getboxes(self, interpolate = False):
+    def getboxes(self, interpolate = False, bind = False, label = False):
         result = [x.getbox() for x in self.boxes]
         result.sort(key = lambda x: x.frame)
         if interpolate:
             if not self.interpolatecache:
                 self.interpolatecache = LinearFill(result)
             result = self.interpolatecache
+
+        if bind:
+            result = Path.bindattributes(self.attributes, result)
+
+        if label:
+            for box in result:
+                box.attributes.insert(0, self.label.text)
+
         return result
+
+    @classmethod 
+    def bindattributes(cls, attributes, boxes):
+        attributes = sorted(attributes, key = lambda x: x.frame)
+
+        byid = {}
+        for attribute in attributes:
+            if attribute.attributeid not in byid:
+                byid[attribute.attributeid] = []
+            byid[attribute.attributeid].append(attribute)
+
+        for attributes in byid.values():
+            for prev, cur in zip(attributes, attributes[1:]):
+                if prev.value:
+                    for box in boxes:
+                        if prev.frame <= box.frame < cur.frame:
+                            if prev.attribute not in box.attributes:
+                                box.attributes.append(prev.attribute)
+            last = attributes[-1]
+            if last.value:
+                for box in boxes:
+                    if last.frame <= box.frame:
+                        if last.attribute not in box.attributes:
+                            box.attributes.append(last.attribute)
+
+        return boxes
 
     def __repr__(self):
         return "<Path {0}>".format(self.id)

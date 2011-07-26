@@ -356,28 +356,7 @@ class DumpCommand(Command):
 
         def bind(self):
             for path in self.paths:
-                attributes = path.attributes
-                attributes.sort(key = lambda x: x.frame)
-
-                byid = {}
-                for attribute in attributes:
-                    if attribute.attributeid not in byid:
-                        byid[attribute.attributeid] = []
-                    byid[attribute.attributeid].append(attribute)
-
-                for attributes in byid.values():
-                    for prev, cur in zip(attributes, attributes[1:]):
-                        if prev.value:
-                            for box in self.boxes:
-                                if prev.frame <= box.frame < cur.frame:
-                                    if prev.attribute not in box.attributes:
-                                        box.attributes.append(prev.attribute)
-                    last = attributes[-1]
-                    if last.value:
-                        for box in self.boxes:
-                            if last.frame <= box.frame:
-                                if last.attribute not in box.attributes:
-                                    box.attributes.append(last.attribute)
+                self.boxes = Path.bindattributes(path.attributes, self.boxes)
 
     def getdata(self, args):
         response = []
@@ -767,6 +746,7 @@ class sample(Command):
         parser.add_argument("--number", "-n", type=int, default=3)
         parser.add_argument("--frames", "-f", type=int, default=4)
         parser.add_argument("--since", "-s")
+        parser.add_argument("--labels", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
@@ -780,6 +760,11 @@ class sample(Command):
             since = parsedatetime.parsedatetime.Calendar().parse(args.since)
             since = time.mktime(since[0])
             since = datetime.datetime.fromtimestamp(since)
+
+        if args.labels:
+            font = ImageFont.truetype("arial.ttf", 14)
+        else:
+            font = None
 
         workers = session.query(turkic.models.Worker)
         for worker in workers:
@@ -799,7 +784,10 @@ class sample(Command):
 
             for job in jobs:
                 print "Visualizing HIT {0}".format(job.hitid)
-                paths = [x.getboxes(interpolate = True) for x in job.paths]
+                paths = [x.getboxes(interpolate = True,
+                                    bind = True,
+                                    label = True) for x in job.paths]
+                print paths
 
                 if args.frames > job.segment.stop - job.segment.start:
                     frames = range(job.segment.start, job.segment.stop + 1) 
@@ -807,7 +795,6 @@ class sample(Command):
                     frames = random.sample(xrange(job.segment.start,
                                                 job.segment.stop + 1),
                                            args.frames)
-
 
                 size = math.sqrt(len(frames))
                 video = job.segment.video
@@ -819,7 +806,8 @@ class sample(Command):
                 offset = (0, 0)
                 horcount = 0
 
-                paths = vision.visualize.highlight_paths(video, paths)
+                paths = vision.visualize.highlight_paths(video, paths,
+                                                         font = font)
                 for frame, framenum in paths:
                     if framenum in frames:
                         image.paste(frame, offset)
