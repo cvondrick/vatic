@@ -186,6 +186,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
                         ["#0000FF", "#BFBFFF", "#A6A6FF"],
                         ["#000080", "#8F8FBF", "#7C7CBF"],
                         ["#800080", "#BF8FBF", "#BF7CBF"]];
+
     this.pickcolor = function()
     {
         return this.availcolors[this.availcolors.push(this.availcolors.shift()) - 1];
