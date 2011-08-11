@@ -405,7 +405,8 @@ where identifier is the identifier for the video and frame is the frame number
 that the error occurs. In most cases, this command will return one URL for you
 to make the corrections. If it outputs two URLs, it means the frame number
 occurs in two overlapping segments, and so you may have to make changes to both
-of the segments.
+of the segments. You can also omit the frame argument, in which case it will
+output all URLs for that video.
 
 --- Listing all Videos -------------------------------------------------------
 

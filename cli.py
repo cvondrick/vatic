@@ -73,6 +73,8 @@ class load(LoadCommand):
         parser.add_argument("--per-object-bonus", type=float)
         parser.add_argument("--completion-bonus", type=float)
         parser.add_argument("--use-frames", default = None)
+        parser.add_argument("--start-frame", type = int, default = 0)
+        parser.add_argument("--stop-frame", type = int, default = None)
         parser.add_argument("--train-with")
         parser.add_argument("--for-training", action="store_true")
         parser.add_argument("--for-training-start", type=int)
@@ -247,9 +249,13 @@ class load(LoadCommand):
                         session.add(segment)
                         session.add(job)
         else:
-            for start in range(0, video.totalframes, args.length):
+            startframe = args.start_frame
+            stopframe = args.stop_frame
+            if not stopframe:
+                stopframe = video.totalframes
+            for start in range(startframe, stopframe, args.length):
                 stop = min(start + args.length + args.overlap + 1,
-                           video.totalframes)
+                           stopframe)
                 segment = Segment(start = start,
                                     stop = stop,
                                     video = video)
@@ -827,15 +833,16 @@ class vet(Command):
     def setup(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("slug")
-        parser.add_argument("frame", type = int)
+        parser.add_argument("frame", type = int, nargs = '?', default = None)
         return parser
 
     def __call__(self, args):
         jobs = session.query(Job)
         jobs = jobs.join(Segment).join(Video)
         jobs = jobs.filter(Video.slug == args.slug)
-        jobs = jobs.filter(Segment.start <= args.frame)
-        jobs = jobs.filter(Segment.stop >= args.frame)
+        if args.frame is not None:
+            jobs = jobs.filter(Segment.start <= args.frame)
+            jobs = jobs.filter(Segment.stop >= args.frame)
         jobs = jobs.filter(turkic.models.HIT.useful == True)
 
         if jobs.count() > 0:
