@@ -793,7 +793,6 @@ class sample(Command):
                 paths = [x.getboxes(interpolate = True,
                                     bind = True,
                                     label = True) for x in job.paths]
-                print paths
 
                 if args.frames > job.segment.stop - job.segment.start:
                     frames = range(job.segment.start, job.segment.stop + 1) 
