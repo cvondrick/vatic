@@ -705,7 +705,8 @@ function Track(player, color, position)
                 });
 
             this.handle.resizable({
-                handles: "n,w,s,e",
+                handles: "n,w,s,e,nw,ne,sw,se",
+                autoHide: true,
                 start: function() {
                     player.pause();
                     me.notifystartupdate();
