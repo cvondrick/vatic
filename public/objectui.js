@@ -26,7 +26,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         }
 
         tracks.drawingnew(true);
-        ui_disable();
 
         console.log("Starting new track object");
 
@@ -56,6 +55,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
         var track = tracks.add(player.frame, position, this.currentcolor[0]);
 
         this.drawer.disable();
+        ui_disable();
 
         this.currentobject.onready.push(function() {
             me.stopnewobject();

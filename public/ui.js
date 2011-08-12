@@ -96,7 +96,7 @@ function ui_setup(job)
         "value='30,1' id='speedcontrolnorm' checked='checked'>" +
     "<label for='speedcontrolnorm'>Normal</label>" +
     "<input type='radio' name='speedcontrol' " +
-        "value='30,3' id='speedcontrolfast'>" +
+        "value='90,1' id='speedcontrolfast'>" +
     "<label for='speedcontrolfast'>Fast</label>" +
     "</div>");
 
