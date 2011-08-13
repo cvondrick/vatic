@@ -36,6 +36,8 @@ function boot()
         mturk_showstatistics();
     }
 
+    mturk_disabletimer();
+
     function dispatch(training)
     {
         training = training ? 1 : 0;
@@ -107,6 +109,8 @@ function loadingscreen(job)
 
                 ls.remove()
                 ui_build(job);
+
+                mturk_enabletimer();
 
                 eventlog("preload", "Done preloading");
             }
