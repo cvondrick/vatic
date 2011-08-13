@@ -22,12 +22,6 @@ You can download and extract vatic from our website:
     $ ./vatic-install.sh
     $ cd vatic
 
---- Dependencies --------------------------------------------------------------
-
-You can install all of vatic's dependencies with the command:
-
-    $ sudo ./install.sh
-
 --- HTTP Server Configuration -------------------------------------------------
 
 Open the Apache configuration file. On Ubuntu, this file is located at:
