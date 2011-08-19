@@ -858,6 +858,7 @@ class listvideos(Command):
         parser.add_argument("--published", action="store_true", default=False)
         parser.add_argument("--training", action="store_true", default=False)
         parser.add_argument("--count", action="store_true", default=False)
+        parser.add_argument("--worker")
         return parser
 
     def __call__(self, args):
@@ -867,7 +868,11 @@ class listvideos(Command):
             videos = videos.filter(Video.isfortraining == True)
         else:
             videos = videos.filter(Video.isfortraining == False)
-            if args.published:
+            if args.worker:
+                videos = videos.join(Segment)
+                videos = videos.join(Job)
+                videos = videos.filter(Job.workerid == args.worker)
+            elif args.published:
                 videos = videos.join(Segment)
                 videos = videos.join(Job)
                 videos = videos.filter(Job.published == True)
