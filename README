@@ -15,7 +15,8 @@ however it should work any operating system and with any server.
 
 --- Download ------------------------------------------------------------------
 
-You can download and extract vatic from our website:
+You can download and extract vatic from our website. Note: do NOT run the 
+installer as root. 
 
     $ wget http://mit.edu/vondrick/vatic/vatic-install.sh
     $ chmod +x vatic-install.sh
