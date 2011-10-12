@@ -394,6 +394,7 @@ Furthermore, if you have found a small mistake in a video and want to make
 the correction yourself, you can start an annotation session initialized with
 the MTurk workers annotations:
 
+    $ turkic vet identifier
     $ turkic vet identifier frame
 
 where identifier is the identifier for the video and frame is the frame number
@@ -402,6 +403,18 @@ to make the corrections. If it outputs two URLs, it means the frame number
 occurs in two overlapping segments, and so you may have to make changes to both
 of the segments. You can also omit the frame argument, in which case it will
 output all URLs for that video.
+
+If you want to find the HIT id, assignment ID, or worker ID for a particular
+video, specify the --ids parameter to the vet command:
+
+    $ turkic vet identifer --ids
+    $ turkic vet identifer frame --ids
+
+will print a list of all the IDs for the video. If the corresponding segment
+has been published and completed, it will list three strings: the HIT ID,
+assignment ID, and the worker ID. If the job has been published but not
+finished, it will just list the HIT ID. If the job has not yet been published,
+it prints "(not published)".
 
 --- Listing all Videos -------------------------------------------------------
 

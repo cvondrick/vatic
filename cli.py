@@ -833,6 +833,7 @@ class vet(Command):
         parser = argparse.ArgumentParser()
         parser.add_argument("slug")
         parser.add_argument("frame", type = int, nargs = '?', default = None)
+        parser.add_argument("--ids", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
@@ -846,7 +847,17 @@ class vet(Command):
 
         if jobs.count() > 0:
             for job in jobs:
-                print job.offlineurl(config.localhost)
+                if args.ids:
+                    if job.published:
+                        print job.hitid,
+                        if job.completed:
+                            print job.assignmentid,
+                            print job.workerid,
+                        print ""
+                    else:
+                        print "(not published)"
+                else:
+                    print job.offlineurl(config.localhost)
         else:
             print "No jobs matching this criteria."
 
