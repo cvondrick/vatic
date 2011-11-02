@@ -505,13 +505,20 @@ class dump(DumpCommand):
             action="store_true", default=False)
         parser.add_argument("--labelme", "-vlm",
             action="store", default=False)
+        parser.add_argument("--pascal", action="store_true", default=False)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         return parser
 
     def __call__(self, args):
         video, data = self.getdata(args)
 
-        if args.output:
+        if args.pascal:
+            if not args.output:
+                print "error: PASCAL output needs an output"
+                return
+            file = args.output
+            print "Dumping video {0}".format(video.slug)
+        elif args.output:
             file = open(args.output, 'w')
             print "Dumping video {0}".format(video.slug)
         else:
@@ -530,10 +537,14 @@ class dump(DumpCommand):
             self.dumppickle(file, data)
         elif args.labelme:
             self.dumplabelme(file, data, args.slug, args.labelme)
+        elif args.pascal:
+            self.dumppascal(file, video, data)
         else:
             self.dumptext(file, data)
 
-        if args.output:
+        if args.pascal:
+            return
+        elif args.output:
             file.close()
         else:
             sys.stdout.write(file.getvalue())
@@ -743,6 +754,48 @@ class dump(DumpCommand):
 
         file.write("</annotation>")
         file.write("\n")
+    
+    def dumppascal(self, folder, video, data):
+        byframe = {}
+        for track in data:
+            for box in track.boxes:
+                if box.frame not in byframe:
+                    byframe[box.frame] = []
+                byframe[box.frame].append((box, track))
+
+        for frame, boxes in byframe.items():
+            file = open("{0}/{1}.xml".format(folder, frame), "w")
+            file.write("<annotation>")
+            file.write("<filename>{0}/{1}.jpg</filename>".format(video.slug, frame))
+
+            for box, track in boxes:
+                if box.lost:
+                    continue
+                file.write("<object>")
+                file.write("<name>{0}</name>".format(track.label))
+                file.write("<bndbox>")
+                file.write("<xmax>{0}</xmax>".format(box.xbr))
+                file.write("<xmin>{0}</xmin>".format(box.xtl))
+                file.write("<ymax>{0}</ymax>".format(box.ybr))
+                file.write("<ymin>{0}</ymin>".format(box.ytl))
+                file.write("</bndbox>")
+                file.write("<difficult>0</difficult>")
+                file.write("<occluded>{0}</occluded>".format(box.occluded))
+                file.write("<pose>Unspecified</pose>")
+                file.write("<truncated>0</truncated>")
+                file.write("</object>")
+            file.write("<segmented>0</segmented>")
+            file.write("<size>")
+            file.write("<depth>3</depth>")
+            file.write("<height>{0}</height>".format(video.width))
+            file.write("<width>{0}</width>".format(video.height))
+            file.write("</size>")
+            file.write("<source>")
+            file.write("<annotation>{0}</annotation>".format(video.slug))
+            file.write("<database>vatic</database>")
+            file.write("<image>vatic</image>")
+            file.write("</source>")
+            file.write("</annotation>")
 
 @handler("Samples the performance by worker")
 class sample(Command):
