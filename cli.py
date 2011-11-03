@@ -507,6 +507,7 @@ class dump(DumpCommand):
             action="store", default=False)
         parser.add_argument("--pascal", action="store_true", default=False)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
+        parser.add_argument("--dimensions", "-d", default = None)
         return parser
 
     def __call__(self, args):
@@ -524,8 +525,18 @@ class dump(DumpCommand):
         else:
             file = cStringIO.StringIO()
 
+        scale = args.scale
+        if args.dimensions:
+            w, h = args.dimensions.split("x")
+            w = float(w)
+            h = float(h)
+            s = w / video.width
+            if s * video.height > h:
+                s = h / video.height
+            scale = s
+
         for track in data:
-            track.boxes = [x.transform(args.scale) for x in track.boxes]
+            track.boxes = [x.transform(scale) for x in track.boxes]
 
         if args.xml:
             self.dumpxml(file, data)
