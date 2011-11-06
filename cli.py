@@ -279,9 +279,14 @@ class load(LoadCommand):
                 pathcache = {}
                 for line in file:
                     (id, xtl, ytl, xbr, ybr,
-                     frame, outside, occluded, label) = line.split(" ")
+                     frame, outside, occluded, generated,
+                     label) = line.split(" ")
+
+                    if int(generated):
+                        continue
 
                     if id not in pathcache:
+                        print "Imported new path {0}".format(id)
                         label = labelcache[label.strip()[1:-1]]
                         pathcache[id] = Path(job = job, label = label)
 
