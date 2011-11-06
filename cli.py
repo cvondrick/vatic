@@ -297,7 +297,7 @@ class load(LoadCommand):
                     box.ybr = int(ybr)
                     box.frame = int(frame)
                     box.outside = int(outside)
-                    box.occluded = int(outside)
+                    box.occluded = int(occluded)
                     pathcache[id].boxes.append(box)
 
         session.commit()
