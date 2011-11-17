@@ -322,6 +322,7 @@ The command can also output to many different formats. Available formats are:
     --matlab    Use MATLAB
     --pickle    Use Python's Pickle
     --labelme   Use LabelMe video's XML format
+    --pascal    Use PASCAL VOC format, treating each frame as an image
 
 The specifications for these formats should be self explanatory.
 
