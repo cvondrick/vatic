@@ -779,14 +779,29 @@ class dump(DumpCommand):
                     byframe[box.frame] = []
                 byframe[box.frame].append((box, track))
 
+        hasit = {}
+
+        try:
+            os.makedirs("{0}/Annotations".format(folder))
+        except:
+            pass
+
         for frame, boxes in byframe.items():
-            file = open("{0}/{1}.xml".format(folder, frame), "w")
+            strframe = str(frame+1).zfill(6)
+            filename = "{0}/Annotations/{1}.xml".format(folder, strframe)
+            file = open(filename, "w")
             file.write("<annotation>")
-            file.write("<filename>{0}/{1}.jpg</filename>".format(video.slug, frame))
+            file.write("<folder>{0}</folder>".format(folder))
+            file.write("<filename>{0}.jpg</filename>".format(strframe))
 
             for box, track in boxes:
                 if box.lost:
                     continue
+
+                if track.label not in hasit:
+                    hasit[track.label] = set()
+                hasit[track.label].add(frame)
+
                 file.write("<object>")
                 file.write("<name>{0}</name>".format(track.label))
                 file.write("<bndbox>")
@@ -811,7 +826,43 @@ class dump(DumpCommand):
             file.write("<database>vatic</database>")
             file.write("<image>vatic</image>")
             file.write("</source>")
+            file.write("<owner>")
+            file.write("<flickrid>vatic</flickrid>")
+            file.write("<name>vatic</name>")
+            file.write("</owner>")
             file.write("</annotation>")
+            file.close()
+
+        try:
+            os.makedirs("{0}/ImageSets/Main/".format(folder))
+        except:
+            pass
+
+        allframes = range(video.totalframes)
+        for label, frames in hasit.items():
+            filename = "{0}/ImageSets/Main/{1}_train.txt".format(folder, label)
+            file = open(filename, "w")
+            for frame in allframes:
+                file.write(str(frame+1).zfill(6))
+                file.write(" ")
+                if frame in frames:
+                    file.write("1")
+                else:
+                    file.write("-1")
+                file.write("\n")
+
+        try:
+            os.makedirs("{0}/JPEGImages/Main/".format(folder))
+        except:
+            pass
+
+        for frame in frames:
+            strframe = str(frame+1).zfill(6)
+            path = Video.getframepath(frame, video.location)
+            try:
+                os.link(path, "{0}/JPEGImages/Main/{1}.jpg".format(folder, strframe))
+            except:
+                pass
 
 @handler("Samples the performance by worker")
 class sample(Command):
