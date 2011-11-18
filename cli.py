@@ -554,6 +554,9 @@ class dump(DumpCommand):
         elif args.labelme:
             self.dumplabelme(file, data, args.slug, args.labelme)
         elif args.pascal:
+            if scale != 1:
+                print "Warning: scale is not 1, yet frames are not resizing!"
+                print "Warning: you should manually update the JPEGImages"
             self.dumppascal(file, video, data)
         else:
             self.dumptext(file, data)
@@ -780,13 +783,19 @@ class dump(DumpCommand):
                 byframe[box.frame].append((box, track))
 
         hasit = {}
+        allframes = range(video.totalframes)
 
         try:
             os.makedirs("{0}/Annotations".format(folder))
         except:
             pass
 
-        for frame, boxes in byframe.items():
+        for frame in allframes:
+            if frame in byframe:
+                boxes = byframe[frame]
+            else:
+                boxes = []
+
             strframe = str(frame+1).zfill(6)
             filename = "{0}/Annotations/{1}.xml".format(folder, strframe)
             file = open(filename, "w")
@@ -794,9 +803,12 @@ class dump(DumpCommand):
             file.write("<folder>{0}</folder>".format(folder))
             file.write("<filename>{0}.jpg</filename>".format(strframe))
 
+            isempty = True
             for box, track in boxes:
                 if box.lost:
                     continue
+
+                isempty = False
 
                 if track.label not in hasit:
                     hasit[track.label] = set()
@@ -815,6 +827,23 @@ class dump(DumpCommand):
                 file.write("<pose>Unspecified</pose>")
                 file.write("<truncated>0</truncated>")
                 file.write("</object>")
+
+            if isempty:
+                # since there are no objects for this frame, we need to fabricate one
+                file.write("<object>")
+                file.write("<name>not-a-real-object</name>")
+                file.write("<bndbox>")
+                file.write("<xmax>10</xmax>")
+                file.write("<xmin>20</xmin>")
+                file.write("<ymax>30</ymax>")
+                file.write("<ymin>40</ymin>")
+                file.write("</bndbox>")
+                file.write("<difficult>1</difficult>")
+                file.write("<occluded>1</occluded>")
+                file.write("<pose>Unspecified</pose>")
+                file.write("<truncated>0</truncated>")
+                file.write("</object>")
+
             file.write("<segmented>0</segmented>")
             file.write("<size>")
             file.write("<depth>3</depth>")
@@ -838,9 +867,8 @@ class dump(DumpCommand):
         except:
             pass
 
-        allframes = range(video.totalframes)
         for label, frames in hasit.items():
-            filename = "{0}/ImageSets/Main/{1}_train.txt".format(folder, label)
+            filename = "{0}/ImageSets/Main/{1}_trainval.txt".format(folder, label)
             file = open(filename, "w")
             for frame in allframes:
                 file.write(str(frame+1).zfill(6))
@@ -851,18 +879,18 @@ class dump(DumpCommand):
                     file.write("-1")
                 file.write("\n")
 
+        file = open("{0}/ImageSets/Main/trainval.txt".format(folder), "w")
+        file.write("\n".join(str(x+1).zfill(6) for x in allframes))
+
         try:
-            os.makedirs("{0}/JPEGImages/Main/".format(folder))
+            os.makedirs("{0}/JPEGImages/".format(folder))
         except:
             pass
 
-        for frame in frames:
+        for frame in allframes:
             strframe = str(frame+1).zfill(6)
             path = Video.getframepath(frame, video.location)
-            try:
-                os.link(path, "{0}/JPEGImages/Main/{1}.jpg".format(folder, strframe))
-            except:
-                pass
+            os.link(path, "{0}/JPEGImages/{1}.jpg".format(folder, strframe))
 
 @handler("Samples the performance by worker")
 class sample(Command):
