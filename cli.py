@@ -511,6 +511,8 @@ class dump(DumpCommand):
         parser.add_argument("--labelme", "-vlm",
             action="store", default=False)
         parser.add_argument("--pascal", action="store_true", default=False)
+        parser.add_argument("--pascal-difficult", type = int, default = 100)
+        parser.add_argument("--pascal-skip", type = int, default = 15)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         parser.add_argument("--dimensions", "-d", default = None)
         return parser
@@ -557,7 +559,8 @@ class dump(DumpCommand):
             if scale != 1:
                 print "Warning: scale is not 1, yet frames are not resizing!"
                 print "Warning: you should manually update the JPEGImages"
-            self.dumppascal(file, video, data)
+            self.dumppascal(file, video, data, args.pascal_difficult,
+                            args.pascal_skip)
         else:
             self.dumptext(file, data)
 
@@ -774,7 +777,7 @@ class dump(DumpCommand):
         file.write("</annotation>")
         file.write("\n")
     
-    def dumppascal(self, folder, video, data):
+    def dumppascal(self, folder, video, data, difficultthresh, skip):
         byframe = {}
         for track in data:
             for box in track.boxes:
@@ -783,13 +786,17 @@ class dump(DumpCommand):
                 byframe[box.frame].append((box, track))
 
         hasit = {}
-        allframes = range(video.totalframes)
+        allframes = range(0, video.totalframes, skip)
 
         try:
             os.makedirs("{0}/Annotations".format(folder))
         except:
             pass
+        
+        numdifficult = 0
+        numtotal = 0
 
+        print "Writing annotations..."
         for frame in allframes:
             if frame in byframe:
                 boxes = byframe[frame]
@@ -814,6 +821,13 @@ class dump(DumpCommand):
                     hasit[track.label] = set()
                 hasit[track.label].add(frame)
 
+                numtotal += 1
+
+                difficult = box.area < difficultthresh
+                if difficult:
+                    numdifficult += 1
+                difficult = int(difficult)
+
                 file.write("<object>")
                 file.write("<name>{0}</name>".format(track.label))
                 file.write("<bndbox>")
@@ -822,14 +836,15 @@ class dump(DumpCommand):
                 file.write("<ymax>{0}</ymax>".format(box.ybr))
                 file.write("<ymin>{0}</ymin>".format(box.ytl))
                 file.write("</bndbox>")
-                file.write("<difficult>0</difficult>")
+                file.write("<difficult>{0}</difficult>".format(difficult))
                 file.write("<occluded>{0}</occluded>".format(box.occluded))
                 file.write("<pose>Unspecified</pose>")
                 file.write("<truncated>0</truncated>")
                 file.write("</object>")
 
             if isempty:
-                # since there are no objects for this frame, we need to fabricate one
+                # since there are no objects for this frame,
+                # we need to fabricate one
                 file.write("<object>")
                 file.write("<name>not-a-real-object</name>")
                 file.write("<bndbox>")
@@ -867,6 +882,9 @@ class dump(DumpCommand):
         except:
             pass
 
+        print "{0} of {1} are difficult".format(numdifficult, numtotal)
+
+        print "Writing image sets..."
         for label, frames in hasit.items():
             filename = "{0}/ImageSets/Main/{1}_trainval.txt".format(folder, label)
             file = open(filename, "w")
@@ -878,19 +896,36 @@ class dump(DumpCommand):
                 else:
                     file.write("-1")
                 file.write("\n")
+            file.close()
 
-        file = open("{0}/ImageSets/Main/trainval.txt".format(folder), "w")
+            train = "{0}/ImageSets/Main/{1}_train.txt".format(folder, label)
+            shutil.copyfile(filename, train)
+
+        filename = "{0}/ImageSets/Main/trainval.txt".format(folder)
+        file = open(filename, "w")
         file.write("\n".join(str(x+1).zfill(6) for x in allframes))
+        file.close()
+
+        train = "{0}/ImageSets/Main/train.txt".format(folder)
+        shutil.copyfile(filename, train)
 
         try:
             os.makedirs("{0}/JPEGImages/".format(folder))
         except:
             pass
 
+        print "Writing JPEG frames..."
         for frame in allframes:
             strframe = str(frame+1).zfill(6)
             path = Video.getframepath(frame, video.location)
-            os.link(path, "{0}/JPEGImages/{1}.jpg".format(folder, strframe))
+            dest = "{0}/JPEGImages/{1}.jpg".format(folder, strframe)
+            try:
+                os.unlink(dest)
+            except OSError:
+                pass
+            os.link(path, dest)
+
+        print "Done."
 
 @handler("Samples the performance by worker")
 class sample(Command):
