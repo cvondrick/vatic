@@ -483,6 +483,32 @@ warn you and abort. You can force deletion with:
 
 which will REMOVE ALL DATA AND CANNOT BE UNDONE.
 
+== WORKAROUNDS ================================================================
+
+If you get the error:
+
+    error: each element of 'ext_modules' option must be an Extension instance
+    or 2-tuple
+
+then follow these steps (we will implement a workaround at a later date):
+
+1) Edit /usr/lib/python2.7/distutils/command/build_ext.py
+2) Find line 356, where it reads:
+
+for i, ext in enumerate(extensions):
+
+3) After that line, add a new line that just says "continue", so that
+it looks like:
+
+       for i, ext in enumerate(extensions):
+           continue
+           if isinstance(ext, Extension):
+               continue                # OK! (assume type-checking done
+                                       # by Extension constructor)
+
+4) Save the file
+5) Go to the pyvision directory and run: $ sudo python setup.py install
+
 == REFERENCES =================================================================
 
 When using our system, please cite:
