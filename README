@@ -259,6 +259,11 @@ the command:
 
     $ turkic publish --offline
 
+Note: for the above command to work, you must have loaded the video with the
+--offline parameter as well: 
+
+    $ turkic load identifier /path/to/frames Person --offline
+
 --- Checking the Status ------------------------------------------------------
 
 You can check the status of the video annotation server with the command:
