@@ -49,6 +49,10 @@ the public directory in vatic, and WSGIScriptAlias to vatic's server.py file.
 If you do use Apache for other purposes, you will have to setup a new virtual
 host with the correct document root and script alias, as shown above.
 
+Make sure you have the mod_headers module enabled:
+
+    $ sudo cp /etc/apache2/mods-available/headers.load /etc/apache2/mods-enabled
+
 After making these changes, restart Apache:
 
     $ sudo apache2ctl graceful
