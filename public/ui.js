@@ -46,13 +46,18 @@ function ui_setup(job)
       "</table>").appendTo(screen).css("width", "100%");
 
 
+    var playerwidth = Math.max(720, job.width);
+
+
     $("#videoframe").css({"width": job.width + "px",
                           "height": job.height + "px",
                           "margin": "0 auto"})
-                    .parent().css("width", Math.max("720", job.width) + "px");
+                    .parent().css("width", playerwidth + "px");
 
-    $("#sidebar").css("height", job.height + "px");
+    $("#sidebar").css({"height": job.height + "px",
+                       "width": "205px"});
 
+    $("#annotatescreen").css("width", (playerwidth + 205) + "px");
 
     $("#bottombar").append("<div id='playerslider'></div>");
     $("#bottombar").append("<div class='button' id='rewindbutton'>Rewind</div> ");
@@ -343,7 +348,7 @@ function ui_setupslider(player)
 
     slider.css({
         marginTop: "6px",
-        width: "520px",
+        width: parseInt(slider.parent().css("width")) - 200 + "px", 
         float: "right"
     });
 
