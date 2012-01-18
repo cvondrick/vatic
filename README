@@ -485,6 +485,26 @@ which will REMOVE ALL DATA AND CANNOT BE UNDONE.
 
 == WORKAROUNDS ================================================================
 
+-- Missing 'extract' or 'load' command ----------------------------------------
+
+If when you run:
+
+    $ turkic load
+
+you get an error saying the load command does not exist, your vatic
+installation is likely incomplete. You can see why this is occuring by entering
+in the sequence of commands:
+
+    $ cd /path/to/vatic
+    $ python
+    >> import cli
+
+Usually, the error message will tell you about a missing package or permission
+error. If you are unable to figure out why this is occuring, feel free to email
+me.
+
+-- each element of 'ext_modules' option must be an Extension... ---------------
+
 If you get the error:
 
     error: each element of 'ext_modules' option must be an Extension instance
