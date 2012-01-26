@@ -1,27 +1,27 @@
-vatic - Video Annotation Tool from Irvine, California
+VATIC - Video Annotation Tool from Irvine, California
 
-vatic is an online video annotation tool for computer vision research that
+VATIC is an online video annotation tool for computer vision research that
 crowdsources work to Amazon's Mechanical Turk. Our tool makes it easy to build
 massive, affordable video data sets. 
 
-This document will describe how to install and use vatic. If you want to modify
-vatic, please read DEVELOPERS after reading this document.
+This document will describe how to install and use VATIC. If you want to modify
+VATIC, please read DEVELOPERS after reading this document.
 
 == INSTALLATION ===============================================================
 
-Note: vatic has only been tested on Ubuntu with Apache 2.2 HTTP server and a
+Note: VATIC has only been tested on Ubuntu with Apache 2.2 HTTP server and a
 MySQL server. This document will describe installation on this platform,
 however it should work any operating system and with any server.
 
 --- Download ------------------------------------------------------------------
 
-You can download and extract vatic from our website. Note: do NOT run the 
+You can download and extract VATIC from our website. Note: do NOT run the 
 installer as root. 
 
-    $ wget http://mit.edu/vondrick/vatic/vatic-install.sh
-    $ chmod +x vatic-install.sh
-    $ ./vatic-install.sh
-    $ cd vatic
+    $ wget http://mit.edu/vondrick/VATIC/VATIC-install.sh
+    $ chmod +x VATIC-install.sh
+    $ ./VATIC-install.sh
+    $ cd VATIC
 
 --- HTTP Server Configuration -------------------------------------------------
 
@@ -36,15 +36,15 @@ contents of the file with:
     WSGIProcessGroup www-data
 
     <VirtualHost *:80>
-        ServerName vatic.domain.edu
-        DocumentRoot /path/to/vatic/public
+        ServerName VATIC.domain.edu
+        DocumentRoot /path/to/VATIC/public
 
-        WSGIScriptAlias /server /path/to/vatic/server.py
+        WSGIScriptAlias /server /path/to/VATIC/server.py
         CustomLog /var/log/apache2/access.log combined
     </VirtualHost>
 
 updating ServerName with your domain name, DocumentRoot with the path to
-the public directory in vatic, and WSGIScriptAlias to vatic's server.py file.
+the public directory in VATIC, and WSGIScriptAlias to VATIC's server.py file.
 
 If you do use Apache for other purposes, you will have to setup a new virtual
 host with the correct document root and script alias, as shown above.
@@ -59,32 +59,32 @@ After making these changes, restart Apache:
 
 --- SQL Server Configuration --------------------------------------------------
 
-We recommend creating a separate database specifically for vatic:
+We recommend creating a separate database specifically for VATIC:
 
     $ mysql -u root
-    mysql> create database vatic;
+    mysql> create database VATIC;
 
 The next section will automatically create the necessary tables.
 
 --- Setup ---------------------------------------------------------------------
 
-Inside the vatic directory, copy config.py-example to config.py:
+Inside the VATIC directory, copy config.py-example to config.py:
 
     $ cp config.py-example config.py
 
 Then open config.py and make changes to the following variables in order to
-configure vatic:
+configure VATIC:
 
     signature       Amazon Mechanical Turk AWS signature (secret access key)
     accesskey       Amazon Mechanical Turk AWS access key (access key ID)
     sandbox         If true, put into Mturk sandbox mode. For debugging.
-    localhost       The local HTTP address: http://vatic.domain.edu/ so it
+    localhost       The local HTTP address: http://VATIC.domain.edu/ so it
                     matches the ServerName in Apache.
     database        Database connection string: for example,
-                    mysql://user:pass@localhost/vatic
+                    mysql://user:pass@localhost/VATIC
     geolocation     API key from ipinfodb.com for geolocation services
 
-If you do not plan on using vatic on Mechcanical Turk (offlien mode only), you
+If you do not plan on using VATIC on Mechcanical Turk (offlien mode only), you
 can leave the signature and accesskey empty.
 
 After saving results, you can then initialize the database:
@@ -97,7 +97,7 @@ Note: if you want to reset the database, you can do this with:
 
 which will require confirmation to reset in order to prevent data loss.
 
-Finally, you must also allow vatic to access turkic, a major dependency:
+Finally, you must also allow VATIC to access turkic, a major dependency:
 
     $ turkic setup --public-symlink
 
