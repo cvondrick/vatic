@@ -84,6 +84,9 @@ configure vatic:
                     mysql://user:pass@localhost/vatic
     geolocation     API key from ipinfodb.com for geolocation services
 
+If you do not plan on using vatic on Mechcanical Turk (offlien mode only), you
+can leave the signature and accesskey empty.
+
 After saving results, you can then initialize the database:
 
     $ turkic setup --database
