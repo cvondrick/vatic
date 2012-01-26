@@ -18,10 +18,10 @@ however it should work any operating system and with any server.
 You can download and extract VATIC from our website. Note: do NOT run the 
 installer as root. 
 
-    $ wget http://mit.edu/vondrick/VATIC/VATIC-install.sh
-    $ chmod +x VATIC-install.sh
-    $ ./VATIC-install.sh
-    $ cd VATIC
+    $ wget http://mit.edu/vondrick/vatic/vatic-install.sh
+    $ chmod +x vatic-install.sh
+    $ ./vatic-install.sh
+    $ cd vatic
 
 --- HTTP Server Configuration -------------------------------------------------
 
