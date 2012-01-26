@@ -36,10 +36,10 @@ contents of the file with:
     WSGIProcessGroup www-data
 
     <VirtualHost *:80>
-        ServerName VATIC.domain.edu
-        DocumentRoot /path/to/VATIC/public
+        ServerName vatic.domain.edu
+        DocumentRoot /path/to/vatic/public
 
-        WSGIScriptAlias /server /path/to/VATIC/server.py
+        WSGIScriptAlias /server /path/to/vatic/server.py
         CustomLog /var/log/apache2/access.log combined
     </VirtualHost>
 
@@ -62,13 +62,13 @@ After making these changes, restart Apache:
 We recommend creating a separate database specifically for VATIC:
 
     $ mysql -u root
-    mysql> create database VATIC;
+    mysql> create database vatic;
 
 The next section will automatically create the necessary tables.
 
 --- Setup ---------------------------------------------------------------------
 
-Inside the VATIC directory, copy config.py-example to config.py:
+Inside the vatic directory, copy config.py-example to config.py:
 
     $ cp config.py-example config.py
 
@@ -78,10 +78,10 @@ configure VATIC:
     signature       Amazon Mechanical Turk AWS signature (secret access key)
     accesskey       Amazon Mechanical Turk AWS access key (access key ID)
     sandbox         If true, put into Mturk sandbox mode. For debugging.
-    localhost       The local HTTP address: http://VATIC.domain.edu/ so it
+    localhost       The local HTTP address: http://vatic.domain.edu/ so it
                     matches the ServerName in Apache.
     database        Database connection string: for example,
-                    mysql://user:pass@localhost/VATIC
+                    mysql://user:pass@localhost/vatic
     geolocation     API key from ipinfodb.com for geolocation services
 
 If you do not plan on using VATIC on Mechcanical Turk (offlien mode only), you
