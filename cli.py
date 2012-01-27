@@ -515,6 +515,7 @@ class dump(DumpCommand):
         parser.add_argument("--pascal-skip", type = int, default = 15)
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         parser.add_argument("--dimensions", "-d", default = None)
+        parser.add_argument("--original-video", "-v", default = None)
         return parser
 
     def __call__(self, args):
@@ -533,8 +534,11 @@ class dump(DumpCommand):
             file = cStringIO.StringIO()
 
         scale = args.scale
-        if args.dimensions:
-            w, h = args.dimensions.split("x")
+        if args.dimensions or args.original_video:
+            if args.original_video:
+                w, h = ffmpeg.extract(args.original_video).next().size
+            else:
+                w, h = args.dimensions.split("x")
             w = float(w)
             h = float(h)
             s = w / video.width

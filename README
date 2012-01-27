@@ -324,6 +324,10 @@ or force it to fit within a max dimension:
 
     $ turkic dump identifier -o output.txt --dimensions 400x200
 
+or force it to fit within the dimensions of the original video:
+
+    $ turkic dump identifier -o output.txt --original-video /path/to/video.mp4
+
 The command can also output to many different formats. Available formats are:
 
     --xml       Use XML
