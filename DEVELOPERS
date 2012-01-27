@@ -1,13 +1,13 @@
-This document will describe how to modify vatic for your own purposes. If you
-only want to use vatic, please see README instead.
+This document will describe how to modify VATIC for your own purposes. If you
+only want to use VATIC, please see README instead.
 
-vatic is actually broken up into three different packages:
+VATIC is actually broken up into three different packages:
 
     1. vatic - video annotation tool
     2. turkic - a platform for easy MTurk management
     3. pyvision - a simple Python computer vision toolkit
 
-In general, you likely want to only modify vatic, which houses the essential
+In general, you likely want to only modify VATIC, which houses the essential
 tools for video annotation, such as: the JavaScript video player, instructions,
 entire user interface, merging paths, quality assurance, etc.
 

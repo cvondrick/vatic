@@ -73,10 +73,10 @@ def readpaths(tracks):
 
         for frame, userbox in track.items():
             box = Box(path = path)
-            box.xtl = int(userbox[0])
-            box.ytl = int(userbox[1])
-            box.xbr = int(userbox[2])
-            box.ybr = int(userbox[3])
+            box.xtl = max(int(userbox[0]), 0)
+            box.ytl = max(int(userbox[1]), 0)
+            box.xbr = max(int(userbox[2]), 0)
+            box.ybr = max(int(userbox[3]), 0)
             box.occluded = int(userbox[4])
             box.outside = int(userbox[5])
             box.frame = int(frame)
