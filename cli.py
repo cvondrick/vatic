@@ -20,6 +20,7 @@ import qa
 import merge
 import parsedatetime.parsedatetime
 import datetime, time
+from xml.etree import ElementTree
 
 @handler("Decompresses an entire video into frames")
 class extract(Command):
@@ -513,6 +514,7 @@ class dump(DumpCommand):
         parser.add_argument("--pascal", action="store_true", default=False)
         parser.add_argument("--pascal-difficult", type = int, default = 100)
         parser.add_argument("--pascal-skip", type = int, default = 15)
+        parser.add_argument("--pascal-negatives")
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         parser.add_argument("--dimensions", "-d", default = None)
         parser.add_argument("--original-video", "-v", default = None)
@@ -564,7 +566,7 @@ class dump(DumpCommand):
                 print "Warning: scale is not 1, yet frames are not resizing!"
                 print "Warning: you should manually update the JPEGImages"
             self.dumppascal(file, video, data, args.pascal_difficult,
-                            args.pascal_skip)
+                            args.pascal_skip, args.pascal_negatives)
         else:
             self.dumptext(file, data)
 
@@ -579,18 +581,20 @@ class dump(DumpCommand):
         results = []
         for id, track in enumerate(data):
             for box in track.boxes:
-                data = {}
-                data['id'] = id
-                data['xtl'] = box.xtl
-                data['ytl'] = box.ytl
-                data['xbr'] = box.xbr
-                data['ybr'] = box.ybr
-                data['frame'] = box.frame
-                data['lost'] = box.lost
-                data['occluded'] = box.occluded
-                data['label'] = track.label
-                data['attributes'] = box.attributes
-                results.append(data)
+                if not box.lost:
+                    data = {}
+                    data['id'] = id
+                    data['xtl'] = box.xtl
+                    data['ytl'] = box.ytl
+                    data['xbr'] = box.xbr
+                    data['ybr'] = box.ybr
+                    data['frame'] = box.frame
+                    data['lost'] = box.lost
+                    data['occluded'] = box.occluded
+                    data['label'] = track.label
+                    data['attributes'] = box.attributes
+                    data['generated'] = box.generated
+                    results.append(data)
 
         from scipy.io import savemat as savematlab
         savematlab(file,
@@ -781,7 +785,8 @@ class dump(DumpCommand):
         file.write("</annotation>")
         file.write("\n")
     
-    def dumppascal(self, folder, video, data, difficultthresh, skip):
+    def dumppascal(self, folder, video, data, difficultthresh, skip,
+                   negdir):
         byframe = {}
         for track in data:
             for box in track.boxes:
@@ -796,9 +801,46 @@ class dump(DumpCommand):
             os.makedirs("{0}/Annotations".format(folder))
         except:
             pass
+        try:
+            os.makedirs("{0}/ImageSets/Main/".format(folder))
+        except:
+            pass
+        try:
+            os.makedirs("{0}/JPEGImages/".format(folder))
+        except:
+            pass
         
         numdifficult = 0
         numtotal = 0
+
+        negatives = {}
+        allnegatives = set()
+        if negdir:
+            print "Reading generic negatives..."
+            for file in os.listdir("{0}/ImageSets/Main".format(negdir)):
+                if not file.endswith("_trainval.txt"):
+                    continue
+                if file.startswith("."):
+                    continue
+                category, _ = file.rsplit("_", 1)
+                category = category.lower()
+
+                file = "{0}/ImageSets/Main/{1}".format(negdir, file)
+
+                negdata = [x.split() for x in open(file)]
+                negs = [x for x, y in negdata if int(y) == -1]
+                negatives[category] = negs
+                allnegatives.update(set(negs))
+
+            print "Writing generic negative annotations (may take a moment)..."
+            for line in allnegatives:
+                source = "{0}/Annotations/{1}.xml".format(negdir, line)
+                tree = ElementTree.parse(source)
+                tree.find("folder").text = folder
+                tree.find("filename").text = "n{0}.jpg".format(line)
+                tree.write("{0}/Annotations/n{1}.xml".format(folder, line))
+                shutil.copyfile("{0}/JPEGImages/{1}.jpg".format(negdir, line),
+                                "{0}/JPEGImages/n{1}.jpg".format(folder, line))
 
         print "Writing annotations..."
         for frame in allframes:
@@ -881,16 +923,12 @@ class dump(DumpCommand):
             file.write("</annotation>")
             file.close()
 
-        try:
-            os.makedirs("{0}/ImageSets/Main/".format(folder))
-        except:
-            pass
-
         print "{0} of {1} are difficult".format(numdifficult, numtotal)
 
         print "Writing image sets..."
         for label, frames in hasit.items():
-            filename = "{0}/ImageSets/Main/{1}_trainval.txt".format(folder, label)
+            filename = "{0}/ImageSets/Main/{1}_trainval.txt".format(folder,
+                                                                    label)
             file = open(filename, "w")
             for frame in allframes:
                 file.write(str(frame+1).zfill(6))
@@ -900,6 +938,9 @@ class dump(DumpCommand):
                 else:
                     file.write("-1")
                 file.write("\n")
+            if label.lower() in negatives:
+                for neg in negatives[label.lower()]:
+                    file.write("n{0} -1\n".format(neg))
             file.close()
 
             train = "{0}/ImageSets/Main/{1}_train.txt".format(folder, label)
@@ -908,15 +949,12 @@ class dump(DumpCommand):
         filename = "{0}/ImageSets/Main/trainval.txt".format(folder)
         file = open(filename, "w")
         file.write("\n".join(str(x+1).zfill(6) for x in allframes))
+        for neg in allnegatives:
+            file.write("n{0}\n".format(neg))
         file.close()
 
         train = "{0}/ImageSets/Main/train.txt".format(folder)
         shutil.copyfile(filename, train)
-
-        try:
-            os.makedirs("{0}/JPEGImages/".format(folder))
-        except:
-            pass
 
         print "Writing JPEG frames..."
         for frame in allframes:
