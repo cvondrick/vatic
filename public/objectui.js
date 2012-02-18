@@ -31,7 +31,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
 
         eventlog("newobject", "Start drawing new object");
 
-        this.instructions.fadeOut();
+        //this.instructions.fadeOut();
 
         this.currentcolor = this.pickcolor();
         this.drawer.color = this.currentcolor[0];
@@ -96,7 +96,7 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
     {
         console.log("Injecting existing object");
 
-        this.instructions.fadeOut();
+        //this.instructions.fadeOut();
 
         this.currentcolor = this.pickcolor();
         var obj = new TrackObject(this.job, this.player,
@@ -154,7 +154,6 @@ function TrackObjectUI(button, container, videoframe, job, player, tracks)
             html += "<li>" + this.job.labels[i] + "</li>";
         }
         html += "</ul>";
-        html += "<p>Click the above button to create your first annotation.</p>";
 
         this.instructions = $(html).appendTo(this.container);
     }
