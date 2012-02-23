@@ -133,6 +133,14 @@ or
 
 The tool will maintain aspect ratio in all cases.
 
+Alternatively, if you have already extracted frames, you can use the
+formatframes command to format the video into a format that VATIC understands:
+
+    $ turkic formatframes /path/to/frames/ /path/to/output/directory
+
+The above command will read all the images in /path/to/frames and create
+hard links (soft copy) in /path/to/output/directory.
+
 --- Importing a Video ---------------------------------------------------------
 
 After extracting frames, the video can be imported into our tool for 

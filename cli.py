@@ -61,6 +61,41 @@ class extract(Command):
                 shutil.rmtree(args.output)
             raise
 
+@handler("Formats existing frames ")
+class formatframes(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("video")
+        parser.add_argument("output")
+        parser.add_argument("--extension", default="jpg")
+        parser.add_argument("--no-cleanup",
+            action="store_true", default=False)
+        return parser
+
+    def __call__(self, args):
+        try:
+            os.makedirs(args.output)
+        except:
+            pass
+        extension = ".{0}".format(args.extension)
+        files = os.listdir(args.video)
+        files = (x for x in files if x.endswith(extension))
+        files = [(int(x.split(".")[0]), x) for x in files]
+        files.sort()
+        files = [(x, y) for x, (_, y) in enumerate(files)]
+        if not files:
+            print "No files ending with {0}".format(extension)
+            return
+        for frame, file in files:
+            path = Video.getframepath(frame, args.output)
+            file = os.path.join(args.video, file)
+            try:
+                os.link(file, path)
+            except OSError:
+                os.makedirs(os.path.dirname(path))
+                os.link(file, path)
+        print "Formatted {0} frames".format(len(files))
+
 @handler("Imports a set of video frames")
 class load(LoadCommand):
     def setup(self):
