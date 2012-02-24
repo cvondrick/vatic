@@ -158,12 +158,12 @@ class load(LoadCommand):
             for x in os.listdir("{0}/{1}".format(args.location, toplevel)))
         maxframes = max(int(os.path.splitext(x)[0])
             for x in os.listdir("{0}/{1}/{2}"
-            .format(args.location, toplevel, secondlevel)))
+            .format(args.location, toplevel, secondlevel))) + 1
 
         print "Found {0} frames.".format(maxframes)
 
         # can we read the last frame?
-        path = Video.getframepath(maxframes, args.location)
+        path = Video.getframepath(maxframes - 1, args.location)
         try:
             im = Image.open(path)
         except IOError:
@@ -259,10 +259,10 @@ class load(LoadCommand):
                     segment.start = 0
                 if args.for_training_stop:
                     segment.stop = args.for_training_stop
-                    if segment.stop > video.totalframes:
-                        segment.stop = video.totalframes
+                    if segment.stop > video.totalframes - 1:
+                        segment.stop = video.totalframes - 1
                 else:
-                    segment.stop = video.totalframes
+                    segment.stop = video.totalframes - 1
                 job = Job(segment = segment, group = group, ready = False)
                 session.add(segment)
                 session.add(job)
@@ -288,7 +288,7 @@ class load(LoadCommand):
             startframe = args.start_frame
             stopframe = args.stop_frame
             if not stopframe:
-                stopframe = video.totalframes
+                stopframe = video.totalframes - 1
             for start in range(startframe, stopframe, args.length):
                 stop = min(start + args.length + args.overlap + 1,
                            stopframe)
@@ -591,7 +591,7 @@ class dump(DumpCommand):
         elif args.json:
             self.dumpjson(file, data)
         elif args.matlab:
-            self.dumpmatlab(file, data)
+            self.dumpmatlab(file, data, video, scale)
         elif args.pickle:
             self.dumppickle(file, data)
         elif args.labelme:
@@ -612,7 +612,7 @@ class dump(DumpCommand):
         else:
             sys.stdout.write(file.getvalue())
 
-    def dumpmatlab(self, file, data):
+    def dumpmatlab(self, file, data, video, scale):
         results = []
         for id, track in enumerate(data):
             for box in track.boxes:
@@ -633,7 +633,13 @@ class dump(DumpCommand):
 
         from scipy.io import savemat as savematlab
         savematlab(file,
-            {"annotations": results}, oned_as="row")
+            {"annotations": results,
+             "num_frames": video.totalframes,
+             "slug": video.slug,
+             "skip": video.skip,
+             "width": int(video.width * scale),
+             "height": int(video.height * scale),
+             "scale": scale}, oned_as="row")
 
     def dumpxml(self, file, data):
         file.write("<annotations count=\"{0}\">\n".format(len(data)))
