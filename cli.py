@@ -1101,6 +1101,7 @@ class find(Command):
         parser.add_argument("--frame", "-f", type = int,
                             nargs = '?', default = None)
         parser.add_argument("--hitid")
+        parser.add_argument("--workerid")
         parser.add_argument("--ids", action="store_true", default = False)
         return parser
 
@@ -1115,6 +1116,8 @@ class find(Command):
                 jobs = jobs.filter(Segment.stop >= args.frame)
         if args.hitid:
             jobs = jobs.filter(Job.hitid == args.hitid)
+        if args.workerid:
+            jobs = jobs.filter(Job.workerid == args.workerid)
         jobs = jobs.filter(turkic.models.HIT.useful == True)
 
         if jobs.count() > 0:
