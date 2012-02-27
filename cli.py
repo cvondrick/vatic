@@ -1094,21 +1094,27 @@ class sample(Command):
                                                     job.hitid))
 
 @handler("Provides a URL to fix annotations during vetting")
-class vet(Command):
+class find(Command):
     def setup(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("slug")
-        parser.add_argument("frame", type = int, nargs = '?', default = None)
+        parser.add_argument("--id")
+        parser.add_argument("--frame", "-f", type = int,
+                            nargs = '?', default = None)
+        parser.add_argument("--hitid")
         parser.add_argument("--ids", action="store_true", default = False)
         return parser
 
     def __call__(self, args):
         jobs = session.query(Job)
         jobs = jobs.join(Segment).join(Video)
-        jobs = jobs.filter(Video.slug == args.slug)
-        if args.frame is not None:
-            jobs = jobs.filter(Segment.start <= args.frame)
-            jobs = jobs.filter(Segment.stop >= args.frame)
+
+        if args.id:
+            jobs = jobs.filter(Video.slug == args.id)
+            if args.frame is not None:
+                jobs = jobs.filter(Segment.start <= args.frame)
+                jobs = jobs.filter(Segment.stop >= args.frame)
+        if args.hitid:
+            jobs = jobs.filter(Job.hitid == args.hitid)
         jobs = jobs.filter(turkic.models.HIT.useful == True)
 
         if jobs.count() > 0:

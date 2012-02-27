@@ -384,6 +384,39 @@ which will pay all workers for all outstanding tasks. We strongly recommend
 paying all workers regardless of their quality. You should attempt to pay
 workers at least once per day.
 
+--- Finding Jobs -------------------------------------------------------------
+
+If you have found a small mistake in a video and want to make
+the correction yourself, you can start an annotation session initialized with
+the MTurk workers annotations:
+
+    $ turkic find --slug identifier
+    $ turkic find --slug identifier --frame frame
+
+where identifier is the identifier for the video and frame is the frame number
+that the error occurs. In most cases, this command will return one URL for you
+to make the corrections. If it outputs two URLs, it means the frame number
+occurs in two overlapping segments, and so you may have to make changes to both
+of the segments. You can also omit the frame argument, in which case it will
+output all URLs for that video.
+
+If you want to find the HIT id, assignment ID, or worker ID for a particular
+video, specify the --ids parameter to the vet command:
+
+    $ turkic find --id identifer --ids
+    $ turkic find --id identifer --frame frame --ids
+
+will print a list of all the IDs for the video. If the corresponding segment
+has been published and completed, it will list three strings: the HIT ID,
+assignment ID, and the worker ID. If the job has been published but not
+finished, it will just list the HIT ID. If the job has not yet been published,
+it prints "(not published)".
+
+Additionally, if you want to find the job that corresponds to a particular
+HIT ID, you can use the find command:
+
+    $ turkic find --hitid HITID
+
 --- Quality Control ----------------------------------------------------------
 
 The gold standard does a "pretty good" job of weeding out bad workers.
@@ -419,31 +452,6 @@ You can also invalidate and respawn individual jobs with the command:
 
     $ turkic invalidate --hit hitid
 
-Furthermore, if you have found a small mistake in a video and want to make
-the correction yourself, you can start an annotation session initialized with
-the MTurk workers annotations:
-
-    $ turkic vet identifier
-    $ turkic vet identifier frame
-
-where identifier is the identifier for the video and frame is the frame number
-that the error occurs. In most cases, this command will return one URL for you
-to make the corrections. If it outputs two URLs, it means the frame number
-occurs in two overlapping segments, and so you may have to make changes to both
-of the segments. You can also omit the frame argument, in which case it will
-output all URLs for that video.
-
-If you want to find the HIT id, assignment ID, or worker ID for a particular
-video, specify the --ids parameter to the vet command:
-
-    $ turkic vet identifer --ids
-    $ turkic vet identifer frame --ids
-
-will print a list of all the IDs for the video. If the corresponding segment
-has been published and completed, it will list three strings: the HIT ID,
-assignment ID, and the worker ID. If the job has been published but not
-finished, it will just list the HIT ID. If the job has not yet been published,
-it prints "(not published)".
 
 --- Listing all Videos -------------------------------------------------------
 
