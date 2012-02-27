@@ -1145,6 +1145,7 @@ class listvideos(Command):
         parser.add_argument("--training", action="store_true", default=False)
         parser.add_argument("--count", action="store_true", default=False)
         parser.add_argument("--worker")
+        parser.add_argument("--stats", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -1171,4 +1172,8 @@ class listvideos(Command):
             print videos.count()
         else:
             for video in videos.distinct():
-                print video.slug
+                print "{0:<25}".format(video.slug),
+                if args.stats:
+                    print "{0:>3}/{1:<8}".format(video.numcompleted, video.numjobs),
+                    print "${0:<15.2f}".format(video.cost),
+                print ""

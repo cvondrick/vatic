@@ -46,6 +46,30 @@ class Video(turkic.database.Base):
             path = "{0}/{1}".format(base, path)
         return path
 
+    @property
+    def cost(self):
+        cost = 0
+        for segment in self.segments:
+            cost += segment.cost
+        return cost
+
+    @property
+    def numjobs(self):
+        count = 0
+        for segment in self.segments:
+            for job in segment.jobs:
+                count += 1
+        return count
+
+    @property
+    def numcompleted(self):
+        count = 0
+        for segment in self.segments:
+            for job in segment.jobs:
+                if job.completed:
+                    count += 1
+        return count
+
 class Label(turkic.database.Base):
     __tablename__ = "labels"
 
@@ -84,6 +108,13 @@ class Segment(turkic.database.Base):
             if job.useful:
                 paths.extend(job.paths)
         return paths
+
+    @property
+    def cost(self):
+        cost = 0
+        for job in self.jobs:
+            cost += job.cost
+        return cost
 
 class Job(turkic.models.HIT):
     __tablename__ = "jobs"
@@ -131,6 +162,12 @@ class Job(turkic.models.HIT):
     @property
     def validator(self):
         return self.segment.video.trainvalidator
+
+    @property
+    def cost(self): 
+        if not self.completed:
+            return 0
+        return self.bonusamount + self.group.cost + self.donatedamount
 
     def __iter__(self):
         return self.paths
