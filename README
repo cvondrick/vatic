@@ -477,6 +477,10 @@ Finally, if you just want to count how many videos are in the system, use the
     $ turkic list --count
     $ turkic list --published --count
 
+If you want statistics about each video, then give the --stats option:
+
+    $ turkic list --stats
+
 --- Managing Workers ---------------------------------------------------------
 
 You can list all known workers with the command:
