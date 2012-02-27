@@ -553,6 +553,7 @@ class dump(DumpCommand):
         parser.add_argument("--scale", "-s", default = 1.0, type = float)
         parser.add_argument("--dimensions", "-d", default = None)
         parser.add_argument("--original-video", "-v", default = None)
+        parser.add_argument("--lowercase", action="store_true", default=False)
         return parser
 
     def __call__(self, args):
@@ -585,6 +586,8 @@ class dump(DumpCommand):
 
         for track in data:
             track.boxes = [x.transform(scale) for x in track.boxes]
+            if args.lowercase:
+                track.label = track.label.lower()
 
         if args.xml:
             self.dumpxml(file, data)
