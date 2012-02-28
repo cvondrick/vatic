@@ -71,6 +71,7 @@ def readpaths(tracks):
         
         logger.debug("Received a {0} track".format(path.label.text))
 
+        visible = False
         for frame, userbox in track.items():
             box = Box(path = path)
             box.xtl = max(int(userbox[0]), 0)
@@ -80,8 +81,14 @@ def readpaths(tracks):
             box.occluded = int(userbox[4])
             box.outside = int(userbox[5])
             box.frame = int(frame)
+            if not box.outside:
+                visible = True
 
             logger.debug("Received box {0}".format(str(box.getbox())))
+
+        if not visible:
+            logger.warning("Received empty path! Skipping")
+            continue
 
         for attributeid, timeline in attributes.items():
             attribute = session.query(Attribute).get(attributeid)
