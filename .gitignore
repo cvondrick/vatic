@@ -3,3 +3,4 @@ config.py
 tmp
 backups
 vatic.tar.gz
+.DS_Store
