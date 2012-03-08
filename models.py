@@ -8,6 +8,7 @@ import vision
 from vision.track.interpolation import LinearFill
 import random
 import logging
+import config
 
 logger = logging.getLogger("vatic.models")
 
@@ -154,6 +155,13 @@ class Job(turkic.models.HIT):
         # is this a training task? if yes, we don't want to respawn
         if not self.istraining:
             return Job(segment = self.segment, group = self.group)
+
+    def check(self):
+        if self.paths.count() > config.maxobjects:
+            raise RuntimeError("Job {0} has too many objects to process "
+                               "payment. Please verify this is not an "
+                               "attempt to hack us and increase the "
+                               "limit in config.py".format(self.id))
 
     @property
     def trainingjob(self):
