@@ -20,6 +20,8 @@ import qa
 import merge
 import parsedatetime.parsedatetime
 import datetime, time
+import vision.pascal
+import itertools
 from xml.etree import ElementTree
 
 @handler("Decompresses an entire video into frames")
@@ -857,34 +859,10 @@ class dump(DumpCommand):
         numdifficult = 0
         numtotal = 0
 
-        negatives = {}
+        pascalds = None
         allnegatives = set()
         if negdir:
-            print "Reading generic negatives..."
-            for file in os.listdir("{0}/ImageSets/Main".format(negdir)):
-                if not file.endswith("_trainval.txt"):
-                    continue
-                if file.startswith("."):
-                    continue
-                category, _ = file.rsplit("_", 1)
-                category = category.lower()
-
-                file = "{0}/ImageSets/Main/{1}".format(negdir, file)
-
-                negdata = [x.split() for x in open(file)]
-                negs = [x for x, y in negdata if int(y) == -1]
-                negatives[category] = negs
-                allnegatives.update(set(negs))
-
-            print "Writing generic negative annotations (may take a moment)..."
-            for line in allnegatives:
-                source = "{0}/Annotations/{1}.xml".format(negdir, line)
-                tree = ElementTree.parse(source)
-                tree.find("folder").text = folder
-                tree.find("filename").text = "n{0}.jpg".format(line)
-                tree.write("{0}/Annotations/n{1}.xml".format(folder, line))
-                shutil.copyfile("{0}/JPEGImages/{1}.jpg".format(negdir, line),
-                                "{0}/JPEGImages/n{1}.jpg".format(folder, line))
+            pascalds = vision.pascal.PascalDataset(negdir)
 
         print "Writing annotations..."
         for frame in allframes:
@@ -982,8 +960,27 @@ class dump(DumpCommand):
                 else:
                     file.write("-1")
                 file.write("\n")
-            if label.lower() in negatives:
-                for neg in negatives[label.lower()]:
+
+            if pascalds:
+                print "Sampling negative VOC for {0}".format(label)
+                negs = itertools.islice(pascalds.find(missing = [label.lower()]), 1000)
+                for neg in negs:
+                    source = "{0}/Annotations/{1}.xml".format(negdir, neg)
+                    tree = ElementTree.parse(source)
+                    tree.find("folder").text = folder
+                    tree.find("filename").text = "n{0}.jpg".format(neg)
+                    try:
+                        os.makedirs(os.path.dirname("{0}/Annotations/n{1}.xml".format(folder, neg)))
+                    except OSError:
+                        pass
+                    try:
+                        os.makedirs(os.path.dirname("{0}/JPEGImages/n{1}.jpg".format(folder, neg)))
+                    except OSError:
+                        pass
+                    tree.write("{0}/Annotations/n{1}.xml".format(folder, neg))
+                    shutil.copyfile("{0}/JPEGImages/{1}.jpg".format(negdir, neg),
+                                    "{0}/JPEGImages/n{1}.jpg".format(folder, neg))
+                    allnegatives.add("n{0}".format(neg))
                     file.write("n{0} -1\n".format(neg))
             file.close()
 
