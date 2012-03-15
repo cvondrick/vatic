@@ -390,8 +390,8 @@ If you have found a small mistake in a video and want to make
 the correction yourself, you can start an annotation session initialized with
 the MTurk workers annotations:
 
-    $ turkic find --slug identifier
-    $ turkic find --slug identifier --frame frame
+    $ turkic find --id identifier
+    $ turkic find --id identifier --frame frame
 
 where identifier is the identifier for the video and frame is the frame number
 that the error occurs. In most cases, this command will return one URL for you
