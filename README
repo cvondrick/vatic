@@ -109,7 +109,9 @@ can verify this with:
     $ turkic status --verify
 
 If you receive any error messages, it means the installation was not complete
-and you should review the previous section.
+and you should review the previous section. Note: If you do not plan on
+using Mechanical Turk, you can safely ignore any errors caused by Mechanical
+Turk.
 
 --- Frame Extraction ----------------------------------------------------------
 
