@@ -1010,6 +1010,66 @@ class dump(DumpCommand):
 
         print "Done."
 
+@handler('reads tracks from a dumped text file')
+class readtracks(Command):
+    def setup(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('filename')
+        parser.add_argument('job_id')
+        return parser
+
+    def __call__(self, args):
+        job = session.query(Job).get(int(args.job_id))
+        video = job.segment.video
+        paths = {}
+
+        # read tracks file
+        with open(args.filename) as tracks:
+            for line in tracks:
+                # get columns
+                cols = line.split(None, 10)
+
+                # skip if interpolated
+                if cols[8] == '1': continue
+
+                # remove quotes from label
+                cols[9] = cols[9][1:-1]
+
+                # get label
+                label = None
+                for l in video.labels:
+                    if l.text == cols[9]:
+                        label = l
+                        continue
+                if not label:
+                    label = Label()
+                    label.text = cols[9]
+                    label.video = video
+                    session.add(label)
+
+                # get path
+                if cols[0] not in paths:
+                    p = paths[cols[0]] = Path()
+                    p.job = job
+                    p.label = label
+                    session.add(p)
+                path = paths[cols[0]]
+
+                # make box
+                box = Box()
+                box.path = path
+                box.xtl = int(cols[1])
+                box.ytl = int(cols[2])
+                box.xbr = int(cols[3])
+                box.ybr = int(cols[4])
+                box.frame = int(cols[5])
+                box.outside = int(cols[6])
+                box.occluded = int(cols[7])
+                session.add(box)
+
+        session.commit()
+        print 'Done.'
+
 @handler("Samples the performance by worker")
 class sample(Command):
     def setup(self):
