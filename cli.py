@@ -1010,12 +1010,12 @@ class dump(DumpCommand):
 
         print "Done."
 
-@handler('reads tracks from a dumped text file')
+@handler("Reads tracks from a dumped text file")
 class readtracks(Command):
     def setup(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('filename')
-        parser.add_argument('job_id')
+        parser.add_argument("filename")
+        parser.add_argument("job_id")
         return parser
 
     def __call__(self, args):
@@ -1024,13 +1024,16 @@ class readtracks(Command):
         paths = {}
 
         # read tracks file
+        counter = 0
         with open(args.filename) as tracks:
             for line in tracks:
+                counter += 1
+
                 # get columns
-                cols = line.split(None, 10)
+                cols = line.split()
 
                 # skip if interpolated
-                if cols[8] == '1': continue
+                if cols[8] == "1": continue
 
                 # remove quotes from label
                 cols[9] = cols[9][1:-1]
@@ -1068,7 +1071,7 @@ class readtracks(Command):
                 session.add(box)
 
         session.commit()
-        print 'Done.'
+        print "Imported {0} tracks".format(counter)
 
 @handler("Samples the performance by worker")
 class sample(Command):
