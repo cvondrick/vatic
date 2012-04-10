@@ -157,7 +157,7 @@ class Job(turkic.models.HIT):
             return Job(segment = self.segment, group = self.group)
 
     def check(self):
-        if self.paths.count() > config.maxobjects:
+        if len(self.paths) > config.maxobjects:
             raise RuntimeError("Job {0} has too many objects to process "
                                "payment. Please verify this is not an "
                                "attempt to hack us and increase the "
