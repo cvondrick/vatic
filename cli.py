@@ -650,7 +650,7 @@ class dump(DumpCommand):
              "height": int(video.height * scale),
              "scale": scale}, oned_as="row")
 
-    def dumpxml(self, file, data, slug):
+    def dumpxml(self, file, data):
         file.write("<annotations count=\"{0}\">\n".format(len(data)))
         for id, track in enumerate(data):
             file.write("\t<track id=\"{0}\" label=\"{1}\">\n"
@@ -670,7 +670,7 @@ class dump(DumpCommand):
             file.write("\t</track>\n")
         file.write("</annotations>\n")
 
-    def dumpviper(self, file, data, slug):
+    def dumpviper(self, file, data, video):
         file.write("<viper xmlns=\"http://lamp.cfar.umd.edu/viper\" "
                    "xmlns:data=\"http://lamp.cfar.umd.edu/viperdata\">\n")
 
