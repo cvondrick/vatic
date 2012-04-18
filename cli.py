@@ -548,6 +548,8 @@ class dump(DumpCommand):
             action="store_true", default=False)
         parser.add_argument("--labelme", "-vlm",
             action="store", default=False)
+        parser.add_argument("--viper",
+            action="store", default=False)
         parser.add_argument("--pascal", action="store_true", default=False)
         parser.add_argument("--pascal-difficult", type = int, default = 100)
         parser.add_argument("--pascal-skip", type = int, default = 15)
@@ -601,6 +603,8 @@ class dump(DumpCommand):
             self.dumppickle(file, data)
         elif args.labelme:
             self.dumplabelme(file, data, args.slug, args.labelme)
+        elif args.viper:
+            self.dumpviper(file, data, video)
         elif args.pascal:
             if scale != 1:
                 print "Warning: scale is not 1, yet frames are not resizing!"
@@ -646,7 +650,7 @@ class dump(DumpCommand):
              "height": int(video.height * scale),
              "scale": scale}, oned_as="row")
 
-    def dumpxml(self, file, data):
+    def dumpxml(self, file, data, slug):
         file.write("<annotations count=\"{0}\">\n".format(len(data)))
         for id, track in enumerate(data):
             file.write("\t<track id=\"{0}\" label=\"{1}\">\n"
@@ -665,6 +669,53 @@ class dump(DumpCommand):
                 file.write("</box>\n")
             file.write("\t</track>\n")
         file.write("</annotations>\n")
+
+    def dumpviper(self, file, data, slug):
+        file.write("<viper xmlns=\"http://lamp.cfar.umd.edu/viper\" "
+                   "xmlns:data=\"http://lamp.cfar.umd.edu/viperdata\">\n")
+
+        file.write("<data>\n")
+        file.write("<sourcefile filename=\"{0}\">".format(video.slug))
+
+        file.write("<file name=\"Information\">\n")
+        file.write("<attribute name=\"H-FRAME-SIZE\"><data:dvalue "
+                   "value=\"{0}\" /></attribute>".format(video.height))
+        file.write("<attribute name=\"V-FRAME-SIZE\"><data:dvalue "
+                   "value=\"{0}\" /></attribute>".format(video.height))
+        file.write("</file>\n")
+
+        categories = set()
+        for id, track in enumerate(data):
+            file.write("\t<object id=\"{0}\" name=\"{1}\">\n"
+                .format(id, track.label))
+            file.write("\t\t<attribute name=\"BOX\">\n")
+            categories.add(track.label)
+            for box in track.boxes:
+                file.write("\t\t<data::bbox framespan=\"{0}:{0}\"".format(box.frame))
+                file.write(" x=\"{0}\"".format(box.xtl))
+                file.write(" y=\"{0}\"".format(box.ytl))
+                file.write(" width=\"{0}\"".format(box.width))
+                file.write(" height=\"{0}\" />".format(box.height))
+                for attr in box.attributes:
+                    file.write("<attribute id=\"{0}\">{1}</attribute>".format(
+                               attr.id, attr.text))
+                file.write("\t\t</attribute>\n")
+            file.write("\t</object>\n")
+        file.write("</sourcefile>\n")
+        file.write("</data>\n")
+
+        file.write("<config>\n")
+        for category in categories:
+            file.write("<descriptor name=\"{0}\" type=\"OBJECT\">\n".format(category))
+            file.write("\n<attribute dynamic=\"true\" name=\"BOX\" type=\"bbox\"/>\n") 
+            file.write("</descriptor>")
+        file.write("<descriptor name=\"Information\" type=\"FILE\">\n")
+        file.write("\t<attribute name=\"H-FRAME-SIZE\" type=\"dvalue\"/>\n")
+        file.write("\t<attribute name=\"V-FRAME-SIZE\" type=\"dvalue\"/>\n")
+        file.write("</descriptor>\n")
+        file.write("</config>\n")
+
+        file.write("</viper>\n")
 
     def dumpjson(self, file, data):
         annotations = {}
