@@ -162,6 +162,7 @@ class Job(turkic.models.HIT):
                                "payment. Please verify this is not an "
                                "attempt to hack us and increase the "
                                "limit in config.py".format(self.id))
+        return True
 
     @property
     def trainingjob(self):
