@@ -516,9 +516,9 @@ which will REMOVE ALL DATA AND CANNOT BE UNDONE.
 
 When using our system, please cite:
 
-    Carl Vondrick, Deva Ramanan, Donald Patterson. "Efficiently Scaling Up
-    Video Annotation with Crowdsourced Marketplaces" European Conference on
-    Computer Vision (ECCV) Crete, Greece, September, 2010. 
+    Carl Vondrick, Donald Patterson, Deva Ramanan. "Efficiently Scaling Up
+    Crowdsourced Video Annotation" International Journal of Computer Vision
+    (IJCV). June 2012.
 
 == FEEDBACK AND BUGS ==========================================================
 
