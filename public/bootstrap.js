@@ -104,8 +104,8 @@ function loadingscreen(job)
             {
                 if (!development && !mturk_isoffline())
                 {
-                    $("body").append('<div id="music"><embed src="magic.mp3">' +
-                        '<noembed><bgsound src="magic.mp3"></noembed></div>');
+                    /*$("body").append('<div id="music"><embed src="magic.mp3">' +
+                        '<noembed><bgsound src="magic.mp3"></noembed></div>');*/
 
                     window.setTimeout(function() {
                         $("#music").remove();
