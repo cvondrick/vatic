@@ -455,7 +455,7 @@ function Track(player, color, position)
      */
     this.pollposition = function()
     {
-        var hidden = this.handle.is(":hidden'");
+        var hidden = this.handle.css("display") == "none";
         this.handle.show();
 
         var pos = this.handle.position();
