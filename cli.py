@@ -18,7 +18,7 @@ import cStringIO
 import Image, ImageDraw, ImageFont
 import qa
 import merge
-import parsedatetime.parsedatetime
+import parsedatetime
 import datetime, time
 import vision.pascal
 import itertools
@@ -1029,7 +1029,7 @@ class sample(Command):
 
         since = None
         if args.since:
-            since = parsedatetime.parsedatetime.Calendar().parse(args.since)
+            since = parsedatetime.Calendar().parse(args.since)
             since = time.mktime(since[0])
             since = datetime.datetime.fromtimestamp(since)
 
