@@ -663,6 +663,11 @@ function Track(player, color, position)
      */
     this.setlock = function(value)
     {
+        if (this.deleted)
+        {
+            return;
+        }
+
         this.locked = value;
 
         if (value)
@@ -814,6 +819,11 @@ function Track(player, color, position)
 
     this.draggable = function(value)
     {
+        if (this.deleted)
+        {
+            return;
+        }
+
         this.candrag = value;
 
         if (value && !this.locked && !this.drawingnew)
@@ -828,6 +838,11 @@ function Track(player, color, position)
 
     this.resizable = function(value)
     {
+        if (this.deleted)
+        {
+            return;
+        }
+
         this.canresize = value;
 
         if (value && !this.locked &&!this.drawingnew)
@@ -1122,8 +1137,8 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside)
     this.ytl = ytl;
     this.xbr = xbr;
     this.ybr = ybr;
-    this.occluded = occluded ? occluded : false;
-    this.outside = outside ? outside : false;
+    this.occluded = occluded ? true : false;
+    this.outside = outside ? true : false;
     this.width = xbr - xtl;
     this.height = ybr - ytl;
 
@@ -1136,7 +1151,6 @@ function Position(xtl, ytl, xbr, ybr, occluded, outside)
     {
         this.ybr = this.ytl + 1;
     }
-
     this.serialize = function()
     {
         return "[" + this.xtl + "," +
