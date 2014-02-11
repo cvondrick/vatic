@@ -212,7 +212,7 @@ function ui_setupbuttons(job, player, tracks)
     });
 
     $("#annotateoptionsresize").button().click(function() {
-        var resizable = !$(this).attr("checked")
+        var resizable = $(this).attr("checked") ? false : true;
         tracks.resizable(resizable);
 
         if (resizable)

@@ -712,6 +712,7 @@ function Track(player, color, position)
             this.handle.resizable({
                 handles: "n,w,s,e",
                 autoHide: true,
+                ghost: true, /* need to fix this bug soon */
                 start: function() {
                     player.pause();
                     me.notifystartupdate();
@@ -747,7 +748,6 @@ function Track(player, color, position)
                 },
                 cancel: ".boundingboxtext"
             });
-
 
             this.handle.mouseover(function() {
                 if (!me.locked && !me.drawingnew)
