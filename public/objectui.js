@@ -442,7 +442,7 @@ function TrackObject(job, player, container, color)
         $("#trackobject" + this.id + "lost").click(function() {
             me.player.pause();
 
-            var outside = $(this).attr("checked") ? true : false;
+            var outside = $(this).is(":checked");
             me.track.setoutside(outside);
             me.track.notifyupdate();
 
@@ -458,7 +458,7 @@ function TrackObject(job, player, container, color)
         $("#trackobject" + this.id + "occluded").click(function() {
             me.player.pause();
 
-            var occlusion = $(this).attr("checked") ? true : false;
+            var occlusion = $(this).is(":checked");
             me.track.setocclusion(occlusion);
             me.track.notifyupdate();
 
