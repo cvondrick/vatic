@@ -15,7 +15,7 @@ import vision.track.interpolation
 import turkic.models
 from models import *
 import cStringIO
-import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import qa
 import merge
 import parsedatetime

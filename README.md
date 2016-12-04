@@ -1,4 +1,5 @@
 # VATIC - Video Annotation Tool from Irvine, California
+[![build status](https://travis-ci.org/cluePrints/vatic.svg)](https://travis-ci.org/cluePrints/vatic)
 
 VATIC is an online video annotation tool for computer vision research that
 crowdsources work to Amazon's Mechanical Turk. Our tool makes it easy to build

@@ -1,0 +1,5 @@
+dist: trusty
+sudo: required
+env:
+  - INSTALL_WITH_EXAMPLE_DATA=true
+script: ./vatic-install.sh
