@@ -1,4 +1,8 @@
+Please note: the community is working on a modernized version in the [contrib](https://github.com/cvondrick/vatic/tree/contrib) branch. Please check it out and commit any pull requests there. Thank you! - December 3, 2016
+
 # VATIC - Video Annotation Tool from Irvine, California
+
+
 
 VATIC is an online video annotation tool for computer vision research that
 crowdsources work to Amazon's Mechanical Turk. Our tool makes it easy to build
