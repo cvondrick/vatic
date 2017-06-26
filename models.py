@@ -3,7 +3,7 @@ import turkic.models
 from sqlalchemy import Column, Integer, Float, String, Boolean, Text
 from sqlalchemy import ForeignKey, Table, PickleType
 from sqlalchemy.orm import relationship, backref
-import Image
+from PIL import Image
 import vision
 from vision.track.interpolation import LinearFill
 import random
