@@ -1,10 +1,11 @@
+#!/bin/bash
 export MYSQL_PASSWORD=${MYSQL_PASSWORD:-hail_ukraine}
 export INSTALL_WITH_EXAMPLE_DATA=${INSTALL_WITH_EXAMPLE_DATA:-false}
 export SERVER_NAME=${SERVER_NAME:-localhost}
 
 set -e
 
-if [[ "$INSTALL_WITH_EXAMPLE_DATA" -eq "true" ]]; then
+if [[ "$INSTALL_WITH_EXAMPLE_DATA" = "true" ]]; then
     echo "(!) Warning: doing aggressive install (assuming empty box just for us and being rude in actions)"
 fi;
 
@@ -38,7 +39,7 @@ cd pyvision
 sudo python setup.py install
 cd ..
 
-if [[ "$INSTALL_WITH_EXAMPLE_DATA" -eq "true" ]]; then
+if [[ "$INSTALL_WITH_EXAMPLE_DATA" = "true" ]]; then
     sudo cp /etc/apache2/mods-available/headers.load /etc/apache2/mods-enabled
     mysql -u root -p$MYSQL_PASSWORD -e 'create database vatic;'
 
