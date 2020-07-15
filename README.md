@@ -2,7 +2,7 @@
 
 Intel has created an excellent annotation tool with the latest technologies. https://github.com/opencv/cvat 
 
-This project is archived, and no further updates are expected.
+The project below is archived, and no further updates are expected.
 
 July 2020
 
