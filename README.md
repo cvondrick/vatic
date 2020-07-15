@@ -1,4 +1,10 @@
-Please note: the community is working on a modernized version in the [contrib](https://github.com/cvondrick/vatic/tree/contrib) branch. Please check it out and commit any pull requests there. Thank you! - December 3, 2016
+# Please Note
+
+Intel has created an excellent annotation tool with the latest technologies. https://github.com/opencv/cvat 
+
+This project is archived, and no further updates are expected.
+
+July 2020
 
 # VATIC - Video Annotation Tool from Irvine, California
 
