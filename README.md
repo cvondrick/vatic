@@ -4,7 +4,7 @@ Intel has created an excellent annotation tool with the latest technologies. htt
 
 The project below is archived, and no further updates are expected.
 
-July 2020
+2009 to 2020
 
 # VATIC - Video Annotation Tool from Irvine, California
 
